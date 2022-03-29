@@ -20,5 +20,6 @@ self: super: {
       }) tfProviders;
     in
       super.terraform_1.withPlugins (_: tfPlugins ++ (with pkgs; [
+        terraform-providers.aws
       ]));
 }
