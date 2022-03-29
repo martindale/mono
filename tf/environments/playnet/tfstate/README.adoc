@@ -1,0 +1,42 @@
+# tfstate
+
+This directory defines resources to create remote state storage for Terraform. The remote state is stored in an encrypted AWS S3 bucket, and used DynamoDB to created a distributed lock to guarantee mutual exclusion. Each environment defined in the `environments` directory has its own encrypted S3 bucket to store its state.
+
+
+## Bootstrapping the environment
+
+Before a new environment can be created and used, one needs to create a remote state store for the new environment. This is accomplished by using the `tfstate` module to create the required resources, specific to the newly created environment. E.g.
+
+[source, terraform]
+----
+include::main.tf[]
+----
+
+Once a new module resource is created for the new environment, run:
+
+```
+terraform init
+terraform apply
+```
+
+This should create the required resources. Once the run is finished, ensure that the updated `terraform.tfstate` file is checked into version control.
+
+```
+git add main.tf README.adoc terraform.tfstate
+git commit -m "bootstrap the environment"
+```
+
+
+## Destroying the environment
+
+When an environment needs to be destroyed, start out by destroying all resources in it. Once all resources have been removed, then delete the module resource for the corresponding environment, and then run:
+
+```
+terraform init
+terraform destroy
+rm main.tf
+git add main.tf terraform.tfstate
+git commit -m "destroy the environment"
+```
+
+Ensure that the updated state is committed into version control.
