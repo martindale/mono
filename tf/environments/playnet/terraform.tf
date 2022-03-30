@@ -13,15 +13,20 @@ terraform {
   }
 }
 
-# Configure the AWS Provider
+
+###############################################################################
+# Providers
+################################################################################
+
 provider "aws" {
   region = var.region
 
   default_tags {
     tags = {
-      Contact     = "anand@portaldefi.com"
+      Contact     = "automation-alerts@portaldefi.com"
       Environment = var.environment
-      Owner       = "Engineering"
+      Nme         = var.environment
+      Owner       = "engineering"
       Terraform   = true
     }
   }
