@@ -12,15 +12,15 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
-        "branch": "master",
+        "branch": "raiden",
         "description": "Nix Packages collection",
         "homepage": "https://nixos.org/",
-        "owner": "NixOS",
+        "owner": "FabricLabs",
         "repo": "nixpkgs",
-        "rev": "80d8655c15055472f0118a877351085cc22c1e92",
-        "sha256": "14aq8rikhpiwv7aw15cjxg88vxwzg02gn4w3wxqnm4g3yy20zzik",
+        "rev": "53552b2a7cd78746a380ccc36217f3f3feba5b3c",
+        "sha256": "16j0vbjhrj5jphkdabnjqizycgaka85rxwqv2k32gp5hahbzz0mr",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/80d8655c15055472f0118a877351085cc22c1e92.tar.gz",
+        "url": "https://github.com/FabricLabs/nixpkgs/archive/53552b2a7cd78746a380ccc36217f3f3feba5b3c.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

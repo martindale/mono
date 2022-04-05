@@ -8,8 +8,10 @@ terraform {
   }
 
   required_providers {
-    aws = { source = "hashicorp/aws" }
-    tls = { source = "hashicorp/tls" }
+    aws      = { source = "hashicorp/aws" }
+    external = { source = "hashicorp/external" }
+    null     = { source = "hashicorp/null" }
+    tls      = { source = "hashicorp/tls" }
   }
 }
 
