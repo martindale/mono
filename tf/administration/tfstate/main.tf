@@ -4,19 +4,8 @@ terraform {
   }
 }
 
-
-###############################################################################
-# Variables
-###############################################################################
-
-variable "environment" {
-  description = "The unique name of the environment"
-  type        = string
-}
-
-variable "region" {
-  description = "The AWS region where the environment is setup"
-  type        = string
+provider "aws" {
+  region = "us-east-2"
 }
 
 
@@ -26,16 +15,16 @@ variable "region" {
 
 # S3 bucket to store the state
 resource "aws_s3_bucket" "state" {
-  bucket = "portal.${var.environment}.${var.region}.state"
+  bucket = "tfstate.state"
 }
 
-#
+# Ensure the S3 bucket is private
 resource "aws_s3_bucket_acl" "state" {
   bucket = aws_s3_bucket.state.id
   acl    = "private"
 }
 
-# S3 bucket encryption configuration to encrypt the state being stored
+# Ensure the S3 bucket is encrypted
 resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
   bucket = aws_s3_bucket.state.bucket
 
@@ -57,7 +46,7 @@ resource "aws_s3_bucket_versioning" "state" {
 
 # Lock to ensure mutual exclusion
 resource "aws_dynamodb_table" "lock" {
-  name           = "portal.${var.environment}.${var.region}.lock"
+  name           = "tfstate.lock"
   hash_key       = "LockID"
   read_capacity  = 5
   write_capacity = 5
