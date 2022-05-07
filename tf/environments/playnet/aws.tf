@@ -1,145 +1,209 @@
-###############################################################################
+################################################################################
 # Configuration
 ################################################################################
 
 locals {
-  subnets = {
-    "us-east-2a" = {
-      availability_zone = "us-east-2a"
-      cidr_block        = cidrsubnet(aws_vpc.playnet.cidr_block, 4, 0)
+  instances = {
+    bastion = {
+      aws_instance_type = "t3.small"
+      aws_subnet        = "public"
+      aws_zone          = "us-east-2a"
+
+      aws_security_groups = [
+        module.aws_networking.security_groups.default,
+        module.aws_networking.security_groups.public
+      ]
+
+      aws_volumes = {
+        root = { size = 32 }
+      }
+
+      configuration = <<-EOF
+        {
+          imports = [ ${path.module}/../../../nix/modules/bastion.nix ];
+        }
+      EOF
     }
-    "us-east-2b" = {
-      availability_zone = "us-east-2b"
-      cidr_block        = cidrsubnet(aws_vpc.playnet.cidr_block, 4, 1)
+    bitcoin = {
+      aws_instance_type = "t3.xlarge"
+      aws_subnet        = "private"
+      aws_zone          = "us-east-2a"
+
+      aws_security_groups = [
+        module.aws_networking.security_groups.default,
+        module.aws_networking.security_groups.public
+      ]
+
+      aws_volumes = {
+        root = { size = 1024 }
+      }
+
+      configuration = <<-EOF
+        {
+          imports = [ ${path.module}/../../../nix/modules/bitcoin.nix ];
+        }
+      EOF
     }
-    "us-east-2c" = {
-      availability_zone = "us-east-2c"
-      cidr_block        = cidrsubnet(aws_vpc.playnet.cidr_block, 4, 2)
+    raiden = {
+      aws_instance_type = "t3.xlarge"
+      aws_subnet        = "private"
+      aws_zone          = "us-east-2a"
+
+      aws_security_groups = [
+        module.aws_networking.security_groups.default,
+        module.aws_networking.security_groups.private
+      ]
+
+      aws_volumes = {
+        root = { size = 32 }
+      }
+
+      configuration = <<-EOF
+        {
+          imports = [ ${path.module}/../../../nix/modules/raiden.nix ];
+
+          # vue-cli-service easily exceeds the 8k default limit
+          boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
+        }
+      EOF
     }
+
+    raiden-cli = {
+      aws_instance_type = "t3.xlarge"
+      aws_subnet        = "private"
+      aws_zone          = "us-east-2a"
+
+      aws_security_groups = [
+        module.aws_networking.security_groups.default,
+        module.aws_networking.security_groups.private
+      ]
+
+      aws_volumes = {
+        root = { size = 32 }
+      }
+
+      configuration = <<-EOF
+        {
+          imports = [ ${path.module}/../../../nix/modules/raiden.nix ];
+
+          # vue-cli-service easily exceeds the 8k default limit
+          boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
+
+          # enable raiden
+          services.raiden.playnet = {
+            enable = true;
+            address = "${var.raiden-node-address}";
+            password-file = "/var/lib/raiden/playnet/keystore-pass";
+            udc-address = "${var.raiden-udc-address}";
+            network-id = "${var.raiden-network}";
+            eth-rpc-endpoint = "${var.ethereum-url}";
+            environment-type = "development";
+            development-environment = "unstable";
+            logging.config = ["console:info"];
+            logging.debug.enable = true;
+            rpc.enable = true;
+            matrix-server = "${var.matrix-url}";
+            path-finding.enable = true;
+            path-finding.service-address = "${var.raiden-pfs-url}";
+          };
+        }
+      EOF
+    }
+
   }
 }
 
 
-###############################################################################
+################################################################################
 # Resources
 ################################################################################
 
-# A VPC is a logically isolated network. Each environment should have one.
-resource "aws_vpc" "playnet" {
-  cidr_block           = "172.31.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support   = true
+# The public key used by Terraform to deploy infrastructure on AWS
+resource "aws_key_pair" "playnet" {
+  key_name   = "${var.environment}-deploy_key"
+  public_key = tls_private_key.deploy.public_key_openssh
 }
 
-# The internet gateway is a VPC component that enables internet access for the
-# VPC over IPv4.
-resource "aws_internet_gateway" "playnet" {
-  vpc_id = aws_vpc.playnet.id
+# Setup the VPC and associated networking
+module "aws_networking" {
+  source = "../../modules/networking-aws"
+
+  environment            = var.environment
+  aws_vpc_cidr_block     = var.aws_vpc_cidr_block
+  aws_availability_zones = ["us-east-2a"]
 }
 
-# A route table for the VPC that defaults as the main route table for the VPC
-# will hold all routes to/from the network. By default, we permit all outgoing
-# traffic.
-resource "aws_default_route_table" "playnet" {
-  default_route_table_id = aws_vpc.playnet.default_route_table_id
+# Provision the instances in the cluster
+module "aws_instances" {
+  source   = "../../modules/instance-aws"
+  for_each = local.instances
 
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.playnet.id
-  }
+  name        = each.key
+  environment = var.environment
+
+  aws_ami        = var.aws_ami
+  aws_key_pair   = aws_key_pair.playnet
+  aws_networking = module.aws_networking
+
+  aws_instance_type   = each.value.aws_instance_type
+  aws_subnet          = each.value.aws_subnet
+  aws_zone            = each.value.aws_zone
+  aws_security_groups = each.value.aws_security_groups
+  aws_volumes         = each.value.aws_volumes
+
+  cloudflare_account_id = var.cloudflare_account_id
+  cloudflare_zone_id    = var.cloudflare_zone_id
 }
 
-# Create a public-facing subnet in each availability zone, and associate it with
-# the routing table for the VPC
-resource "aws_subnet" "playnet" {
-  for_each = local.subnets
-
-  availability_zone = each.value.availability_zone
-  cidr_block        = each.value.cidr_block
-  vpc_id            = aws_vpc.playnet.id
-
-  tags = {
-    Name = "${var.environment} // public // ${each.value.availability_zone}"
-  }
-}
-
-# Spin up the instances to host services in the environment.
-resource "aws_instance" "raiden" {
-  # TODO: Use the AWS NixOS AMI module to identify this value for the region
-  ami                         = "ami-0b20a80b82052d23f"
-  associate_public_ip_address = true
-  instance_type               = "t3.small"
-  key_name                    = aws_key_pair.deploy.key_name
-  subnet_id                   = aws_subnet.playnet["us-east-2a"].id
-
-  root_block_device {
-    encrypted   = true
-    volume_size = 32
-
-    tags = {
-      Name = "${var.environment} // raiden // root"
-    }
-  }
-
-  tags = {
-    Name = "${var.environment} // raiden"
-  }
-}
-
-# Configure NixOS for the instances
-module "nixos" {
-  source = "../../modules/nixos"
+# Configure the operating system for each instance
+module "aws_configuration" {
+  source   = "../../modules/nixos"
+  for_each = module.aws_instances
 
   target = {
-    key  = tls_private_key.deploy.private_key_pem
-    host = aws_instance.raiden.public_ip
-    user = "root"
+    key          = tls_private_key.deploy.private_key_pem
+    host         = each.value.ipv4_address
+    user         = "root"
+    bastion_host = each.value.is_public ? null : module.aws_instances.bastion.fqdn
+    bastion_user = each.value.is_public ? null : "root"
   }
 
   triggers = {
-    host = aws_instance.raiden.public_ip
+    instance = each.value.id
+    host     = each.value.fqdn
   }
 
   configuration = <<-EOF
   {
     imports = [
       ${path.module}/../../../nix/modules/aws.nix
-      ${path.module}/../../../nix/modules/base.nix
-      ${path.module}/../../../nix/modules/devtools.nix
+      ${path.module}/../../../nix/modules/default.nix
+      ${path.module}/../../../nix/modules/users.nix
+      (${local.instances[each.key].configuration})
     ];
 
-    portal.nodeFqdn = "raiden.playnet.portaldefi.com";
-    portal.nodeName = "raiden";
+    portal.nodeFqdn = "${each.value.fqdn}";
     portal.rootSshKey = "${tls_private_key.deploy.public_key_openssh}";
-
-    services.raiden.goerli = {
-      enable = true;
-      address = "0xb7f337B1244709aafd9baf50057eD0df934f2076";
-      password-file = "/var/lib/raiden/goerli/keystore-pass";
-      network-id = "goerli";
-      ethereum.rpc-endpoint = "https://goerli.infura.io/v3/3f6691a33225484c8e1eebde034b274f";
-      environment-type = "development";
-      logging.config = ["console:info"];
-      rpc.enable = true;
-      path-finding.enable = true;
-    };
   }
   EOF
-
-  depends_on = [aws_instance.raiden]
 }
 
-###############################################################################
+
+################################################################################
 # Outputs
 ################################################################################
 
-output "aws" {
-  description = "The AWS infrastructure"
-  value = {
-    vpc              = aws_vpc.playnet
-    internet_gateway = aws_internet_gateway.playnet
-    route_table      = aws_default_route_table.playnet
-    subnets          = aws_subnet.playnet
-    instance         = aws_instance.raiden
-  }
+output "aws_networking" {
+  description = "The AWS networking infrastructure"
+  value       = module.aws_networking
+}
+
+output "aws_instances" {
+  description = "The AWS instances"
+  value       = module.aws_instances
+}
+
+output "aws_configuration" {
+  description = "The nixos configuration deployed on to the instances"
+  value       = module.aws_configuration
 }

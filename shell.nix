@@ -7,6 +7,7 @@ in
       git
       less
       niv
+      nix-diff
       terraform
       which
     ];
@@ -30,6 +31,9 @@ in
         echo "# Your settings/credentials go below."
         echo "export AWS_ACCESS_KEY_ID='your_aws_access_key_id'"
         echo "export AWS_SECRET_ACCESS_KEY='your_aws_secret_access_key'"
+        echo
+        echo "export CLOUDFLARE_EMAIL='your_cloudflare_email_address'"
+        echo "export CLOUDFLARE_API_KEY='your_cloudflare_global_api_key'"
         echo "EOF"
         exit 1
       fi

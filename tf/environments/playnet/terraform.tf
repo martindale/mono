@@ -1,17 +1,18 @@
 terraform {
   backend "s3" {
-    key            = "playnet"
-    bucket         = "portal.playnet.us-east-2.state"
-    dynamodb_table = "portal.playnet.us-east-2.lock"
     region         = "us-east-2"
+    bucket         = "tfstate.state"
+    key            = "environments/playnet/terraform.state"
+    dynamodb_table = "tfstate.lock"
     encrypt        = true
   }
 
   required_providers {
-    aws      = { source = "hashicorp/aws" }
-    external = { source = "hashicorp/external" }
-    null     = { source = "hashicorp/null" }
-    tls      = { source = "hashicorp/tls" }
+    aws        = { source = "hashicorp/aws" }
+    cloudflare = { source = "cloudflare/cloudflare" }
+    external   = { source = "hashicorp/external" }
+    null       = { source = "hashicorp/null" }
+    tls        = { source = "hashicorp/tls" }
   }
 }
 
@@ -21,15 +22,20 @@ terraform {
 ################################################################################
 
 provider "aws" {
-  region = var.region
+  region = var.aws_region
 
   default_tags {
     tags = {
-      Contact     = "automation-alerts@portaldefi.com"
+      Name        = var.environment
       Environment = var.environment
-      Nme         = var.environment
       Owner       = "engineering"
+      Contact     = "automation-alerts@portaldefi.com"
       Terraform   = true
+      Workspace   = terraform.workspace
     }
   }
+}
+
+provider "cloudflare" {
+  account_id = var.cloudflare_account_id
 }

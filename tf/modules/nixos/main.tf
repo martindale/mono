@@ -3,6 +3,8 @@ terraform {
     external = { source = "hashicorp/external" }
     null     = { source = "hashicorp/null" }
   }
+
+  experiments = [module_variable_optional_attrs]
 }
 
 
@@ -18,9 +20,11 @@ variable "configuration" {
 variable "target" {
   description = "The target of the deployment"
   type = object({
-    key  = string
-    host = string
-    user = string
+    key          = string
+    host         = string
+    user         = string
+    bastion_host = optional(string)
+    bastion_user = optional(string)
   })
 }
 
@@ -51,11 +55,13 @@ resource "null_resource" "realization" {
   triggers = merge(var.triggers, { derivation = local.derivation.path })
 
   provisioner "local-exec" {
-    command = join(" ", [
+    command = join(" ", concat([
       "${path.module}/deploy.sh",
       local.derivation.path,
       "${var.target.user}@${var.target.host}"
-    ])
+      ], var.target.bastion_user == null ? [] : [
+      "${var.target.bastion_user}@${var.target.bastion_host}"
+    ]))
     environment = {
       # marked non-sensitive since deploy.sh takes care of its clean up
       SSH_PRIVATE_KEY = nonsensitive(var.target.key)

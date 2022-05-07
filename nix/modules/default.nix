@@ -4,23 +4,37 @@
 , options
 , pkgs
 , ... }:
+
+with lib;
+
 {
   imports = [ "${toString modulesPath}/profiles/minimal.nix" ];
 
   options.portal = {
-    nodeFqdn = lib.mkOption {
+    nodeFqdn = mkOption {
       description = "The fully-qualified domain name of the node";
-      type = lib.types.str;
+      type = types.str;
     };
 
-    nodeName = lib.mkOption {
+    nodeName = mkOption {
       description = "The name of the node";
-      type = lib.types.str;
+      type = types.str;
+      readOnly = true;
+      default = elemAt (splitString "." config.portal.nodeFqdn) 0;
     };
 
-    rootSshKey = lib.mkOption {
+    nodeDomain = mkOption {
+      description = "The domain of the node";
+      type = types.str;
+      readOnly = true;
+      default = concatStrings (
+        intersperse "." (drop 1 (splitString "." config.portal.nodeFqdn))
+      );
+    };
+
+    rootSshKey = mkOption {
       description = "The public key used for secure remote access as `root`";
-      type = lib.types.str;
+      type = types.str;
     };
   };
 
@@ -29,7 +43,6 @@
       # enable XLibs to allow building gtk; without this the build fails
       # see https://github.com/NixOS/nixpkgs/issues/102137
       noXlibs = lib.mkForce false;
-
       systemPackages = with pkgs; [
         coreutils
         htop
@@ -38,8 +51,8 @@
     };
 
     networking = {
-      firewall.allowedTCPPorts = [ 22 ];
       hostName = config.portal.nodeName;
+      domain = config.portal.nodeDomain;
       nameservers = [ "1.1.1.1" "1.0.0.1" ];
     };
 
@@ -48,21 +61,14 @@
       wheelNeedsPassword = false;
     };
 
-    services = {
-      # ban those pesky bots
-      fail2ban.enable = true;
-
-      openssh = {
-        enable = true;
-        passwordAuthentication = false;
-      };
+    services.openssh = {
+      enable = true;
+      allowSFTP = false;
+      passwordAuthentication = false;
+      kbdInteractiveAuthentication = false;
+      hostKeys = [ { type = "ed25519"; path = "/etc/ssh/ed25519_key"; } ];
     };
 
     time.timeZone = "UTC";
-
-    users = {
-      mutableUsers = false;
-      users.root.openssh.authorizedKeys.keys = [config.portal.rootSshKey];
-    };
   };
 }

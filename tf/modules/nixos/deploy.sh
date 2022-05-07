@@ -5,7 +5,7 @@ set -euo pipefail
 
 sshPrivateKey=$(mktemp)
 trap "{ rm -f $sshPrivateKey; }" EXIT
-echo "$SSH_PRIVATE_KEY" > "$sshPrivateKey"
+echo "$SSH_PRIVATE_KEY" >"$sshPrivateKey"
 
 ################################################################################
 # Configuration
@@ -23,14 +23,13 @@ NIX_COPY_OPTS=(
 )
 NIX_PROFILE=/nix/var/nix/profiles/system
 SSH_OPTS=(
-  -o "ConnectTimeout=300"
+  -o "ConnectTimeout=30"
   -o "StrictHostKeyChecking=no"
   -o "UserKnownHostsFile=/dev/null"
   -o "GlobalKnownHostsFile=/dev/null"
   -o "IdentitiesOnly=yes"
   -o "IdentityFile=${sshPrivateKey}"
 )
-
 
 ################################################################################
 # Helpers
@@ -46,13 +45,17 @@ function execOnHost() {
   ssh "${SSH_OPTS[@]}" $SSH_HOST "$@"
 }
 
-
 ################################################################################
 # Preconditions and other checks
 ################################################################################
 
 # Ensure the local SSH directory exists with appropriate permissions
 mkdir -m 0700 -p $HOME/.ssh
+
+# Use the bastion host, if specified
+if [ "$#" -eq 3 ]; then
+  SSH_OPTS+=("-J" "$3")
+fi
 
 # Wait until we can SSH into the host
 while ! ssh "${SSH_OPTS[@]}" $SSH_HOST exit; do
@@ -64,7 +67,6 @@ if execOnHost 'ping -c 3 -q cache.nixos.org >/dev/null 2>&1'; then
   log "enabling substitutes for copying nix closure"
   NIX_COPY_OPTS+=("--use-substitutes")
 fi
-
 
 ################################################################################
 # Build, deploy, activate, clean up and reboot, if needed
@@ -82,7 +84,7 @@ execOnHost $outPath/bin/switch-to-configuration switch
 
 log "running garbage collection (at least 4GB free) on host ${SSH_HOST}"
 totalFree=$(df /nix/store | tail -n 1 | awk "{ print \$4 }")
-maxFree=$(( 4 * 1024**3 - 1024 * $totalFree ))
+maxFree=$((4 * 1024 ** 3 - 1024 * $totalFree))
 execOnHost nix-collect-garbage --max-freed $maxFree
 
 runningKernel=$(execOnHost readlink /run/booted-system/kernel)

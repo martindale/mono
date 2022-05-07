@@ -21,6 +21,7 @@ self: super: {
     in
       super.terraform_1.withPlugins (_: tfPlugins ++ (with pkgs; [
         terraform-providers.aws
+        terraform-providers.cloudflare
         terraform-providers.external
         terraform-providers.local
         terraform-providers.null

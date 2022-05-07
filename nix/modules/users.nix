@@ -1,0 +1,110 @@
+# This file lists user-accounts that are be created on each running instance.
+#
+# - `createNormalUser()` to create an account for human beings
+# - `createSystemUser()` to create service/process accounts
+#
+# NOTE: User accounts are listed alphabetically. Please preserve this when
+# adding new users.
+#
+{ config, lib, pkgs, ... }:
+
+with lib;
+
+let
+  # Creates a regular user account with reasonable defaults
+  createNormalUser = name: props: {
+    "${name}" = props // {
+      inherit name;
+
+      createHome = true;
+      home = "/home/${name}";
+      group = "users";
+      isNormalUser = true;
+      useDefaultShell = true;
+    };
+  };
+
+  # Creates a system user account with reasonable defaults
+  createSystemUser = name: props: {
+    "${name}" = props // {
+      inherit name;
+
+      group = "serviceaccounts";
+      isSystemUser = true;
+    };
+  };
+
+in
+{
+  users = {
+    # user mutations will not survive past a deployment
+    mutableUsers = false;
+
+    # The list of user accounts to be created on each machine
+    #
+    # See https://search.nixos.org/options?channel=21.11&query=users.users to
+    # check out the schema for defining a user.
+    users =
+      ############
+      # Developers
+      ############
+
+      # Alexey Melnichenko
+      createNormalUser "alexey" {
+        extraGroups = [ "sudo" "wheel" ];
+        openssh.authorizedKeys.keys = [];
+      } //
+
+      # Anand Suresh
+      createNormalUser "anand" {
+        extraGroups = [ "sudo" "wheel" ];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMozgKcmC5KdPFteZey9Ov45/inEfg/PCdSaZKd582tb anand@portaldefi.com"
+        ];
+      } //
+
+      # Eric Martindale
+      createNormalUser "eric" {
+        extraGroups = [ "sudo" "wheel" ];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJg4GT0PvkEI+J8wMIU1MYYHowXOPBgL0b7hmZue0iuF eric@mainstay"
+        ];
+      } //
+
+      # Farid Azizov
+      createNormalUser "farid" {
+        extraGroups = [ "sudo" "wheel" ];
+        openssh.authorizedKeys.keys = [];
+      } //
+
+      # Jack Mills
+      createNormalUser "jack" {
+        extraGroups = [ "sudo" "wheel" ];
+        openssh.authorizedKeys.keys = [];
+      } //
+
+      # Manoj Duggirala
+      createNormalUser "manoj" {
+        extraGroups = [ "sudo" "wheel" ];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILIMf8LBaISQrt1bXWn1mm8ANFPuy50BnTgLlu1MuG3o manoj@portaldefi.com"
+        ];
+      } //
+
+      # Victor Wu
+      createNormalUser "victor" {
+        extraGroups = [ "sudo" "wheel" ];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGe8OhFIdO6yUvGF6MHZYJxUv45hN8TmRe3xTMc9c2z3 victor@portaldefi.com"
+        ];
+      } //
+
+      ##################
+      # Service Accounts
+      ##################
+
+      createSystemUser "terraform" {
+        openssh.authorizedKeys.keys = [config.portal.rootSshKey];
+      };
+  };
+}
