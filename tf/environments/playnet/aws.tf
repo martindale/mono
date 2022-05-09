@@ -41,6 +41,10 @@ locals {
       configuration = <<-EOF
         {
           imports = [ ${path.module}/../../../nix/modules/bitcoin.nix ];
+
+          portal.bitcoin.network = "${var.bitcoin-network}";
+          portal.bitcoin.port = ${var.bitcoin-port};
+          portal.bitcoin.portRpc = ${var.bitcoin-rpc-port};
         }
       EOF
     }

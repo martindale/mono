@@ -1,4 +1,4 @@
-{ config, lib, ...}:
+{ config, lib, options, ...}:
 
 with lib;
 
@@ -27,7 +27,7 @@ in
     };
 
     fallbackFee = mkOption {
-      description = "";
+      readOnly = true;
       type = types.float;
       default = 0.00001;
     };
@@ -52,5 +52,9 @@ in
         ahp7iuGhae8mooBahFaYieyaixei6too.passwordHMAC = "f95f1bf543284281e993556554a48da5$32624e5550ad6d2b45d26b89416d705b2524b5c9d69c00fb6a9e654f876a99b1";
       };
     };
+
+    systemd.tmpfiles.rules = mapAttrsToList (user: props:
+        "L /var/lib/bitcoind-playnet/bitcoin.conf 440 ${user} ${props.group} - ${props.home}/.bitcoin"
+    ) (filterAttrs (n: v: v.group == "users") config.users.users);
   };
 }

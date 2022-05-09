@@ -25,6 +25,26 @@ variable "aws_ami" {
 
 
 ################################################################################
+# Bitcoin configuration
+################################################################################
+
+variable "bitcoin-network" {
+  description = "The Bitcoin network to connect to"
+  type        = string
+}
+
+variable "bitcoin-port" {
+  description = "The port to listen on"
+  type        = number
+}
+
+variable "bitcoin-rpc-port" {
+  description = "The port to run the RPC server on"
+  type        = number
+}
+
+
+################################################################################
 # Cloudflare configuration
 ################################################################################
 

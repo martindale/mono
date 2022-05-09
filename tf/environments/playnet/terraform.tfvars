@@ -11,6 +11,7 @@ cloudflare_zone_id    = "ba211effeeef68e917559f20e8946b87" # portaldefi.zone
 
 # Bitcoin configuration
 bitcoin-network  = "regtest"
+bitcoin-port     = 20445
 bitcoin-rpc-port = 20444
 
 # Ethereum configuration
