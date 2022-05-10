@@ -5,6 +5,7 @@ in
     nativeBuildInputs = with pkgs; [
       coreutils
       git
+      jq
       less
       niv
       nix-diff
@@ -37,5 +38,12 @@ in
         echo "EOF"
         exit 1
       fi
+
+      # Aliases
+      alias ls='ls --color'
+      alias l='ls -la'
+
+      alias tf-get-deploy-private-key='terraform state pull | jq -r ".resources[] | select(.name == \"deploy\") | .instances[0].attributes.private_key_pem"'
+      alias tf-get-deploy-public-key='terraform state pull | jq -r ".resources[] | select(.name == \"deploy\") | .instances[0].attributes.public_key_openssh"'
     '';
   }

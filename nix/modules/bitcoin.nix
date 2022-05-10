@@ -40,7 +40,6 @@ in
       port = cfg.port;
       rpc.port = cfg.portRpc;
 
-      testnet = cfg.network == "regtest";
       extraConfig = optionalString (cfg.network == "regtest") ''
         regtest=1
       '' + ''
@@ -52,9 +51,5 @@ in
         ahp7iuGhae8mooBahFaYieyaixei6too.passwordHMAC = "f95f1bf543284281e993556554a48da5$32624e5550ad6d2b45d26b89416d705b2524b5c9d69c00fb6a9e654f876a99b1";
       };
     };
-
-    systemd.tmpfiles.rules = mapAttrsToList (user: props:
-        "L /var/lib/bitcoind-playnet/bitcoin.conf 440 ${user} ${props.group} - ${props.home}/.bitcoin"
-    ) (filterAttrs (n: v: v.group == "users") config.users.users);
   };
 }

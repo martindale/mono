@@ -37,6 +37,8 @@ let
 in
 {
   users = {
+    groups.serviceaccounts = {};
+
     # user mutations will not survive past a deployment
     mutableUsers = false;
 

@@ -70,5 +70,7 @@ with lib;
     };
 
     time.timeZone = "UTC";
+
+    users.users.root.openssh.authorizedKeys.keys = [config.portal.rootSshKey];
   };
 }
