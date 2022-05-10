@@ -76,7 +76,9 @@ in
       # Farid Azizov
       createNormalUser "farid" {
         extraGroups = [ "sudo" "wheel" ];
-        openssh.authorizedKeys.keys = [];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMZoPerJjxh2xCSpPvcXRFoKzTDzTj2jtWOzkjlXEWt+ farid@getportal.co"
+        ];
       } //
 
       # Jack Mills
