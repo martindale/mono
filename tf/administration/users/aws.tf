@@ -34,6 +34,7 @@ resource "aws_iam_group_membership" "developers" {
     aws_iam_user.farid.name,
     aws_iam_user.jack.name,
     aws_iam_user.manoj.name,
+    aws_iam_user.neil.name,
     aws_iam_user.victor.name,
   ]
 }
@@ -77,6 +78,12 @@ resource "aws_iam_user" "manoj" {
   name = "manoj"
   path = "/employees/"
   tags = { Name = "Manoj Duggirala" }
+}
+
+resource "aws_iam_user" "neil" {
+  name = "neil"
+  path = "/contractors/"
+  tags = { Name = "Neil Player" }
 }
 
 resource "aws_iam_user" "victor" {
