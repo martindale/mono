@@ -54,7 +54,9 @@ in
       # Alexey Melnichenko
       createNormalUser "alexey" {
         extraGroups = [ "sudo" "wheel" ];
-        openssh.authorizedKeys.keys = [];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKrpnnVa13It9FW6v2IMDP0jbbtjiW14VtTwba3kAyTe alexey@portaldefi.com"
+        ];
       } //
 
       # Anand Suresh
