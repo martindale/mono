@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    git
+    gitMinimal
+    nodejs-12_x
   ];
 }

@@ -1,55 +1,52 @@
-{ config, lib, options, ...}:
-
-with lib;
-
 let
-  cfg = config.portal.bitcoin;
+  nix-bitcoin = builtins.fetchTarball {
+    url = "https://github.com/fort-nix/nix-bitcoin/archive/cae0ff448fe936c6ae1470f8b1a59e214a45ef9b.tar.gz";
+    sha256 = "08nds694grrn5y5yvwb10l6s2x7zk5j7pyrsnjmkdrs3f97x1hd1";
+  };
 
 in
+{ config, lib, ...}:
 {
-  options.portal.bitcoin = {
-    network = mkOption {
-      description = "";
-      type = types.enum ["mainnet" "regtest"];
-      default = "regtest";
-    };
+  imports = [
+    "${nix-bitcoin}/modules/modules.nix"
+  ];
 
-    port = mkOption {
-      description = "The port to listen on for incoming connections";
-      type = types.int;
-      default = 20445;
-    };
+  nix-bitcoin = {
+    # Automatically generate all secrets required by services.
+    # The secrets are stored in /etc/nix-bitcoin-secrets
+    generateSecrets = true;
 
-    portRpc = mkOption {
-      description = "The port to listen on for incoming connections";
-      type = types.int;
-      default = 20444;
-    };
-
-    fallbackFee = mkOption {
-      readOnly = true;
-      type = types.float;
-      default = 0.00001;
-    };
-  };
-
-  config = {
-    services.bitcoind.playnet = {
+    # Enable interactive access to nix-bitcoin features (like bitcoin-cli) for
+    # your system's main user
+    operator = {
       enable = true;
-
-      port = cfg.port;
-      rpc.port = cfg.portRpc;
-
-      extraConfig = optionalString (cfg.network == "regtest") ''
-        regtest=1
-      '' + ''
-        server=1
-        txindex=1
-        fallbackfee=${toString cfg.fallbackFee}
-      '';
-      rpc.users = {
-        ahp7iuGhae8mooBahFaYieyaixei6too.passwordHMAC = "f95f1bf543284281e993556554a48da5$32624e5550ad6d2b45d26b89416d705b2524b5c9d69c00fb6a9e654f876a99b1";
-      };
+      allowRunAsUsers =
+        let
+          isDeveloper = name: value: value.group == "users";
+        in
+          lib.attrNames (lib.filterAttrs isDeveloper config.users.users);
     };
+};
+
+  # Enable some services.
+  # See ./configuration.nix for all available features.
+  services = {
+    bitcoind = {
+      enable = true;
+      port = 20445;
+      rpc.port = 20444;
+      rpc.users = {
+        ahp7iuGhae8mooBahFaYieyaixei6too = {
+          passwordHMAC = "f95f1bf543284281e993556554a48da5$32624e5550ad6d2b45d26b89416d705b2524b5c9d69c00fb6a9e654f876a99b1";
+        };
+      };
+      regtest = true;
+      txindex = true;
+    };
+
+    clightning.enable = true;
   };
+
+  # Prevent garbage collection of the nix-bitcoin source
+  system.extraDependencies = [ nix-bitcoin ];
 }

@@ -3,7 +3,7 @@
 # Usage: derive.sh <nixos> ...
 set -euo pipefail
 
-DERIVATION=$(nix-instantiate "$@")
+DERIVATION=$(nix-instantiate --show-trace "$@")
 
 if [[ "$DERIVATION" != /nix/store/*.drv ]]; then
   echo "{\"error\":\"${DERIVATION}\"}"

@@ -1,5 +1,5 @@
 # Nix
-result* # symlinks to built assets
+result*
 
 # Terraform
 .terraform

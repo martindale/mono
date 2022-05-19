@@ -25,7 +25,7 @@ locals {
       EOF
     }
     bitcoin = {
-      aws_instance_type = "t3.xlarge"
+      aws_instance_type = "t3.small"
       aws_subnet        = "private"
       aws_zone          = "us-east-2a"
 
@@ -35,16 +35,12 @@ locals {
       ]
 
       aws_volumes = {
-        root = { size = 1024 }
+        root = { size = 32 }
       }
 
       configuration = <<-EOF
         {
           imports = [ ${path.module}/../../../nix/modules/bitcoin.nix ];
-
-          portal.bitcoin.network = "${var.bitcoin-network}";
-          portal.bitcoin.port = ${var.bitcoin-port};
-          portal.bitcoin.portRpc = ${var.bitcoin-rpc-port};
         }
       EOF
     }
@@ -71,49 +67,6 @@ locals {
         }
       EOF
     }
-
-    raiden-cli = {
-      aws_instance_type = "t3.xlarge"
-      aws_subnet        = "private"
-      aws_zone          = "us-east-2a"
-
-      aws_security_groups = [
-        module.aws_networking.security_groups.default,
-        module.aws_networking.security_groups.private
-      ]
-
-      aws_volumes = {
-        root = { size = 32 }
-      }
-
-      configuration = <<-EOF
-        {
-          imports = [ ${path.module}/../../../nix/modules/raiden.nix ];
-
-          # vue-cli-service easily exceeds the 8k default limit
-          boot.kernel.sysctl."fs.inotify.max_user_watches" = 524288;
-
-          # enable raiden
-          services.raiden.playnet = {
-            enable = true;
-            address = "${var.raiden-node-address}";
-            password-file = "/var/lib/raiden/playnet/keystore-pass";
-            udc-address = "${var.raiden-udc-address}";
-            network-id = "${var.raiden-network}";
-            eth-rpc-endpoint = "${var.ethereum-url}";
-            environment-type = "development";
-            development-environment = "unstable";
-            logging.config = ["console:info"];
-            logging.debug.enable = true;
-            rpc.enable = true;
-            matrix-server = "${var.matrix-url}";
-            path-finding.enable = true;
-            path-finding.service-address = "${var.raiden-pfs-url}";
-          };
-        }
-      EOF
-    }
-
   }
 }
 
@@ -182,6 +135,7 @@ module "aws_configuration" {
     imports = [
       ${path.module}/../../../nix/modules/aws.nix
       ${path.module}/../../../nix/modules/default.nix
+      ${path.module}/../../../nix/modules/devtools.nix
       ${path.module}/../../../nix/modules/users.nix
       (${local.instances[each.key].configuration})
     ];
