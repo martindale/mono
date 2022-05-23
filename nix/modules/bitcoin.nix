@@ -1,7 +1,7 @@
 let
   nix-bitcoin = builtins.fetchTarball {
-    url = "https://github.com/fort-nix/nix-bitcoin/archive/cae0ff448fe936c6ae1470f8b1a59e214a45ef9b.tar.gz";
-    sha256 = "08nds694grrn5y5yvwb10l6s2x7zk5j7pyrsnjmkdrs3f97x1hd1";
+    url = "https://github.com/fort-nix/nix-bitcoin/archive/v0.0.71.tar.gz";
+    sha256 = "1f5v8i6bdcg86yf19zqy3cz347shbj8an8difrg6dmb8f41jkgk1";
   };
 
 in
