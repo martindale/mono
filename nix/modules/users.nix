@@ -86,7 +86,9 @@ in
       # Jack Mills
       createNormalUser "jack" {
         extraGroups = [ "sudo" "wheel" ];
-        openssh.authorizedKeys.keys = [];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ8mkZ7I1Nkemk58rqjkIrj1fG/wxR4zya9WqTjQYuQP jack@getportal.co"
+        ];
       } //
 
       # Manoj Duggirala
