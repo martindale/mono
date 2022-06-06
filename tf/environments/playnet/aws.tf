@@ -40,7 +40,10 @@ locals {
 
       configuration = <<-EOF
         {
-          imports = [ ${path.module}/../../../nix/modules/bitcoin.nix ];
+          imports = [
+            ${path.module}/../../../nix/modules/bitcoin.nix
+            ${path.module}/../../../nix/modules/fabric.nix
+          ];
         }
       EOF
     }

@@ -1,4 +1,16 @@
 {
+    "fabric": {
+        "branch": "nix",
+        "description": "Fabric is an experimental protocol for exchanging information.",
+        "homepage": "https://fabric.pub",
+        "owner": "fabriclabs",
+        "repo": "fabric",
+        "rev": "d81f4158ff22ed6c7baf8bf9f3fc483b41c60cfc",
+        "sha256": "0bkgllalvq07dghg1m7xjxrbkkxiqssk72h1aq94yd09cwnikcw7",
+        "type": "tarball",
+        "url": "https://github.com/fabriclabs/fabric/archive/d81f4158ff22ed6c7baf8bf9f3fc483b41c60cfc.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "niv": {
         "branch": "master",
         "description": "Easy dependency management for Nix projects",
