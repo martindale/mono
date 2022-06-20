@@ -134,18 +134,18 @@ module "aws_configuration" {
   }
 
   configuration = <<-EOF
-  {
-    imports = [
-      ${path.module}/../../../nix/modules/aws.nix
-      ${path.module}/../../../nix/modules/default.nix
-      ${path.module}/../../../nix/modules/devtools.nix
-      ${path.module}/../../../nix/modules/users.nix
-      (${local.instances[each.key].configuration})
-    ];
+    {
+      imports = [
+        ${path.module}/../../../nix/modules/aws.nix
+        ${path.module}/../../../nix/modules/default.nix
+        ${path.module}/../../../nix/modules/devtools.nix
+        ${path.module}/../../../nix/modules/users.nix
+        (${local.instances[each.key].configuration})
+      ];
 
-    portal.nodeFqdn = "${each.value.fqdn}";
-    portal.rootSshKey = "${tls_private_key.deploy.public_key_openssh}";
-  }
+      portal.nodeFqdn = "${each.value.fqdn}";
+      portal.rootSshKey = "${tls_private_key.deploy.public_key_openssh}";
+    }
   EOF
 }
 
