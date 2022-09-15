@@ -3,7 +3,7 @@
 ################################################################################
 
 locals {
-  services  = ["bitcoin", "ethereum", "faucet", "lightning"]
+  services  = ["goerli", "ropsten"]
   dns_names = [for name in local.services : "${name}.node.${var.environment}"]
   dns_records = { for name in local.dns_names : name => {
     zone_id = var.cloudflare_zone_id
@@ -89,10 +89,6 @@ module "nixos" {
         "$${config.systemd.package}/lib/systemd/systemd-networkd-wait-online --any"
       ];
 
-      portal.bitcoin.port = 20445;
-      portal.bitcoin.rpcPort = 20444;
-      portal.ethereum.hostname = "${cloudflare_record.services["ethereum.node.playnet"].hostname}";
-      portal.ethereum.port = 8545;
       portal.nodeFqdn = "${cloudflare_record.node.hostname}";
       portal.rootSshKey = "${tls_private_key.deploy.public_key_openssh}";
     }

@@ -2,35 +2,37 @@
 
 with lib;
 
-let
-  cfg = config.portal;
-
-in
 {
-  options.portal.ethereum = {
-    hostname = mkOption {
-      description = "Ethereum hostname";
-      type = types.str;
-      default = "ethereum.${config.networking.hostName}.${config.networking.domain}";
-    };
-
-    port = mkOption {
-      description = "Ethereum RPC port";
-      type = types.port;
-    };
-  };
+  # TODO: what should be configurable
+  options.portal.ethereum = {};
 
   config = {
-    services.geth.playnet = {
-      enable = true;
-      network = "goerli";
-      http.enable = true;
-      http.port = cfg.ethereum.port;
-      metrics.enable = true;
-      extraArgs = [
-        "--http.vhosts"
-        "localhost,${cfg.ethereum.hostname}"
-      ];
+    services.geth = {
+      goerli = rec {
+        enable = true;
+        port = 30000;
+        network = "goerli";
+        http.enable = true;
+        http.port = config.services.geth.goerli.port + 1;
+        websocket.enable = true;
+        websocket.port = config.services.geth.goerli.port + 2;
+        websocket.apis = ["net" "eth"];
+        metrics.enable = true;
+        metrics.port = config.services.geth.goerli.port + 9;
+      };
+
+      ropsten = rec {
+        enable = true;
+        port = 30010;
+        network = "ropsten";
+        http.enable = true;
+        http.port = config.services.geth.ropsten.port + 1;
+        websocket.enable = true;
+        websocket.port = config.services.geth.ropsten.port + 2;
+        websocket.apis = ["net" "eth"];
+        metrics.enable = true;
+        metrics.port = config.services.geth.ropsten.port + 9;
+      };
     };
   };
 }

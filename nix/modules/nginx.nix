@@ -5,6 +5,7 @@ with lib;
 let
   cfg = config.portal;
 
+
 in
 {
   options.portal.nginx = {
@@ -18,19 +19,12 @@ in
       description = "A set of hosts being TLS-terminated, keyed by service";
       type = types.attrs;
       default = {
-        bitcoin = {
-          locations."/".proxyPass = "http://localhost:${toString cfg.bitcoin.rpcPort}/";
+        goerli = {
+          locations."/".proxyPass = "http://localhost:${toString config.services.geth.goerli.http.port}/";
         };
-        ethereum = {
-          locations."/".proxyPass = "http://localhost:${toString cfg.ethereum.port}/";
-          # TODO: security issues
-          basicAuth = {
-            anand = "anand";
-          };
+        ropsten = {
+          locations."/".proxyPass = "http://localhost:${toString config.services.geth.ropsten.http.port}/";
         };
-        /* faucet = {
-          locations."/".proxyPass = "http://localhost:${toString cfg.faucet.port}/";
-        }; */
       };
     };
   };
@@ -62,15 +56,21 @@ in
       recommendedTlsSettings = true;
 
       # Configure proxying of requests
-      virtualHosts = mapAttrs' (name: config: nameValuePair "${name}.${cfg.nodeFqdn}" ({
+      virtualHosts = {
+        "${cfg.nodeFqdn}" = {
+          forceSSL = true;
+          enableACME = true;
+          locations."/".proxyPass = "http://${cfg.server.hostname}:${toString cfg.server.port}/";
+        };
+      } // mapAttrs' (name: config: nameValuePair "${name}.${cfg.nodeFqdn}" ({
         forceSSL = true;
         enableACME = true;
         } // config)) cfg.nginx.hosts;
     };
 
-    # /var/lib/acme/.challenges must be writable by the ACME user
-    # and readable by the Nginx user. The easiest way to achieve
-    # this is to add the Nginx user to the ACME group.
+    # /var/lib/acme/.challenges must be writable by the ACME user and readable
+    # by the Nginx user. The easiest way to achieve this is to add the Nginx
+    # user to the ACME group.
     users.users.nginx.extraGroups = [ "acme" ];
   };
 }

@@ -1,6 +1,9 @@
 # Nix
 result*
 
+# Node.js
+node_modules
+
 # Terraform
 .terraform
 .terraform.lock.hcl
