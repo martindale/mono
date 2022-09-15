@@ -1,14 +1,26 @@
 {
     "fabric": {
-        "branch": "nix",
+        "branch": "feature/node-16",
         "description": "Fabric is an experimental protocol for exchanging information.",
         "homepage": "https://fabric.pub",
         "owner": "fabriclabs",
         "repo": "fabric",
-        "rev": "d81f4158ff22ed6c7baf8bf9f3fc483b41c60cfc",
-        "sha256": "0bkgllalvq07dghg1m7xjxrbkkxiqssk72h1aq94yd09cwnikcw7",
+        "rev": "0f461f322e9cf88362ad116bf36cde981d691068",
+        "sha256": "103bwgrx5fzb2aw6j3r9piv0xsxcrivxxrfj30ixvfpb8xn2r93a",
         "type": "tarball",
-        "url": "https://github.com/fabriclabs/fabric/archive/d81f4158ff22ed6c7baf8bf9f3fc483b41c60cfc.tar.gz",
+        "url": "https://github.com/fabriclabs/fabric/archive/0f461f322e9cf88362ad116bf36cde981d691068.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "faucet": {
+        "branch": "feature/node-16",
+        "description": "Fast, simple faucet for Bitcoin-based chains.",
+        "homepage": "",
+        "owner": "fabriclabs",
+        "repo": "faucet",
+        "rev": "7612c9a77e8af614c05bbc50a9f8725213881dac",
+        "sha256": "1vkwd460707ixnmmx5plhn5fnf6rhwkhw8dy62s3v0k70cwbwir5",
+        "type": "tarball",
+        "url": "https://github.com/fabriclabs/faucet/archive/7612c9a77e8af614c05bbc50a9f8725213881dac.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -24,15 +36,27 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
-        "branch": "master",
+        "branch": "release-21.11",
         "description": "Nix Packages collection",
         "homepage": "https://nixos.org/",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "80d8655c15055472f0118a877351085cc22c1e92",
-        "sha256": "14aq8rikhpiwv7aw15cjxg88vxwzg02gn4w3wxqnm4g3yy20zzik",
+        "rev": "eabc38219184cc3e04a974fe31857d8e0eac098d",
+        "sha256": "04ffwp2gzq0hhz7siskw6qh9ys8ragp7285vi1zh8xjksxn1msc5",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/80d8655c15055472f0118a877351085cc22c1e92.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/eabc38219184cc3e04a974fe31857d8e0eac098d.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "node2nix": {
+        "branch": "master",
+        "description": "Generate Nix expressions to build NPM packages",
+        "homepage": "",
+        "owner": "svanderburg",
+        "repo": "node2nix",
+        "rev": "026360084db8a27095aafdac7125d7f1a93046c8",
+        "sha256": "147hb7s22g0k15qz9nhbf0wx1phma9z2s4czpz3b3gvldlcg3vyc",
+        "type": "tarball",
+        "url": "https://github.com/svanderburg/node2nix/archive/026360084db8a27095aafdac7125d7f1a93046c8.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "raiden": {
@@ -47,5 +71,19 @@
         "url": "https://github.com/raiden-network/light-client/archive/v2.2.0.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz",
         "version": "2.2.0"
+    },
+    "terraform-provider-equinix": {
+        "branch": "master",
+        "description": "Terraform Equinix provider",
+        "homepage": "https://registry.terraform.io/providers/equinix/equinix/latest/docs",
+        "owner": "equinix",
+        "repo": "terraform-provider-equinix",
+        "rev": "v1.7.0",
+        "sha256": "1qxixznlb5mbcs0kbr9qqz7b3vsb653q9s69vrj9372rrcj2yrqz",
+        "type": "tarball",
+        "url": "https://github.com/equinix/terraform-provider-equinix/archive/v1.7.0.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz",
+        "vendorSha256": "sha256-3wTILP9wnZTBQvYQrhwC6/HbJ+AhmXBoXIcNYqeL0r8=",
+        "version": "1.7.0"
     }
 }

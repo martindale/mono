@@ -35,6 +35,8 @@ in
         echo
         echo "export CLOUDFLARE_EMAIL='your_cloudflare_email_address'"
         echo "export CLOUDFLARE_API_KEY='your_cloudflare_global_api_key'"
+        echo
+        echo "export METAL_AUTH_TOKEN='your_equinix_metal_api_token'"
         echo "EOF"
         exit 1
       fi
@@ -50,5 +52,6 @@ in
 
       ## Builds a NixOS system including the specified module; useful for testing
       alias build-module='nix-build --attr nixos --argstr module'
+      alias build-playnet='nix-build --attr playnet'
     '';
   }

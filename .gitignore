@@ -5,3 +5,6 @@ result*
 .terraform
 .terraform.lock.hcl
 terraform.tfstate*
+
+# Secure content
+secure

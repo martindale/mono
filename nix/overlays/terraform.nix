@@ -19,7 +19,7 @@ self: super: {
         subPackages = [ "." ];
       }) tfProviders;
     in
-      super.terraform_1.withPlugins (_: tfPlugins ++ (with pkgs; [
+      super.terraform.withPlugins (_: tfPlugins ++ (with pkgs; [
         terraform-providers.aws
         terraform-providers.cloudflare
         terraform-providers.external
