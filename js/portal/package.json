@@ -13,12 +13,16 @@
     "posttest": "npm run lint",
     "test": "mocha"
   },
+  "dependencies": {
+    "web3-legacy": "melnx/web3.js#0.20.7"
+  },
   "devDependencies": {
     "c8": "7.12.0",
     "chai": "4.3.6",
     "mocha": "10.0.0",
     "node2nix": "1.11.0",
-    "standard": "17.0.0"
+    "standard": "17.0.0",
+    "truffle": "^5.5.30"
   },
   "c8": {
     "check-coverage": true,
