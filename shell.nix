@@ -21,7 +21,7 @@ in
       export PORTAL=$HOME/.config/portal.conf
       if [ -f $PORTAL ]; then
         source $PORTAL
-      else
+      elif [ ! $CI ]; then
         echo "Developer environment not setup correctly!"
         echo "Please setup your environment before proceeding by running:"
         echo
