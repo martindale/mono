@@ -12,7 +12,7 @@ const Server = require('../../lib/core/server')
  * @type {Array}
  */
 const ENDPOINTS = [
-  '/api/v1/orderbook'
+  '/api/v1/swap'
 ]
 
 /**

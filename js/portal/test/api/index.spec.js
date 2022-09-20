@@ -6,7 +6,7 @@ const Client = require('../../lib/core/client')
 const Server = require('../../lib/core/server')
 const Api = require('../../lib/core/api')()
 
-describe('API Resources', function () {
+describe('Client/Server Interface Specification', function () {
   let client, server
 
   beforeEach(function () {
