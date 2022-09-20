@@ -28,7 +28,7 @@ jobs:
         nix_path: nixpkgs=channel:nixos-22.05
 
     - name: run tests
-      run: nix-shell --run "cd js/portal && npm ci"
+      run: nix-shell --run "cd js/portal && npm ci && npm test"
 
     - name: upload to build cache
       uses: cachix/cachix-action@v10
