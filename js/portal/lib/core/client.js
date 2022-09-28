@@ -15,20 +15,20 @@ module.exports = class Client extends EventEmitter {
 
     this.hostname = props.hostname || 'localhost'
     this.port = props.port || 80
-    this.client = http
+
     Object.seal(this)
   }
 
   /**
    * Performs an HTTP request and returns the response
    * @param {Object} args Arguments for the operation
-   * @param {Object} data Data to be sent as part of the request
-   * @returns {Promise<Object|Buffer|Readable>}
+   * @param {Object} [data] Data to be sent as part of the request
+   * @returns {Promise<Object>}
    */
   _request (args, data) {
     return new Promise((resolve, reject) => {
-      const buf = JSON.stringify(data)
-      const req = this.client.request(Object.assign(args, {
+      const buf = (data && JSON.stringify(data)) || ''
+      const req = http.request(Object.assign(args, {
         hostname: this.hostname,
         port: this.port,
         headers: Object.assign(args.headers || {}, {
@@ -46,16 +46,12 @@ module.exports = class Client extends EventEmitter {
         .once('response', res => {
           const { statusCode } = res
           const contentType = res.headers['content-type']
-          const contentEncoding = res.headers['content-encoding']
 
           if (statusCode !== 200) {
             const err = new Error(`unexpected status code ${statusCode}`)
             return reject(err)
-          } else if (contentType !== 'application/json') {
+          } else if (!contentType.startsWith('application/json')) {
             const err = new Error(`unexpected content-type ${contentType}`)
-            return reject(err)
-          } else if (contentEncoding !== 'identity') {
-            const err = new Error(`unexpected content-encoding ${contentEncoding}`)
             return reject(err)
           }
 

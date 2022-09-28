@@ -12,6 +12,7 @@ const Server = require('../../lib/core/server')
  * @type {Array}
  */
 const ENDPOINTS = [
+  '/api/v1/fees',
   '/api/v1/swap'
 ]
 

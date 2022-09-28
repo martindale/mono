@@ -1,31 +1,24 @@
 /**
- * @file
+ * @file Client/Server Interface Specification
  */
 
 const Client = require('../../lib/core/client')
 const Server = require('../../lib/core/server')
-const Api = require('../../lib/core/api')()
 
-describe('Client/Server Interface Specification', function () {
-  let client, server
+before('Initialize client/server', function () {
+  return new Server()
+    .once('start', instance => {
+      this.server = instance
+      this.client = new Client(instance)
+    })
+    .start()
+})
 
-  beforeEach(function () {
-    return new Server()
-      .once('start', instance => {
-        server = instance
-        client = new Client()
-      })
-      .start()
-  })
-
-  afterEach(function () {
-    return server
-      .once('stop', instance => {
-        server = null
-        client = null
-      })
-      .stop()
-  })
-
-  Object.keys(Api).forEach(endpoint => require(`..${endpoint}`)(client, server))
+after('Destroy client/server', function () {
+  this.server
+    .once('stop', instance => {
+      this.server = null
+      this.client = null
+    })
+    .stop()
 })
