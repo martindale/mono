@@ -30,7 +30,7 @@ in
         PORTAL_HTTP_HOSTNAME = cfg.hostname;
         PORTAL_HTTP_PORT = toString cfg.port;
       };
-      script = "${pkgs.portal}/lib/node_modules/@portal/portal/bin/portal";
+      script = "${pkgs.portaldefi.portal}/lib/node_modules/@portal/portal/bin/portal";
       serviceConfig = {
         DynamicUser = true;
         Restart = "always";

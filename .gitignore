@@ -2,6 +2,7 @@
 result*
 
 # Node.js
+coverage
 node_modules
 
 # Terraform

@@ -9,6 +9,7 @@ in
       less
       niv
       nix-diff
+      nodejs-16_x
       terraform
       which
     ];

@@ -1,5 +1,8 @@
-pragma solidity ^0.7.6;
+/// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.5.8;
 
+
+/// ERC-20 Interface
 interface IERC20 {
     function transfer(address to, uint256 value) external returns (bool);
 
@@ -19,11 +22,10 @@ interface IERC20 {
 }
 
 
-contract Swaps {
-    constructor() {
-
-    }
-
+/// A smart contract that implements one-half of a swap, enabling the transfer
+/// of any ERC-20 token on one EVM chain with any ERC-20 token on another EVM
+/// chain.
+contract Swap {
     mapping(uint => bool) public hashes;
     mapping(uint => bool) public claimed;
     mapping(uint => uint) public amounts;
@@ -31,14 +33,23 @@ contract Swaps {
     mapping(uint => address) public recipients;
     mapping(uint => uint) public secrets;
 
-    event Deposited(uint trade, address tokenDeposited, uint amountDeposited, address tokenDesired, uint amountDesired, bytes32 hashOfSecret, address recipient);
+    event Deposited(
+        uint trade,
+        address tokenDeposited,
+        uint amountDeposited,
+        address tokenDesired,
+        uint amountDesired,
+        bytes32 hashOfSecret,
+        address recipient
+    );
+
     event Claimed(uint trade, uint secret);
 
     function hashOfSecretNumber(uint secret) public pure returns (bytes32 hash) {
         hash = keccak256(toBytes(secret));
     }
 
-    function idOfHashOfSecretNumber(uint hash) public pure returns (uint id){
+    function idOfHashOfSecretNumber(uint hash) public pure returns (uint id) {
         id = uint(hash);
     }
 
@@ -54,34 +65,32 @@ contract Swaps {
     }
 
     function claim(uint secret) public returns (bool) {
-
         bytes32 hash = keccak256(toBytes(secret));
         uint orderId = uint(hash);
 
-        require(isClaimableOrder(orderId));
-
+        require(isClaimableOrder(orderId), "Order is not claimable!");
 
         IERC20 erc20 = IERC20(tokenAddresses[orderId]);
-
-        erc20.transfer(msg.sender, amounts[orderId]);
-
         secrets[orderId] = secret;
         claimed[orderId] = true;
 
-        emit Claimed(orderId, secret);
+        erc20.transfer(msg.sender, amounts[orderId]);
 
+        emit Claimed(orderId, secret);
         return true;
     }
 
-    /*function onTokenTransfer(address from, uint256 amount, bytes memory data) public returns (bool success) {
-        uint id = hashes.length;
-        amounts[id] = amount;
-        bytes32 data2 = bytesToBytes32(data, 0);
-        hashes.push(data2);
-        return true;
-    }*/
-
-    function deposit(address tokenDeposited, uint amountDeposited, address tokenDesired, uint amountDesired, bytes32 hashOfSecret, address recipient) public returns(uint orderId){
+    function deposit(
+        address tokenDeposited,
+        uint amountDeposited,
+        address tokenDesired,
+        uint amountDesired,
+        bytes32 hashOfSecret,
+        address recipient
+    )
+        public
+        returns(uint orderId)
+    {
 
         //bytes32 hashBytes32 = hashOfSecret;// bytesToBytes32(hashOfSecret, 0);
         orderId = uint(hashOfSecret);
@@ -99,18 +108,20 @@ contract Swaps {
         return orderId;
     }
 
-    function toBytes(uint256 x) pure internal returns (bytes memory b) {
+    function toBytes(uint256 x) internal pure returns (bytes memory b) {
         b = new bytes(32);
+        // solhint-disable-next-line no-inline-assembly
         assembly { mstore(add(b, 32), x) }
         return b;
     }
 
     function bytesToBytes32(bytes memory b, uint offset) private pure returns (bytes32) {
-      bytes32 out;
+        bytes32 out;
 
-      for (uint i = 0; i < 32; i++) {
-        out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
-      }
-      return out;
+        for (uint i = 0; i < 32; i++) {
+            out |= bytes32(b[offset + i] & 0xFF) >> (i * 8);
+        }
+
+        return out;
     }
 }
