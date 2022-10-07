@@ -1,14 +1,11 @@
-{ config
-, lib
-, modulesPath
-, options
-, pkgs
-, ... }:
+{ config, lib, modulesPath, options, pkgs, ... }:
 
 with lib;
 
 {
-  imports = [ "${toString modulesPath}/profiles/minimal.nix" ];
+  imports = [
+    "${toString modulesPath}/profiles/minimal.nix"
+  ];
 
   options.portal = {
     nodeFqdn = mkOption {
@@ -17,14 +14,14 @@ with lib;
     };
 
     nodeName = mkOption {
-      description = "The name of the node";
+      description = "The host name of the node";
       type = types.str;
       readOnly = true;
       default = elemAt (splitString "." config.portal.nodeFqdn) 0;
     };
 
     nodeDomain = mkOption {
-      description = "The domain of the node";
+      description = "The domain name of the node";
       type = types.str;
       readOnly = true;
       default = concatStrings (
@@ -51,7 +48,7 @@ with lib;
     };
 
     networking = {
-      hostName = config.portal.nodeName;
+      hostName = mkForce config.portal.nodeName;
       domain = config.portal.nodeDomain;
       nameservers = [ "1.1.1.1" "1.0.0.1" ];
     };
@@ -65,7 +62,7 @@ with lib;
       enable = true;
       allowSFTP = false;
       passwordAuthentication = false;
-      kbdInteractiveAuthentication = false;
+      /* kbdInteractiveAuthentication = false; */
       hostKeys = [ { type = "ed25519"; path = "/etc/ssh/ed25519_key"; } ];
     };
 

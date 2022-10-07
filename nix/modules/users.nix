@@ -67,6 +67,15 @@ in
         ];
       } //
 
+      # Casey Bowman
+      createNormalUser "casey" {
+        extraGroups = [ "sudo" "wheel" ];
+        openssh.authorizedKeys.keys = [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ94FG2tYjhAAaTqHGGlEeI2gY7y8Mhez3S2J6fX1XDo casey@portaldefi.com"
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHpECyxKV36J7+P9hDb3sF7+7FzU/0iR+Q+WSJGgXv5o casey@portaldefi.com"
+        ];
+      } //
+
       # Eric Martindale
       createNormalUser "eric" {
         extraGroups = [ "sudo" "wheel" ];
