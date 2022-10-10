@@ -139,19 +139,19 @@ module.exports = class Server extends EventEmitter {
     req
       .on('data', chunk => chunks.push(chunk))
       .once('end', () => {
+        // Parse any incoming JSON object and stash it at req.json for later use
         const str = Buffer.concat(chunks).toString('utf8')
 
         if (str === '') {
           req.json = null
         } else {
           try {
-            // Parse the json and stash it for later use
             req.json = JSON.parse(str)
           } catch (e) {
             const err = new Error(`unexpected non-JSON response ${str}`)
+            res.send(err)
             this.emit('log', 'error', err, req, res)
-            res.statusCode = 400
-            return res.end()
+            return
           }
         }
 
@@ -236,5 +236,23 @@ class HttpResponse extends http.ServerResponse {
       statusCode: this.statusCode,
       headers: this.headers
     }
+  }
+
+  /**
+   * Sends the specified data to the socket and ends the response
+   * @param {Error|Object} data The data to be sent
+   * @returns {Void}
+   */
+  send (data) {
+    const buf = data instanceof Error
+      ? JSON.stringify({ message: data.message })
+      : JSON.stringify(data)
+
+    this.statusCode = data instanceof Error ? 400 : 200
+
+    this.setHeader('content-type', 'application/json')
+    this.setHeader('content-length', Buffer.byteLength(buf))
+    this.setHeader('content-encoding', 'identity')
+    this.end(buf)
   }
 }

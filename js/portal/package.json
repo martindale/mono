@@ -11,10 +11,12 @@
     "lint": "standard",
     "lint-fix": "standard --fix",
     "posttest": "npm run lint",
-    "test": "mocha"
+    "test": "mocha",
+    "watch": "mocha --watch"
   },
   "dependencies": {
-    "web3-legacy": "github:melnx/web3.js#0.20.7"
+    "uuid": "^9.0.0",
+    "web3": "^1.8.0"
   },
   "devDependencies": {
     "c8": "^7.12.0",

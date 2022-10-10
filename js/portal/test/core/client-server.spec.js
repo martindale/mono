@@ -13,6 +13,7 @@ const Server = require('../../lib/core/server')
  */
 const ENDPOINTS = [
   '/api/v1/fees',
+  '/api/v1/orderbook/limit',
   '/api/v1/swap'
 ]
 
@@ -81,6 +82,13 @@ describe('Client/Server', function () {
      * Expected user stores a.k.a. the happy paths
      */
     describe('Expected', function () {
+      it('must expose the expected endpoints', function () {
+        expect(server.endpoints).to.be.an('array').that.deep.equals([
+          '/fixtures/echo',
+          '/fixtures/http_methods'
+        ])
+      })
+
       /**
        * Tests sending a json object from a client to the server, and echoing it
        * back to the client.
@@ -115,10 +123,27 @@ describe('Client/Server', function () {
      * Expected errors and pathological cases
      */
     describe('Error Handling', function () {
-      it('must return a 400 for bad JSON')
-      it('must return 404 for unknown/unexpected endpoints')
-      it('must return 405 for unknown/unexpected HTTP methods')
-      it('must return 500 for unknown/unexpected errors')
+      it('must return 404 for unknown/unexpected endpoints', function () {
+        const args = { method: 'GET', path: '/fixtures/unknown/endpoint' }
+        return client._request(args)
+          .then(json => { throw new Error('unexpected success!') })
+          .catch(err => {
+            expect(err).to.be.an.instanceof(Error)
+            expect(err.message).to.be.a('string')
+            expect(err.message).to.equal('unexpected status code 404')
+          })
+      })
+
+      it('must return 405 for unknown/unexpected HTTP methods', function () {
+        const args = { method: 'PUT', path: '/fixtures/http_methods' }
+        return client._request(args)
+          .then(json => { throw new Error('unexpected success!') })
+          .catch(err => {
+            expect(err).to.be.an.instanceof(Error)
+            expect(err.message).to.be.a('string')
+            expect(err.message).to.equal('unexpected status code 405')
+          })
+      })
     })
   })
 })

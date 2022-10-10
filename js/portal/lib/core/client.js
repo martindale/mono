@@ -20,6 +20,43 @@ module.exports = class Client extends EventEmitter {
   }
 
   /**
+   * Adds a limit order to the orderbook
+   * @param {Object} order The limit order to add the orderbook
+   */
+  addLimitOrder (order) {
+    return this._request({
+      method: 'PUT',
+      path: '/api/v1/orderbook/limit'
+    }, {
+      uid: order.uid,
+      type: order.type,
+      side: order.side,
+      hash: order.hash,
+      baseAsset: order.baseAsset,
+      baseNetwork: order.baseNetwork,
+      baseQuantity: order.baseQuantity,
+      quoteAsset: order.quoteAsset,
+      quoteNetwork: order.quoteNetwork,
+      quoteQuantity: order.quoteQuantity
+    })
+  }
+
+  /**
+   * Adds a limit order to the orderbook
+   * @param {Object} order The limit order to delete the orderbook
+   */
+  deleteLimitOrder (order) {
+    return this._request({
+      method: 'DELETE',
+      path: '/api/v1/orderbook/limit'
+    }, {
+      id: order.id,
+      baseAsset: order.baseAsset,
+      quoteAsset: order.quoteAsset
+    })
+  }
+
+  /**
    * Performs an HTTP request and returns the response
    * @param {Object} args Arguments for the operation
    * @param {Object} [data] Data to be sent as part of the request
@@ -47,30 +84,30 @@ module.exports = class Client extends EventEmitter {
           const { statusCode } = res
           const contentType = res.headers['content-type']
 
-          if (statusCode !== 200) {
-            const err = new Error(`unexpected status code ${statusCode}`)
-            return reject(err)
+          if (statusCode !== 200 && statusCode !== 400) {
+            return reject(new Error(`unexpected status code ${statusCode}`))
           } else if (!contentType.startsWith('application/json')) {
-            const err = new Error(`unexpected content-type ${contentType}`)
-            return reject(err)
+            return reject(new Error(`unexpected content-type ${contentType}`))
+          } else {
+            const chunks = []
+            res
+              .on('data', chunk => chunks.push(chunk))
+              .once('error', err => reject(err))
+              .once('end', () => {
+                const str = Buffer.concat(chunks).toString('utf8')
+                let obj = null
+
+                try {
+                  obj = JSON.parse(str)
+                } catch (err) {
+                  return reject(new Error(`malformed JSON response "${str}"`))
+                }
+
+                statusCode === 400
+                  ? reject(new Error(obj.message))
+                  : resolve(obj)
+              })
           }
-
-          const chunks = []
-          res
-            .on('data', chunk => chunks.push(chunk))
-            .once('error', err => reject(err))
-            .once('end', () => {
-              const str = Buffer.concat(chunks).toString('utf8')
-              let obj = null
-
-              try {
-                obj = JSON.parse(str)
-              } catch (err) {
-                return reject(new Error(`unexpected non-JSON response ${str}`))
-              }
-
-              resolve(obj)
-            })
         })
         .end(buf)
     })

@@ -1,5 +1,5 @@
 /**
- * @file The HTTP API of the server
+ * @file Exposes an HTTP API for the server
  */
 
 const { readdirSync, statSync } = require('fs')
@@ -54,11 +54,11 @@ function buildApi (path) {
   // functions, to the endpoint, which would be rooted at the parent of the
   // specified path.
   for (const path of paths) {
+    const handler = require(path)
     const subpath = path.substring(startIndex)
     const endpoint = basename(path) === 'index.js'
       ? dirname(subpath)
       : `${dirname(subpath)}/${basename(subpath, extname(subpath))}`
-    const handler = require(path)
 
     endpoints[endpoint] = handler
   }
@@ -70,7 +70,6 @@ function buildApi (path) {
  * Recursively reads and returns all files in the specified directory
  * @param {String} dir The directory to traverse
  * @returns {String[]}
- * @todo Replace synchronous functions with async variants
  */
 function getEndpointPaths (dir) {
   const dirs = []
@@ -81,7 +80,7 @@ function getEndpointPaths (dir) {
     const stat = statSync(path)
     if (stat.isDirectory()) {
       dirs.push(path)
-    } else if (stat.isFile()) {
+    } else if (stat.isFile() && extname(path) === '.js') {
       files.push(path)
     }
   }
