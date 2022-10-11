@@ -5,6 +5,7 @@ const {createHash, randomBytes} = require('crypto');
 const {createHodlInvoice, settleHodlInvoice, pay, payViaPaymentRequest } = require('lightning');
 const {subscribeToInvoice} = require('lightning');
 const {getInvoice} = require('lightning');
+const {decodePaymentRequest} = require('lightning');
 
 
 // Settings from Polar "lightning Network 1"
@@ -85,27 +86,6 @@ const main = async function () {
   });
 
 
-  // Print out public keys for Alice and Carol's wallets on both networks
-  // const aliceWalletInfo_1 = await lnService.getWalletInfo(alice_1);
-  // const aliceWalletPublicKey_1 = aliceWalletInfo_1.public_key;
-  // console.log("Alice's wallet 1 public key")
-  // console.log(aliceWalletPublicKey_1);
-  // const carolWalletInfo_1 = await lnService.getWalletInfo(carol_1);
-  // const carolWalletPublicKey_1 = carolWalletInfo_1.public_key;
-  // console.log("")
-  // console.log("Carol's wallet 1 public key")
-  // console.log(carolWalletPublicKey_1);
-  // const aliceWalletInfo_2 = await lnService.getWalletInfo(alice_2);
-  // const aliceWalletPublicKey_2 = aliceWalletInfo_2.public_key;
-  // console.log("")
-  // console.log("Alice's wallet 2 public key")
-  // console.log(aliceWalletPublicKey_2);
-  // const carolWalletInfo_2 = await lnService.getWalletInfo(carol_2);
-  // const carolWalletPublicKey_2 = carolWalletInfo_2.public_key;
-  // console.log("")
-  // console.log("Carol's wallet 2 public key")
-  // console.log(carolWalletPublicKey_2);
-
   // Carol chooses secret, generates hash for swap, and shares hash with orderbook
   const randomSecret = () => randomBytes(32);
   const sha256 = buffer => createHash('sha256').update(buffer).digest('hex');
@@ -132,6 +112,7 @@ const main = async function () {
   console.log("")
   console.log("payment hash on Lightning Network 1");
   console.log(aliceInvoice_1.id);
+  console.log("")
   console.log("Alice creates invoice1")
   const request_1 = (await createHodlInvoice(aliceInvoice_1)).request;
   console.log("Alice has created invoice1")
@@ -144,24 +125,27 @@ const main = async function () {
 
   // Alice sends Carol request_1
 
-
+  // -------------------------------------------------------------------
   // There are two steps to paying a hold invoice
   //
   // Step #1 - the payer calls the pay() method
   //  - Sometimes we'll call this paymentStepOne in the context of these two separate steps.
   //   We'll also say that the payer has entered the invoice.
   //
+  // The pay() method carries out paymentStepOne but waits until paymentStepTwo is carried out before returning (see below).
+  //
   // When the payer does this, HTLCs are set up along the payment path.
   // Once the HTLCs reach all the way to the payee,
   // the payee is said to be holding the invoice.
+  // Note the pay() method call has not yet returned at this point.
   // All of this, following step #1, is automatically done by the lightning network.
   //
-  // Only at this point can she then perform step #2. The Hold Invoice stops here to
+  // Only at this point can the payee then perform step #2 and accept payment. The Hold Invoice stops here to
   // allow her to take this second step herself. A normal invoice would have performed
-  // the second step automatically.
+  // this second step automatically, in addition to having set up the HTLCs.
   //
   // Through the subscription, the payee is alerted to let her know when the HTLCs have reached her
-  // so that she is then holding the invoice.
+  // so that she can know when she is holding the invoice.
   //
   //
   // Step #2 - the payee calls the settleHodlInvoice() method
@@ -178,11 +162,15 @@ const main = async function () {
   // confusing, given that there is a pay() method in step 1 and settling happens in step 2.
 
   // QUESTION - how does Carol confirm that aliceInvoice_1 uses the swap hash as the payment hash?
-  // ANSWER - Carol uses the getInvoice() method
+  // ANSWER - The hash can be determined from the BOLT #11 invoice
+  // -------------------------------------------------------------------
+
+
+
 
   // Carol is willing now to carry out paymentStepOne on this hold invoice on network 1.
   // This is because Alice won't be able to accept the payment yet since Alice does not know the secret.
-  // Carol carries out paymentStepOne later on in the code here.
+  // Carol though carries out paymentStepOne later on in the code here.
 
 
 
@@ -205,7 +193,7 @@ const main = async function () {
   console.log("");
 
   // QUESTION - how does Alice confirm that carolInvoice_2 uses the swap hash as the payment hash?
-  // ANSWER - Alice uses the getInvoice() method
+  // ANSWER - The hash can be determined from the BOLT #11 invoice
 
   await subscription_1.on('invoice_updated', async invoice_1 => {
     if (invoice_1.is_confirmed) {
@@ -222,6 +210,20 @@ const main = async function () {
     console.log(invoice_1.id);
     console.log("invoice 1 amount");
     console.log(invoice_1.tokens);
+    console.log("")
+
+    // Carol checks to make sure the payment hash for invoice2 is equal to the swap hash
+
+    alice_2.request = request_2;
+    const details2 = await decodePaymentRequest(alice_2).catch(reason => console.log(reason));
+    console.log("invoice_2 payment hash")
+    console.log(details2.id);
+    console.log("")
+    console.log("swap hash")
+    console.log(swapHash)
+    console.log("")
+    console.log("Are the two hashes equal?")
+    console.log(swapHash == details2.id)
     console.log("")
 
     // Alice does not know the secret initially, so she cannot settle the invoice on network 1.
@@ -268,6 +270,21 @@ const main = async function () {
     await settleHodlInvoice(carolInvoice_2);
     console.log("Carol has performed paymentStep2 on invoice2")
   });
+
+  // Carol checks to make sure the payment hash for invoice1 is equal to the swap hash
+
+  carol_1.request = request_1;
+  const details1 = await decodePaymentRequest(carol_1).catch(reason => console.log(reason));
+  console.log("invoice_1 payment hash")
+  console.log(details1.id);
+  console.log("")
+  console.log("swap hash")
+  console.log(swapHash)
+  console.log("")
+  console.log("Are the two hashes equal?")
+  console.log(swapHash == details1.id)
+  console.log("")
+
 
 
   // Carol performs paymentStepOne on invoice_1 in network 1
