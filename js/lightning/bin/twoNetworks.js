@@ -284,6 +284,9 @@ const main = async function () {
   console.log("Are the two hashes equal?")
   console.log(swapHash == details1.id)
   console.log("")
+  console.log("invoice_1 expires at")
+  console.log(details1.expires_at)
+  console.log("")
 
 
 
