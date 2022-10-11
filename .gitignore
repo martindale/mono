@@ -12,3 +12,6 @@ terraform.tfstate*
 
 # Secure content
 secure
+
+# IntelliJ
+.idea

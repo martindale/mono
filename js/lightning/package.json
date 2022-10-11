@@ -1,0 +1,24 @@
+{
+  "name": "lightning-swaps",
+  "version": "0.0.0",
+  "description": "MVP for Portal Lightning Swaps",
+  "directories": {
+    "bin": "bin",
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha",
+    "oneNetwork" : "./bin/oneNetwork.js",
+    "twoNetworks": "./bin/twoNetworks.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lightning": "6.1.2"
+  },
+  "devDependencies": {
+    "chai": "4.3.6",
+    "mocha": "10.0.0"
+  }
+}
