@@ -6,9 +6,9 @@ const { EventEmitter } = require('events')
 const Order = require('./order')
 
 /**
-* A weak-map storing private data for each instance of the class
-* @type {WeakMap}
-*/
+ * A weak-map storing private data for each instance of the class
+ * @type {WeakMap}
+ */
 const INSTANCES = new WeakMap()
 
 /**
@@ -22,6 +22,7 @@ module.exports = class Orderbook extends EventEmitter {
    * @param {[String]} props.baseAsset The symbol of the asset being bought/sold
    * @param {[String]} props.quoteAsset The symbol of the asset used for payment
    * @param {[Number]} props.limitSize Reciprocal of the smallest limit price
+   * @param {[Number]} props.store A Store instance where orders are persisted
    */
   constructor (props) {
     if (props == null) {
@@ -100,8 +101,12 @@ module.exports = class Orderbook extends EventEmitter {
    * @returns {Object}
    */
   toJSON () {
+    const props = INSTANCES.get(this)
     return {
-      type: this.constructor.name
+      type: this.constructor.name,
+      baseAsset: props.baseAsset,
+      quoteAsset: props.quoteAsset,
+      limitSize: props.limitSize
     }
   }
 

@@ -3,7 +3,7 @@
  */
 
 const { expect } = require('chai')
-const Network = require('../../lib/core/network')
+const Network = require('../../../lib/core/network')
 
 describe('Network', function () {
   describe('Instantiation', function () {

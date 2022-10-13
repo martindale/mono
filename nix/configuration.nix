@@ -12,6 +12,9 @@ with lib;
     ./modules/users.nix
   ];
 
-  portal.nodeFqdn = mkDefault "nixos";
-  portal.rootSshKey = mkDefault "not-provided";
+  portal = {
+    nodeFqdn = mkDefault "nixos";
+    rootSshKey = mkDefault "not-provided";
+  };
+
 }

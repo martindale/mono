@@ -1,4 +1,5 @@
 { pkgs ? import ../../nix { inherit system; }
+, nodejs ? pkgs.portaldefi.nodejs
 , system ? builtins.currentSystem
 }:
 
@@ -12,12 +13,11 @@ let
 in
 
 pkgs.npmlock2nix.v2.build {
-  inherit node_modules_attrs;
+  inherit node_modules_attrs nodejs;
 
   src = pkgs.nix-gitignore.gitignoreSourcePure [./.gitignore] ./.;
   buildCommands = ["HOME=$PWD npm run build"];
   nativeBuildInputs = [ pkgs.solc pkgs.jq pkgs.moreutils ];
-  nodejs = pkgs.nodejs-16_x;
   installPhase = "cp -r build/* $out";
   prePatch = ''
     # Patching the truffle config. We want to use the nixpkgs-provided solc

@@ -11,8 +11,10 @@
     "lint": "standard",
     "lint-fix": "standard --fix",
     "posttest": "npm run lint",
-    "test": "mocha",
-    "watch": "mocha --watch"
+    "test": "mocha test/unit",
+    "test:unit": "mocha test/unit",
+    "test:integration": "mocha test/integration",
+    "watch": "npm test -- --watch"
   },
   "dependencies": {
     "uuid": "^9.0.0",

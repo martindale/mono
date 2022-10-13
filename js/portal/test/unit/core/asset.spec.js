@@ -3,7 +3,7 @@
  */
 
 const { expect } = require('chai')
-const Asset = require('../../lib/core/asset')
+const Asset = require('../../../lib/core/asset')
 
 describe('Asset', function () {
   describe('Instantiation', function () {

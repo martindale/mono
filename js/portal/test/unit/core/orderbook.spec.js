@@ -1,10 +1,10 @@
 /**
- * @fle Behavioral specification for the Orderbook
+ * @file Behavioral specification for the Orderbook
  */
 
 const { expect } = require('chai')
-const Order = require('../../lib/core/order')
-const Orderbook = require('../../lib/core/orderbook')
+const Order = require('../../../lib/core/order')
+const Orderbook = require('../../../lib/core/orderbook')
 
 describe('Orderbook', function () {
   const PROPS = {

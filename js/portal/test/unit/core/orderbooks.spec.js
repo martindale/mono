@@ -3,8 +3,8 @@
  */
 
 const { expect } = require('chai')
-const Orderbook = require('../../lib/core/orderbook')
-const Orderbooks = require('../../lib/core/orderbooks')
+const Orderbook = require('../../../lib/core/orderbook')
+const Orderbooks = require('../../../lib/core/orderbooks')
 
 describe('Orderbooks', function () {
   describe('Instantiation', function () {

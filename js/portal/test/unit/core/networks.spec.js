@@ -3,8 +3,8 @@
  */
 
 const { expect } = require('chai')
-const Network = require('../../lib/core/network')
-const Networks = require('../../lib/core/networks')
+const Network = require('../../../lib/core/network')
+const Networks = require('../../../lib/core/networks')
 
 const SUPPORTED = [
   'goerli',

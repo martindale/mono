@@ -36,15 +36,15 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "npmlock2nix": {
-        "branch": "v2-lockfile-backwardcompatible-with-tests",
+        "branch": "nin/npm-extra-args",
         "description": "nixify npm based packages [maintainer=@andir] ",
         "homepage": "",
         "owner": "NinjaTrappeur",
         "repo": "npmlock2nix",
-        "rev": "be632ff23a00b5a8706d6ef7b2b06243ec5bc168",
-        "sha256": "1qay7k7vphd06mq56aaaq07xy6x3skil01bzn6w8is6m4am7bj3k",
+        "rev": "e6a156ddc001316993a994e7d1118417d0389e34",
+        "sha256": "1nsk93pdssndzx9k1apx3qhr1q7dmsg7sbx33p5rhk7452zq3k4w",
         "type": "tarball",
-        "url": "https://github.com/NinjaTrappeur/npmlock2nix/archive/be632ff23a00b5a8706d6ef7b2b06243ec5bc168.tar.gz",
+        "url": "https://github.com/NinjaTrappeur/npmlock2nix/archive/e6a156ddc001316993a994e7d1118417d0389e34.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "terraform-provider-equinix": {

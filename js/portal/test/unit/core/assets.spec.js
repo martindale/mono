@@ -3,8 +3,8 @@
  */
 
 const { expect } = require('chai')
-const Asset = require('../../lib/core/asset')
-const Assets = require('../../lib/core/assets')
+const Asset = require('../../../lib/core/asset')
+const Assets = require('../../../lib/core/assets')
 
 const SUPPORTED = [
   'ETH',

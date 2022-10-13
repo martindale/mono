@@ -3,7 +3,7 @@
  */
 
 const { expect } = require('chai')
-const Order = require('../../lib/core/order')
+const Order = require('../../../lib/core/order')
 
 describe('Order', function () {
   const PROPS = {
