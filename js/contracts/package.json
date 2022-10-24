@@ -1,0 +1,19 @@
+{
+  "name": "@portal/contracts",
+  "version": "0.0.0",
+  "description": "EVM contracts for Portal",
+  "scripts": {
+    "build": "truffle build",
+    "clean": "rm -rf build node_modules package-lock.json",
+    "lint": "solhint contracts/*.sol",
+    "lint-fix": "solhint --fix contracts/*.sol",
+    "posttest": "npm run lint",
+    "test": "truffle test"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "ganache": "^7.4.3",
+    "solhint": "^3.3.7",
+    "truffle": "^5.5.31"
+  }
+}

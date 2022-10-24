@@ -1,4 +1,23 @@
 self: super:
-{
-  portal = (import ../../js/portal { pkgs = super; }).package;
-}
+
+let
+  # Change the version of nodejs for this project here
+  nodejs = super.nodejs-16_x;
+  portal = import ../../js/portal { inherit nodejs; pkgs = super; };
+in
+
+  rec {
+    portaldefi = {
+      inherit nodejs;
+      contracts = import ../../js/contracts { inherit nodejs; pkgs = super; };
+      portal = portal.build;
+    };
+
+    portaldefi-unit-tests = {
+      portal = portal.test;
+    };
+
+    portaldefi-integration-tests = {
+      portal = import ../vm-tests/portal.nix { pkgs = super; };
+    };
+  }

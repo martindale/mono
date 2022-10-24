@@ -11,18 +11,6 @@
         "url": "https://github.com/fabriclabs/fabric/archive/0f461f322e9cf88362ad116bf36cde981d691068.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
-    "faucet": {
-        "branch": "feature/node-16",
-        "description": "Fast, simple faucet for Bitcoin-based chains.",
-        "homepage": "",
-        "owner": "fabriclabs",
-        "repo": "faucet",
-        "rev": "7612c9a77e8af614c05bbc50a9f8725213881dac",
-        "sha256": "1vkwd460707ixnmmx5plhn5fnf6rhwkhw8dy62s3v0k70cwbwir5",
-        "type": "tarball",
-        "url": "https://github.com/fabriclabs/faucet/archive/7612c9a77e8af614c05bbc50a9f8725213881dac.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    },
     "niv": {
         "branch": "master",
         "description": "Easy dependency management for Nix projects",
@@ -36,41 +24,28 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
-        "branch": "release-21.11",
+        "branch": "nixos-unstable",
         "description": "Nix Packages collection",
         "homepage": "https://nixos.org/",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "eabc38219184cc3e04a974fe31857d8e0eac098d",
-        "sha256": "04ffwp2gzq0hhz7siskw6qh9ys8ragp7285vi1zh8xjksxn1msc5",
+        "rev": "79d3ca08920364759c63fd3eb562e99c0c17044a",
+        "sha256": "1zz72k161yl9dxs5nxgy5p6nh8zsz4fbpclm99r12jw39zrlzhhw",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/eabc38219184cc3e04a974fe31857d8e0eac098d.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/79d3ca08920364759c63fd3eb562e99c0c17044a.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
-    "node2nix": {
-        "branch": "master",
-        "description": "Generate Nix expressions to build NPM packages",
+    "npmlock2nix": {
+        "branch": "nin/npm-extra-args",
+        "description": "nixify npm based packages [maintainer=@andir] ",
         "homepage": "",
-        "owner": "svanderburg",
-        "repo": "node2nix",
-        "rev": "026360084db8a27095aafdac7125d7f1a93046c8",
-        "sha256": "147hb7s22g0k15qz9nhbf0wx1phma9z2s4czpz3b3gvldlcg3vyc",
+        "owner": "NinjaTrappeur",
+        "repo": "npmlock2nix",
+        "rev": "e6a156ddc001316993a994e7d1118417d0389e34",
+        "sha256": "1nsk93pdssndzx9k1apx3qhr1q7dmsg7sbx33p5rhk7452zq3k4w",
         "type": "tarball",
-        "url": "https://github.com/svanderburg/node2nix/archive/026360084db8a27095aafdac7125d7f1a93046c8.tar.gz",
+        "url": "https://github.com/NinjaTrappeur/npmlock2nix/archive/e6a156ddc001316993a994e7d1118417d0389e34.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-    },
-    "raiden": {
-        "branch": "master",
-        "description": "The Raiden Light Client",
-        "homepage": "https://raiden.network/",
-        "owner": "raiden-network",
-        "repo": "light-client",
-        "rev": "v2.2.0",
-        "sha256": "0l9b9q89zscjghydgy7b6ixwik7vbxzdfzvpk6n2s7k1h3dmb734",
-        "type": "tarball",
-        "url": "https://github.com/raiden-network/light-client/archive/v2.2.0.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz",
-        "version": "2.2.0"
     },
     "terraform-provider-equinix": {
         "branch": "master",
@@ -83,7 +58,7 @@
         "type": "tarball",
         "url": "https://github.com/equinix/terraform-provider-equinix/archive/v1.7.0.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz",
-        "vendorSha256": "sha256-3wTILP9wnZTBQvYQrhwC6/HbJ+AhmXBoXIcNYqeL0r8=",
+        "vendorSha256": "sha256-oANCzm5HSxs5vTiu1kIGJQcwAvNg84G9qXnoBge9fAs=",
         "version": "1.7.0"
     }
 }

@@ -3,11 +3,12 @@
 with lib;
 
 let
-  cfg = config.portal.server;
-
+  cfg = config.portaldefi.portal.server;
 in
 {
-  options.portal.server = {
+  options.portaldefi.portal.server = {
+    enable = mkEnableOption "portal";
+
     hostname = mkOption {
       description = "The interface/IP address to listen on";
       type = types.str;
@@ -21,7 +22,7 @@ in
     };
   };
 
-  config = {
+  config = lib.mkIf cfg.enable {
     systemd.services.portal = {
       description = "Portal Server";
       wantedBy = [ "multi-user.target" ];
@@ -30,11 +31,11 @@ in
         PORTAL_HTTP_HOSTNAME = cfg.hostname;
         PORTAL_HTTP_PORT = toString cfg.port;
       };
-      script = "${pkgs.portal}/lib/node_modules/@portal/portal/bin/portal";
       serviceConfig = {
         DynamicUser = true;
         Restart = "always";
         StateDirectory = "portal";
+        ExecStart = "${pkgs.portaldefi.portal}/bin/portal";
         # Basic Hardening measures
         NoNewPrivileges = "true";
         PrivateDevices = "true";
