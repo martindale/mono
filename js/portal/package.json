@@ -43,7 +43,7 @@
     "recursive": true,
     "reporter": "spec",
     "slow": 1000,
-    "timeout": 60000,
+    "timeout": 2000,
     "ui": "bdd",
     "watch-files": [
       "lib/**/*.js",
