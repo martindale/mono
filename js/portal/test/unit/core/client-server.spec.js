@@ -12,6 +12,7 @@ const Server = require('../../../lib/core/server')
  * @type {Array}
  */
 const ENDPOINTS = [
+  '/api/v1/updates',
   '/api/v1/alive',
   '/api/v1/fees',
   '/api/v1/orderbook/limit',
@@ -57,36 +58,65 @@ describe('Client/Server', function () {
      */
     before(function () {
       return new Server({ api: join(__dirname, 'fixtures') })
-        .once('start', instance => {
-          const { hostname, port } = instance
-
-          server = instance
-          client = new Client({ hostname, port })
-        })
         .start()
+        .then(instance => {
+          const { hostname, port } = instance
+          server = instance
+          client = new Client({ hostname, port, pathname: '/fixtures' })
+          return client.connect()
+        })
     })
 
     /**
      * Stop the client/server instances at the end of the test suite
      * @returns {Promise} Resolves once the server has stopped
      */
-    after(function () {
-      return server
-        .once('stop', instance => {
-          server = null
-          client = null
-        })
-        .stop()
+    after(function (done) {
+      client
+        .once('disconnected', () => server
+          .once('stop', instance => {
+            server = null
+            client = null
+            done()
+          })
+          .stop())
+        .disconnect()
     })
 
     /**
      * Expected user stores a.k.a. the happy paths
      */
     describe('Expected', function () {
+      /**
+       * Ensures the client is connected and ready for the rest of the suite
+       */
+      it('must have an open websocket connection', function () {
+        expect(client.isConnected).to.equal(true)
+      })
+
+      /**
+       * Tests sending and receiving messages over the websocket
+       * @param {Function} done Function called when the test is done
+       */
+      it('must echo websocket messages back to the client', function (done) {
+        const obj = { foo: 'bar' }
+
+        client
+          .once('message', data => {
+            expect(data).to.be.an('object').that.deep.equals(obj)
+            done()
+          })
+          ._send(obj)
+      })
+
+      /**
+       * Tests if the server is exposing all the expected endpoints
+       */
       it('must expose the expected endpoints', function () {
         expect(server.endpoints).to.be.an('array').that.deep.equals([
           '/fixtures/echo',
-          '/fixtures/http_methods'
+          '/fixtures/http_methods',
+          '/fixtures'
         ])
       })
 
@@ -94,7 +124,7 @@ describe('Client/Server', function () {
        * Tests sending a json object from a client to the server, and echoing it
        * back to the client.
        */
-      it('must send/receive JSON data', function () {
+      it('must send/receive JSON data over HTTP', function () {
         const args = { method: 'GET', path: '/fixtures/echo' }
         const data = { foo: 'bar', bar: 'baz' }
         return client._request(args, data)
@@ -117,6 +147,13 @@ describe('Client/Server', function () {
               json: data
             }))
         }))
+      })
+
+      /**
+       * Ensures the client is still connected after the tests
+       */
+      it('must have an open websocket connection', function () {
+        expect(client.isConnected).to.equal(true)
       })
     })
 

@@ -4,6 +4,7 @@
 
 const { EventEmitter } = require('events')
 const http = require('http')
+const Websocket = require('ws')
 
 /**
  * Exports an implementation of a client
@@ -15,15 +16,53 @@ module.exports = class Client extends EventEmitter {
 
     this.hostname = props.hostname || 'localhost'
     this.port = props.port || 80
+    this.pathname = props.pathname || '/api/v1/updates'
+    this.websocket = null
 
     Object.seal(this)
+  }
+
+  /**
+   * Returns whether or not the client is connected to the server
+   * @returns {Boolean}
+   */
+  get isConnected () {
+    return (this.websocket != null) && (this.websocket.readyState === 1)
+  }
+
+  /**
+   * Opens a connection to the server
+   * @returns {Promise<Void>}
+   */
+  connect () {
+    return new Promise((resolve, reject) => {
+      const url = `ws://${this.hostname}:${this.port}${this.pathname}`
+      const ws = new Websocket(url)
+
+      this.websocket = ws
+        .on('message', (...args) => this._onMessage(...args))
+        .once('open', () => { this.emit('connected'); resolve() })
+        .once('close', () => { this.websocket = null })
+        .once('error', reject)
+    })
+  }
+
+  /**
+   * Closes the connection to the server
+   * @returns {Promise<Void>}
+   */
+  disconnect () {
+    return new Promise((resolve, reject) => this.websocket
+      .once('error', reject)
+      .once('close', () => { this.emit('disconnected'); resolve() })
+      .close())
   }
 
   /**
    * Adds a limit order to the orderbook
    * @param {Object} order The limit order to add the orderbook
    */
-  addLimitOrder (order) {
+  submitLimitOrder (order) {
     return this._request({
       method: 'PUT',
       path: '/api/v1/orderbook/limit'
@@ -45,7 +84,7 @@ module.exports = class Client extends EventEmitter {
    * Adds a limit order to the orderbook
    * @param {Object} order The limit order to delete the orderbook
    */
-  deleteLimitOrder (order) {
+  cancelLimitOrder (order) {
     return this._request({
       method: 'DELETE',
       path: '/api/v1/orderbook/limit'
@@ -103,13 +142,44 @@ module.exports = class Client extends EventEmitter {
                   return reject(new Error(`malformed JSON response "${str}"`))
                 }
 
-                statusCode === 400
-                  ? reject(new Error(obj.message))
-                  : resolve(obj)
+                statusCode === 200
+                  ? resolve(obj)
+                  : reject(new Error(obj.message))
               })
           }
         })
         .end(buf)
     })
+  }
+
+  /**
+   * Send data to the server
+   * @param {Object} obj The object to send
+   * @returns {Promise<Void>}
+   */
+  _send (obj) {
+    return new Promise((resolve, reject) => {
+      const buf = Buffer.from(JSON.stringify(obj))
+      const opts = { binary: false }
+      this.websocket.send(buf, opts, err => err ? reject(err) : resolve())
+    })
+  }
+
+  /**
+   * Handles incoming websocket messages
+   * @param {Buffer|Object} data The data received over the websocket
+   * @returns {Void}
+   */
+  _onMessage (data) {
+    let event, arg
+    try {
+      event = 'message'
+      arg = JSON.parse(data)
+    } catch (err) {
+      event = 'error'
+      arg = err
+    } finally {
+      this.emit(event, arg)
+    }
   }
 }
