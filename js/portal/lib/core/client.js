@@ -99,16 +99,16 @@ module.exports = class Client extends EventEmitter {
 
   /**
    * Create the required state for an atomic swap
-   * @param {Order} maker The maker order
+   * @param {Swap} swap The maker order
    * @param {Order} taker The taker order
    * @returns {Swap}
    */
-  // createSwap (maker, taker) {
-  //   return this._request({
-  //     method: 'PUT',
-  //     path: '/api/v1/swap'
-  //   }, { maker, taker })
-  // }
+  doSwapStepOne (swap, state) {
+    return this._request({
+      method: 'PUT',
+      path: '/api/v1/swap'
+    }, { swap, state })
+  }
 
   /**
    * Exchanges swap data with the counterparty through the server

@@ -13,6 +13,8 @@ before('Initialize client/server', function () {
       const { hostname, port } = instance
 
       this.server = instance
+      this.alice = new Client({ hostname, port })
+      this.bob = new Client({ hostname, port })
       this.client = new Client({ hostname, port })
 
       return this.client.connect()
@@ -25,6 +27,8 @@ after('Destroy client/server', function () {
   return client.disconnect()
     .then(() => server.stop())
     .then(() => {
+      this.test.ctx.alice = null
+      this.test.ctx.bob = null
       this.test.ctx.client = null
       this.test.ctx.server = null
     })

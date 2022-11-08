@@ -46,10 +46,8 @@ module.exports = class Order {
    * @param {String} props.side The side of the orderbook to add the order
    * @param {String} props.hash The hash of the atomic swap secret
    * @param {String} props.baseAsset The symbol of the asset being bought/sold
-   * @param {String} props.baseNetwork The parent network for the base asset
    * @param {String} props.baseQuantity The amount of base asset being traded
    * @param {String} props.quoteAsset The symbol of the asset used for payment
-   * @param {String} props.quoteNetwork The parent network for the quote asset
    * @param {String} props.quoteQuantity The amount of quote asset being traded
    */
   constructor (props) {

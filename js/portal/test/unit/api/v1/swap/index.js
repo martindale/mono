@@ -36,7 +36,43 @@ module.exports = function (client, server) {
        */
       describe('Interface Specification', function () {
         describe('Expected Cases', function () {
-          it('must test all HTTP RPC calls')
+          it('perform an atomic swap between alice and bob', async function () {
+            const { alice, bob } = this.test.ctx
+            const swap = getSwapFromOrderMatching()
+
+            const swapAlice = await alice.createSwap(maker, taker)
+            // assert client/server state
+            const swapBob = await bob.stepOne(maker, taker)
+            // assert client/server state
+
+            const swappedAlice = await bob.exchangeSwap(swapBob)
+            // assert client/server state
+            const swappedBob = await alice.exchangeSwap(swapAlice)
+            // assert client/server state
+
+            await alice.commitSwap(swapAlice, swappedBob)
+            // assert client/server state
+            await bob.stepTwo(swapBob, swappedAlice)
+            // assert client/server state
+          })
+
+          it('must return funds when one party cancels', function () {
+            const { alice, bob } = this.test.ctx
+            const { maker, taker } = getMatchedOrderFromSomewhere()
+
+            const swapAlice = await alice.stepOne(maker, taker)
+            // assert client/server state
+            const swapBob = await bob.stepOne(maker, taker)
+            // assert client/server state
+            const swappedAlice = await bob.exchangeSwap(swapBob)
+            // assert client/server state
+            const swappedBob = await alice.exchangeSwap(swapAlice)
+            // assert client/server state
+            await alice.stepTwo(swapAlice, swappedBob)
+            // assert client/server state
+            await bob.stepTwo(swapBob, swappedAlice)
+            // assert client/server state
+          })
         })
 
         describe('Exceptional Cases', function () {

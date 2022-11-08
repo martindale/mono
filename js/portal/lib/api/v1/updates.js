@@ -2,8 +2,6 @@
  * @file Handles a bidirectional websocket channel for each client
  */
 
-const Swap = require('../../core/swap')
-
 /**
  * Handles a bidirectional websocket channel for each client
  * @param {Websocket} ws The underlying websocket
@@ -26,7 +24,9 @@ module.exports.UPGRADE = function (ws, ctx) {
     .on('closed', onOrder)
     .on('match', (makerOrder, takerOrder) => {
       if (makerOrder.uid === uid || takerOrder.uid === uid) {
-        ws.send(new Swap({ uid, makerOrder, takerOrder }))
+        ctx.swaps
+          .create({ makerOrder, takerOrder })
+          .then(swap => ws.send(swap))
       }
     })
 }

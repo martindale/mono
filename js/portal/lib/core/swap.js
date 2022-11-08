@@ -2,35 +2,54 @@
  * @file Defines the state of a single party to an atomic swap
  */
 
+const assert = require('assert')
 const uuid = require('uuid')
 
 /**
- * Defines the state of a single party to an atomic swap
- * @type {Party}
+ * @type {Swap}
  */
-module.exports = class Party {
+module.exports = class Swap {
   /**
-   * Creates a new Party instance
+   * Creates a new Swap instance
    * @param {Object} props Properties of the swap
-   * @param {String} props.id Unique identifier of the owner of the swap half
-   * @param {String} props.makerOrder The maker order that triggered the swap
-   * @param {String} props.takerOrder The taker order that triggered the swap
+   * @param {String} props.maker The maker order that triggered the swap
+   * @param {String} props.taker The taker order that triggered the swap
    */
   constructor (props) {
-    this.id = uuid.v4()
+    this.id = hash(maker.id, taker.id)
+    this.makerOrder = props.maker
+    this.takerOrder = props.taker
+
+    this.makerAsset = this.makerOrder.makerAsset
+    this.takerAsset = this.takerOrder.takerAsset
+
+    this.makerNetwork = this.makerAsset.networks[props.makerNetwork] // lightning
+    this.takerNetwork = this.takerAsset.networks[props.takerNetwork]
+
+    this.makerClient = props.makerNetwork
+    this.takerClient = props.takerNetwork
+
     this.uid = props.uid
-    this.makerOrder = props.makerOrder
-    this.takerOrder = props.takerOrder
 
     Object.seal(this)
   }
 
- /**
-  * Returns the unique identifier for this particular swap part/side
-  * @returns {String}
-  */
-  get id () {
-    return hash(this.swapId + this.userId)
+  /**
+   * The parent orderbook which matched the orders that triggered this swap
+   * @returns {Orderbook}
+   */
+  get orderbook () {
+    assert(this.makerOrder.orderbook === this.takerOrder.orderbook)
+    return this.makerOrder.orderbook
+  }
+
+  /**
+   * The hash of the secret used to hold assets
+   * @returns {String}
+   */
+  get hash () {
+    assert(this.makerOrder.hash === this.takerOrder.hash)
+    return this.makerOrder.hash
   }
 
   /**

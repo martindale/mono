@@ -36,3 +36,9 @@ HttpContext.assets = Assets
  * @type {Orderbooks}
  */
 HttpContext.orderbooks = new Orderbooks(null, HttpContext)
+
+/**
+ * Interface to all open atomic swaps
+ * @type {Swaps}
+ */
+HttpContext.swaps = new Swaps(null, HttpContext)
