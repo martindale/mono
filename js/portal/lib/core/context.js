@@ -6,6 +6,7 @@ const Assets = require('./assets')
 const Networks = require('./networks')
 const Orderbooks = require('./orderbooks')
 const Store = require('./store')
+const Swaps = require('./swaps')
 
 /**
  * Export the request context
@@ -38,7 +39,7 @@ HttpContext.assets = Assets
 HttpContext.orderbooks = new Orderbooks(null, HttpContext)
 
 /**
- * Interface to all open atomic swaps
+ * Interface to all open atomic swaps in progress
  * @type {Swaps}
  */
 HttpContext.swaps = new Swaps(null, HttpContext)

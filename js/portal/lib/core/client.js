@@ -99,59 +99,65 @@ module.exports = class Client extends EventEmitter {
 
   /**
    * Create the required state for an atomic swap
-   * @param {Swap} swap The maker order
-   * @param {Order} taker The taker order
+   * @param {Swap|Object} swap The swap to open
+   * @param {Object} state Any state required to open the swap
    * @returns {Swap}
    */
-  doSwapStepOne (swap, state) {
+  swapOpen (swap, state) {
     return this._request({
       method: 'PUT',
       path: '/api/v1/swap'
-    }, { swap, state })
-  }
-
-  /**
-   * Exchanges swap data with the counterparty through the server
-   * @param {Swap} swap The swap data to be exchanged with the counterparty
-   * @returns {Promise<Swap>} The swap data of the counterparty
-   */
-  exchangeSwap (swap, state) {
-    return new Promise((resolve, reject) => {
-      swap.state = state
-      const args = { method: 'POST', path: '/api/v1/swap' }
-      const onTimeOut = () => reject(Error('timed out'))
-      const timer = setTimeout(onTimeOut, 30000)
-      const onMessage = msg => {
-        if (msg.id && msg.id === swap.id) {
-          this.off('message', onMessage)
-          clearTimeout(timer)
-          resolve(msg)
-        }
-      }
-
-      this
-        .on('message', onMessage)
-        ._request(args, swap)
-    })
+    }, { swap, party: { state } })
   }
 
   /**
    * Completes the atomic swap
-   * @param {Swap[]} swaps The maker and taker swaps
+   * @param {Swap|Object} swap The swap to commit
    * @returns {Promise<Void>}
    */
-  commitSwap (swaps) {
-    return Promise.reject(Error('not implemented yet'))
+  swapCommit (swap) {
+    return this._request({
+      method: 'POST',
+      path: '/api/v1/swap'
+    }, { swap })
   }
 
   /**
-   * Cancels the atomic swap optimistically and returns funds to owners
-   * @param {Swap[]} swaps The maker and taker swaps
+   * Abort the atomic swap optimistically and returns funds to owners
+   * @param {Swap|Object} swap The swap to abort
    * @returns {Promise<Void>}
    */
-  cancelSwap (swaps) {
-    return Promise.reject(Error('not implemented yet'))
+  swapAbort (swap) {
+    return this._request({
+      method: 'DELETE',
+      path: '/api/v1/swap'
+    }, { swap })
   }
+
+  // /**
+  //  * Exchanges swap data with the counterparty through the server
+  //  * @param {Swap} swap The swap data to be exchanged with the counterparty
+  //  * @returns {Promise<Swap>} The swap data of the counterparty
+  //  */
+  // exchangeSwap (swap, state) {
+  //   return new Promise((resolve, reject) => {
+  //     swap.state = state
+  //     const args = { method: 'POST', path: '/api/v1/swap' }
+  //     const onTimeOut = () => reject(Error('timed out'))
+  //     const timer = setTimeout(onTimeOut, 30000)
+  //     const onMessage = msg => {
+  //       if (msg.id && msg.id === swap.id) {
+  //         this.off('message', onMessage)
+  //         clearTimeout(timer)
+  //         resolve(msg)
+  //       }
+  //     }
+  //
+  //     this
+  //       .on('message', onMessage)
+  //       ._request(args, swap)
+  //   })
+  // }
 
   /**
    * Performs an HTTP request and returns the response

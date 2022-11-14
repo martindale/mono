@@ -1,14 +1,8 @@
 /**
- * @file Handles a bidirectional websocket channel for each client
+ * @file HTTP handler used to manage atomic swaps
  */
 
-const Swap = require('swap')
-
-/**
- * Manages internal state
- * @type {Map}
- */
-const SWAPS = new Map()
+const HTTP_METHODS = module.exports
 
 /**
  * Creates a swap based on an order match
@@ -17,39 +11,45 @@ const SWAPS = new Map()
  * @param {HttpContext} ctx The HTTP request context
  * @returns {Void}
  */
-module.exports.PUT = function (req, res, ctx) {
-  let data
+HTTP_METHODS.PUT = function swapOpen (req, res, ctx) {
+  const swap = req.json.swap
+  const party = Object.assign(req.json.party, { id: req.uid })
 
-  try {
-    data = new Swap(Object.assign({}, req.json, { uid: req.clientId }))
-  } catch (err) {
-    data = err
-  } finally {
-    res.send(data)
-  }
+  ctx.swaps.open(swap, party)
+    .then(swap => res.send(swap))
+    .catch(err => res.send(err))
 }
 
 /**
- * Exchanges the maker/taker swaps between the parties
+ * Commits to a swap in progress
  * @param {HttpRequest} req The incoming HTTP request
  * @param {HttpResponse} res The outgoing HTTP response
  * @param {HttpContext} ctx The HTTP request context
  * @returns {Void}
  */
-module.exports.POST = function (req, res, ctx) {
-  const party = req.json
-  const { id } = party
+HTTP_METHODS.POST = function swapCommit (req, res, ctx) {
+  const party = Object.assign(req.json.party, { id: req.uid })
 
-  // if the counterparty data already exists, then exchange the data
-  // if not, save the party data, and wait for the counterparty
-  if (SWAPS.has(id)) {
-    const counterParty = SWAPS.get(id)
-    ctx.clients[party.uid].send(counterParty)
-    ctx.clients[counterParty.uid].send(party)
-    SWAPS.delete(id)
-  } else {
-    SWAPS.set(id, party)
+  ctx.swaps.commit(party)
+    .then(swap => res.send(swap))
+    .catch(err => res.send(err))
+}
+
+/**
+ * Aborts a swap in progress
+ * @param {HttpRequest} req The incoming HTTP request
+ * @param {HttpResponse} res The outgoing HTTP response
+ * @param {HttpContext} ctx The HTTP request context
+ * @returns {Void}
+ */
+HTTP_METHODS.DELETE = function swapAbort (req, res, ctx) {
+  let data
+
+  try {
+    ctx.swaps.abort(req.json, { id: req.uid })
+  } catch (err) {
+    data = err
+  } finally {
+    res.send(data)
   }
-
-  res.end()
 }

@@ -246,4 +246,14 @@ module.exports = class Order {
       this.quoteQuantity === target.quoteQuantity &&
       this.quoteNetwork === target.quoteNetwork
   }
+
+  /**
+   * Validates a matched order-pair
+   * @param {Object<Order>} maker The maker order of the match order-pair
+   * @param {Object<Order>} taker The taker order of the match order-pair
+   * @returns {Boolean}
+   */
+  static validateMatch (maker, taker) {
+    return true
+  }
 }

@@ -1,19 +1,19 @@
 /**
- * @file The Goerli blockchain network
+ * @file The Lightning network
  */
 
 const Network = require('../core/network')
-const Web3 = require('web3')
+const Raiden = require('lightning')
 
 /**
- * Exports a Web3 interface to the Goerli blockchain network
- * @type {Goerli}
+ * Exports a Web3 interface to the Lightning blockchain network
+ * @type {Raiden}
  */
-module.exports = class Goerli extends Network {
+module.exports = class Raiden extends Network {
   constructor (props) {
     super({
       assets: ['ETH', 'USDC'],
-      client: new Web3(props)
+      client: new Raiden()
     })
   }
 
