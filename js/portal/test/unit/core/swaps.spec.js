@@ -3,6 +3,7 @@
  */
 
 const { expect } = require('chai')
+const Context = require('../../../lib/core/context')
 const Order = require('../../../lib/core/order')
 const Party = require('../../../lib/core/party')
 const Swap = require('../../../lib/core/swap')
@@ -60,7 +61,7 @@ describe('Swaps', function () {
      * Create a fresh swaps instance at the start of the suite
      * @returns {Void}
      */
-    before(function () { swaps = new Swaps() })
+    before(function () { swaps = new Swaps(null, Context) })
 
     /**
      * Destroy the swaps instance at the end of the suite

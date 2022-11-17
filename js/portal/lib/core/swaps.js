@@ -63,18 +63,6 @@ module.exports = class Swaps extends EventEmitter {
     }
   }
 
-  async open (swap, party) {
-    if (swap == null || swap.id == null) {
-      throw Error('unknown swap!')
-    } else if (!this.swaps.has(swap.id)) {
-      throw Error(`unknown swap "${swap.id}"!`)
-    } else {
-      const swap = this.swaps.get(swap.id)
-      const result = await swap.open(party)
-      return result
-    }
-  }
-
   /**
    * Handles commiting to a swap by a user that is a party to id
    * @param {Swap} swap The swap being committed
