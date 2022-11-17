@@ -23,7 +23,6 @@ module.exports = class Party {
     this.asset = props.asset
     this.network = props.network
     this.quantity = props.quantity
-
     this.swap = null // assigned by the swap constructor
     this.state = null // populated by the user/client over http/rpc
 
@@ -71,30 +70,16 @@ module.exports = class Party {
   }
 
   /**
-   * Creates a secret-holding party from the maker order of a match
-   * @param {Order} maker The maker order returned by order matching
+   * Creates a secret-holding party from the an order from the matching engine
+   * @param {Order} order An order (maker or taker) returned by order matching
    * @returns {Party}
    */
-  static fromMakerOrder (maker) {
+  static fromOrder (order, ctx) {
     return new Party({
-      id: maker.uid,
-      asset: maker.asset,
-      network: maker.network,
-      quantity: maker.quantity
-    })
-  }
-
-  /**
-   * Creates a secret-holding party from the maker order of a match
-   * @param {Order} taker The maker order returned by order matching
-   * @returns {Party}
-   */
-  static fromTakerOrder (taker) {
-    return new Party({
-      id: taker.uid,
-      asset: taker.asset,
-      network: taker.network,
-      quantity: taker.quantity
+      id: order.uid,
+      asset: ctx.assets[order.asset],
+      network: ctx.networks[order.network],
+      quantity: order.quantity
     })
   }
 }

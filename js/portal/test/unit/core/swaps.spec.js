@@ -1,5 +1,5 @@
 /**
- * @fle Behavioral specification for interface to in-progress atomic swaps
+ * @file Behavioral specification for interface to in-progress atomic swaps
  */
 
 const { expect } = require('chai')

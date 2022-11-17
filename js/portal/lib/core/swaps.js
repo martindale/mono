@@ -13,6 +13,7 @@ module.exports = class Swaps extends EventEmitter {
   constructor (props, ctx) {
     super()
 
+    this.ctx = ctx
     this.swaps = new Map()
 
     Object.seal(this)
@@ -29,7 +30,7 @@ module.exports = class Swaps extends EventEmitter {
       let swap
 
       try {
-        swap = Swap.fromOrders(maker, taker)
+        swap = Swap.fromOrders(maker, taker, this.ctx)
           .once('open', () => this.emit('open', swap))
           .once('abort', () => this.emit('abort', swap))
           .once('commit', () => this.emit('commit', swap))

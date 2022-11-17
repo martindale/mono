@@ -211,13 +211,14 @@ module.exports = class Swap extends EventEmitter {
    * Creates an atomic swap for settling a pair of orders
    * @param {Order} makerOrder The maker of the order
    * @param {Order} takerOrder The taker of the order
+   * @param {HttpContext} ctx The http context object
    * @returns {Swap}
    */
-  static fromOrders (makerOrder, takerOrder) {
+  static fromOrders (makerOrder, takerOrder, ctx) {
     const id = hash(makerOrder.id, takerOrder.id)
     const secretHash = makerOrder.hash
-    const secretHolder = Party.fromMakerOrder(makerOrder)
-    const secretSeeker = Party.fromTakerOrder(takerOrder)
+    const secretHolder = Party.fromOrder(makerOrder, ctx)
+    const secretSeeker = Party.fromOrder(takerOrder, ctx)
 
     return new Swap({ id, secretHash, secretHolder, secretSeeker })
   }

@@ -1,5 +1,5 @@
 /**
- * @fle Behavioral specification for a Network
+ * @file Behavioral specification for a Network
  */
 
 const { expect } = require('chai')
