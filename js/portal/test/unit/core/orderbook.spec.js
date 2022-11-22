@@ -13,6 +13,9 @@ describe('Orderbook', function () {
     limitSize: 100
   }
 
+  /**
+   * Tests instantiation behavior
+   */
   describe('Instantiation', function () {
     it('must throw when instantiated without required arguments', function () {
       expect(() => new Orderbook()).to.throw()
@@ -28,93 +31,386 @@ describe('Orderbook', function () {
       let ob = null
       expect(() => { ob = new Orderbook(PROPS) }).to.not.throw()
       expect(ob).to.be.an.instanceof(Orderbook)
-      expect(ob.baseAsset).to.be.a('string').that.equals(PROPS.baseAsset)
-      expect(ob.quoteAsset).to.be.a('string').that.equals(PROPS.quoteAsset)
-      expect(ob.limitSize).to.be.a('number').that.equals(PROPS.limitSize)
-      expect(ob.orderCount).to.be.a('number').that.equals(0)
+      /* eslint-disable-next-line no-unused-expressions */
+      expect(ob).to.be.sealed
+      expect(ob.assetPair).to.be.a('string').that.equals('ETH-USDC')
+      expect(ob.baseAsset).to.be.a('string').that.equals('ETH')
+      expect(ob.quoteAsset).to.be.a('string').that.equals('USDC')
+      expect(ob.limitSize).to.be.a('number').that.equals(100)
+      expect(ob.side.ask).to.be.an.instanceof(Map)
+      expect(ob.side.bid).to.be.an.instanceof(Map)
+      expect(ob.best.ask).to.be.a('number').that.equals(Number.MAX_VALUE)
+      expect(ob.best.bid).to.be.a('number').that.equals(0)
+      expect(ob.orders).to.be.an.instanceof(Map)
+      expect(ob.queues).to.be.an('object')
+      expect(ob.queues.cancel).to.be.an.instanceof(Set)
+      expect(ob.queues.limit).to.be.an('object')
+      expect(ob.queues.limit.ask).to.be.an.instanceof(Set)
+      expect(ob.queues.limit.bid).to.be.an.instanceof(Set)
+      expect(ob.spread).to.be.a('number').that.equals(Number.MAX_VALUE)
+      expect(ob.price).to.be.a('number').that.equals(Number.MAX_VALUE / 2)
+      expect(ob._id).to.equal(null)
     })
   })
 
+  /**
+   * Regular operational behavior testing
+   */
   describe('Operation', function () {
     let ob
 
+    /**
+     * Create a fresh orderbook at the start of the suite
+     * @returns {Void}
+     */
     before(function () { ob = new Orderbook(PROPS) })
 
+    /**
+     * Destroy the orderbook at the end of the suite
+     * @returns {Void}
+     */
     after(function () { ob = null })
 
-    describe('Expected', function () {
-      const O = {
+    /**
+     * Order management user stories
+     */
+    describe('Order Management', function () {
+      const BASE_ORDER = {
         uid: 'uid',
         type: 'limit',
+        baseAsset: 'ETH',
+        baseNetwork: 'goerli',
+        quoteAsset: 'USDC',
+        quoteNetwork: 'sepolia'
+      }
+      const askOrder = new Order(Object.assign({}, BASE_ORDER, {
+        side: 'ask',
+        hash: 'hash',
+        baseQuantity: 1,
+        quoteQuantity: 1100
+      }))
+      const bidOrder = new Order(Object.assign({}, BASE_ORDER, {
         side: 'bid',
-        hash: 'myhash',
+        hash: 'hash',
+        baseQuantity: 1,
+        quoteQuantity: 1000
+      }))
+
+      /**
+       * Tests the addition of an ask limit order
+       *
+       * Calls `.add()` to add `askOrder`, and validates the returned valud, as
+       * well as the `created` and  opened` events, checking the order as it
+       * moves through its states.
+       *
+       * @param {Function} done Function executed upon completion of test
+       * @returns {Void}
+       */
+      it('must correctly add a new ask limit order', function (done) {
+        let orderCreated = false
+        let orderOpened = false
+        let actualChecks = 0
+        const expectedChecks = 3
+        const check = () => (++actualChecks === expectedChecks) && done()
+
+        ob
+          .once('created', order => {
+            // no event should have fired at this stage
+            expect(orderCreated).to.equal(false)
+            expect(orderOpened).to.equal(false)
+
+            // the event should report the incoming order
+            expect(order).to.deep.equal(askOrder)
+
+            // validate the state of the orderbook
+            expect(ob.best.ask).to.be.a('number').that.equals(Number.MAX_VALUE)
+            expect(ob.best.bid).to.be.a('number').that.equals(0)
+            expect(ob.spread).to.be.a('number').that.equals(Number.MAX_VALUE)
+            expect(ob.price).to.be.a('number').that.equals(Number.MAX_VALUE / 2)
+
+            orderCreated = true
+            check()
+          })
+          .once('opened', order => {
+            // the `created` event should have fired by now
+            expect(orderCreated).to.equal(true)
+            expect(orderOpened).to.equal(false)
+
+            // the event should return the order as it was sent
+            expect(order).to.deep.equal(askOrder)
+            // the cancel queue should have been fully processed by now
+            expect(ob.queues.cancel).to.have.lengthOf(0)
+            // limit order queue should have been exhausted
+            expect(ob.queues.limit.bid).to.have.lengthOf(0)
+
+            // validate the state of the orderbook
+            expect(ob.best.ask).to.be.a('number').that.equals(1100)
+            expect(ob.best.bid).to.be.a('number').that.equals(0)
+            expect(ob.spread).to.be.a('number').that.equals(1100)
+            expect(ob.price).to.be.a('number').that.equals(550)
+
+            orderOpened = true
+            check()
+          })
+          .add(askOrder).then(() => {
+            // the `created` event should have fired by now
+            expect(orderCreated).to.equal(true)
+            expect(orderOpened).to.equal(false)
+
+            // the order should be queued for processing
+            expect(ob.queues.limit.ask).to.have.lengthOf(1)
+            // matching should be queued for the next tick
+            expect(ob._id).to.not.equal(null)
+
+            // validate the state of the orderbook
+            expect(ob.best.ask).to.be.a('number').that.equals(Number.MAX_VALUE)
+            expect(ob.best.bid).to.be.a('number').that.equals(0)
+            expect(ob.spread).to.be.a('number').that.equals(Number.MAX_VALUE)
+            expect(ob.price).to.be.a('number').that.equals(Number.MAX_VALUE / 2)
+
+            check()
+          })
+          .catch(done)
+      })
+
+      /**
+       * Tests the addition of a bid limit order
+       *
+       * Calls `.add()` to add `bidOrder`, and validates the returned valud, as
+       * well as the `created` and  opened` events, checking the order as it
+       * moves through its states.
+       *
+       * @param {Function} done Function executed upon completion of test
+       * @returns {Void}
+       */
+      it('must correctly add a new bid limit order', function (done) {
+        let orderCreated = false
+        let orderOpened = false
+        let actualChecks = 0
+        const expectedChecks = 3
+        const check = () => (++actualChecks === expectedChecks) && done()
+
+        ob
+          .once('created', order => {
+            // no event should have fired at this stage
+            expect(orderCreated).to.equal(false)
+            expect(orderOpened).to.equal(false)
+
+            // the event should return the order as it was sent
+            expect(order).to.equal(bidOrder)
+            expect(order.status).to.equal('created')
+
+            // validate the state of the orderbook
+            expect(ob.best.ask).to.be.a('number').that.equals(1100)
+            expect(ob.best.bid).to.be.a('number').that.equals(0)
+            expect(ob.spread).to.be.a('number').that.equals(1100)
+            expect(ob.price).to.be.a('number').that.equals(550)
+
+            orderCreated = true
+            check()
+          })
+          .once('opened', order => {
+            // the `created` event should have fired by now
+            expect(orderCreated).to.equal(true)
+            expect(orderOpened).to.equal(false)
+
+            // the event should return the order as it was sent
+            expect(order).to.equal(bidOrder)
+            expect(order.status).to.equal('opened')
+
+            // the cancel queue should have been fully processed by now
+            expect(ob.queues.cancel).to.have.lengthOf(0)
+            // limit order queue should have been exhausted
+            expect(ob.queues.limit.bid).to.have.lengthOf(0)
+
+            // validate the state of the orderbook
+            expect(ob.best.ask).to.be.a('number').that.equals(1100)
+            expect(ob.best.bid).to.be.a('number').that.equals(1000)
+            expect(ob.spread).to.be.a('number').that.equals(100)
+            expect(ob.price).to.be.a('number').that.equals(1050)
+
+            orderOpened = true
+            check()
+          })
+          .add(bidOrder).then(order => {
+            // the `created` event should have fired by now
+            expect(orderCreated).to.equal(true)
+            expect(orderOpened).to.equal(false)
+
+            // the event should return the order as it was sent
+            expect(order).to.equal(bidOrder)
+            expect(order.status).to.equal('created')
+
+            // the order should be queued for processing
+            expect(ob.queues.limit.bid).to.have.lengthOf(1)
+            // matching should be queued for the next tick
+            expect(ob._id).to.not.equal(null)
+
+            // validate the state of the orderbook
+            expect(ob.best.ask).to.be.a('number').that.equals(1100)
+            expect(ob.best.bid).to.be.a('number').that.equals(0)
+            expect(ob.spread).to.be.a('number').that.equals(1100)
+            expect(ob.price).to.be.a('number').that.equals(550)
+
+            check()
+          })
+          .catch(done)
+      })
+
+      /**
+       * Tests the cancellation of the previously-added ask limit order
+       *
+       * Calls `.cancel()` to add `askOrder`, and validates the returned value,
+       * as well as the `created` and  `closed` events, checking the order as it
+       * moves through its states.
+       *
+       * @param {Function} done Function executed upon completion of test
+       * @returns {Void}
+       */
+      it('must cancel an existing ask limit order', function (done) {
+        let orderCreated = false
+        let orderClosed = false
+        let actualChecks = 0
+        const expectedChecks = 3
+        const check = () => (++actualChecks === expectedChecks) && done()
+
+        ob
+          .once('created', order => {
+            // the `created` event should have fired by now
+            expect(orderCreated).to.equal(false)
+            expect(orderClosed).to.equal(false)
+
+            orderCreated = true
+            check()
+          })
+          .once('closed', order => {
+            expect(ob.best.ask).to.be.a('number').that.equals(Number.MAX_VALUE)
+            expect(ob.best.bid).to.be.a('number').that.equals(1000)
+            expect(ob.spread).to.be.a('number').that.equals(Number.MAX_VALUE)
+            expect(ob.price).to.be.a('number').that.equals(Number.MAX_VALUE / 2)
+
+            orderClosed = true
+            check()
+          })
+          .cancel({ id: askOrder.id }).then(() => {
+            // the `created` event should have fired by now
+            expect(orderCreated).to.equal(true)
+            expect(orderClosed).to.equal(false)
+
+            expect(ob.best.ask).to.be.a('number').that.equals(1100)
+            expect(ob.best.bid).to.be.a('number').that.equals(1000)
+            expect(ob.spread).to.be.a('number').that.equals(100)
+            expect(ob.price).to.be.a('number').that.equals(1050)
+
+            check()
+          })
+          .catch(done)
+      })
+
+      /**
+       * Tests the cancellation of the previously-added bid limit order
+       *
+       * Calls `.cancel()` to add `bidOrder`, and validates the returned value,
+       * as well as the `created` and  `closed` events, checking the order as it
+       * moves through its states.
+       *
+       * @param {Function} done Function executed upon completion of test
+       * @returns {Void}
+       */
+      it('must cancel an existing bid limit order', function (done) {
+        let orderCreated = false
+        let orderClosed = false
+        let actualChecks = 0
+        const expectedChecks = 3
+        const check = () => (++actualChecks === expectedChecks) && done()
+
+        ob
+          .once('created', order => {
+            expect(order).to.be.an.instanceof(Order)
+            /* eslint-disable-next-line no-unused-expressions */
+            expect(order).to.be.sealed
+
+            // the `created` event should have fired by now
+            expect(orderCreated).to.equal(false)
+            expect(orderClosed).to.equal(false)
+
+            orderCreated = true
+            check()
+          })
+          .once('closed', order => {
+            expect(order).to.be.an.instanceof(Order)
+            /* eslint-disable-next-line no-unused-expressions */
+            expect(order).to.be.sealed
+
+            expect(ob.best.ask).to.be.a('number').that.equals(Number.MAX_VALUE)
+            expect(ob.best.bid).to.be.a('number').that.equals(0)
+            expect(ob.spread).to.be.a('number').that.equals(Number.MAX_VALUE)
+            expect(ob.price).to.be.a('number').that.equals(Number.MAX_VALUE / 2)
+
+            orderClosed = true
+            check()
+          })
+          .cancel({ id: bidOrder.id }).then(o => {
+            expect(o).to.be.an.instanceof(Order)
+            /* eslint-disable-next-line no-unused-expressions */
+            expect(o).to.be.sealed
+
+            // the `created` event should have fired by now
+            expect(orderCreated).to.equal(true)
+            expect(orderClosed).to.equal(false)
+
+            expect(ob.best.ask).to.be.a('number').that.equals(Number.MAX_VALUE)
+            expect(ob.best.bid).to.be.a('number').that.equals(1000)
+            expect(ob.spread).to.be.a('number').that.equals(Number.MAX_VALUE)
+            expect(ob.price).to.be.a('number').that.equals(Number.MAX_VALUE / 2)
+
+            check()
+          })
+          .catch(done)
+      })
+    })
+
+    /**
+     * Order management user stories
+     */
+    describe('Order Matching', function () {
+      const BASE_ORDER = {
+        uid: 'uid',
+        type: 'limit',
+        hash: 'hash',
         baseAsset: 'ETH',
         baseNetwork: 'goerli',
         baseQuantity: 1,
         quoteAsset: 'USDC',
         quoteNetwork: 'sepolia',
-        quoteQuantity: 10
+        quoteQuantity: 1000
       }
-      let order = null // tracks the order that is first added, and then deleted
+      const askOrder = new Order(Object.assign({}, BASE_ORDER, { side: 'ask' }))
+      const bidOrder = new Order(Object.assign({}, BASE_ORDER, { side: 'bid' }))
 
-      it('must add a new limit order and return it', function () {
-        return ob.add(O).then(o => {
-          expect(o).to.be.an.instanceof(Order)
-          expect(o.id).to.be.a('string')
-          expect(o.ts).to.be.a('number')
-          expect(o.uid).to.be.a('string').that.equals(O.uid)
-          expect(o.type).to.be.a('string').that.equals(O.type)
-          expect(o.side).to.be.a('string').that.equals(O.side)
-          expect(o.hash).to.be.a('string').that.equals(O.hash)
-          expect(o.baseAsset).to.be.a('string').that.equals(O.baseAsset)
-          expect(o.baseNetwork).to.be.a('string').that.equals(O.baseNetwork)
-          expect(o.baseQuantity).to.be.a('number').that.equals(O.baseQuantity)
-          expect(o.quoteAsset).to.be.a('string').that.equals(O.quoteAsset)
-          expect(o.quoteNetwork).to.be.a('string').that.equals(O.quoteNetwork)
-          expect(o.quoteQuantity).to.be.a('number').that.equals(O.quoteQuantity)
-
-          order = o
-        })
+      before('initialize orderbook', function (done) {
+        ob
+          .once('opened', order => {
+            expect(order).to.deep.equal(askOrder)
+            expect(ob.orders.size).to.equal(1)
+            done()
+          })
+          .add(askOrder)
       })
 
-      it('must delete an existing limit order and return it', function () {
-        return ob.delete({ id: order.id }).then(o => {
-          expect(o).to.be.an.instanceof(Order)
-          expect(o.id).to.be.a('string')
-          expect(o.ts).to.be.a('number')
-          expect(o.uid).to.be.a('string').that.equals(O.uid)
-          expect(o.type).to.be.a('string').that.equals(O.type)
-          expect(o.side).to.be.a('string').that.equals(O.side)
-          expect(o.hash).to.be.a('string').that.equals(O.hash)
-          expect(o.baseAsset).to.be.a('string').that.equals(O.baseAsset)
-          expect(o.baseNetwork).to.be.a('string').that.equals(O.baseNetwork)
-          expect(o.baseQuantity).to.be.a('number').that.equals(O.baseQuantity)
-          expect(o.quoteAsset).to.be.a('string').that.equals(O.quoteAsset)
-          expect(o.quoteNetwork).to.be.a('string').that.equals(O.quoteNetwork)
-          expect(o.quoteQuantity).to.be.a('number').that.equals(O.quoteQuantity)
-
-          order = null
-        })
+      after('cleanup orderbook', function () {
+        ob = null
       })
-    })
 
-    describe('Error Handling', function () {
-      it('must throw an error when uid is missing')
-      it('must throw an error when uid is not a string')
-
-      it('must throw an error when type is missing')
-      it('must throw an error when type is invalid')
-
-      it('must throw an error when side is missing')
-      it('must throw an error when side is invalid')
-
-      it('must throw an error when baseAsset is unsupported')
-      it('must throw an error when baseNetwork is unsupported')
-      it('must throw an error when baseQuantity is invalid')
-
-      it('must throw an error when quoteAsset is unsupported')
-      it('must throw an error when quoteNetwork is unsupported')
-      it('must throw an error when quoteQuantity is invalid')
+      it('must match a pair of limit orders', function (done) {
+        ob
+          .once('match', (maker, taker) => {
+            expect(maker).to.be.an.instanceof(Order).that.deep.equals(askOrder)
+            expect(taker).to.be.an.instanceof(Order).that.deep.equals(bidOrder)
+            done()
+          })
+          .add(bidOrder)
+      })
     })
   })
 })

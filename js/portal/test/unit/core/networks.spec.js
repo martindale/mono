@@ -30,51 +30,63 @@ describe('Networks', function () {
       expect(networks).to.be.an.instanceof(Networks)
       /* eslint-disable-next-line no-unused-expressions */
       expect(networks).to.be.sealed
+    })
+  })
 
-      // #[network]
+  describe('API', function () {
+    let networks
+
+    before(function () { networks = new Networks(PROPS) })
+
+    after(function () { networks = null })
+
+    // #[network]
+    describe('.[network]', function () {
       for (const name in PROPS) {
-        expect(name).to.be.a('string')
-        expect(networks[name]).to.be.an.instanceof(Network)
+        it(`must expose the ${name} network at networks.${name}`, function () {
+          expect(name).to.be.a('string')
+          expect(networks[name]).to.be.an.instanceof(Network)
 
-        const network = networks[name]
+          const network = networks[name]
 
-        expect(network).to.respondTo('deposit')
-        expect(() => network.deposit()).to.not.throw(/not implemented/)
+          expect(network).to.respondTo('deposit')
+          expect(() => network.deposit()).to.not.throw(/not implemented/)
 
-        expect(network).to.respondTo('withdraw')
-        expect(() => network.withdraw()).to.not.throw(/not implemented/)
+          expect(network).to.respondTo('withdraw')
+          expect(() => network.withdraw()).to.not.throw(/not implemented/)
+        })
       }
+    })
 
-      // #byAssets
-      expect(networks.byAssets).to.be.an.instanceof(Map)
-      networks.byAssets.forEach((networks, asset) => {
-        expect(networks).to.be.an.instanceof(Map)
-        networks.forEach((network, name) => {
-          expect(network).to.be.an.instanceof(Network)
-          expect(network.assets).to.contain(asset)
+    describe('.byAssets', function () {
+      it('must expose supported networks by assets', function () {
+        expect(networks.byAssets).to.be.an.instanceof(Map)
+
+        networks.byAssets.forEach((networks, asset) => {
+          expect(networks).to.be.an.instanceof(Map)
+          networks.forEach((network, name) => {
+            expect(network).to.be.an.instanceof(Network)
+            expect(network.assets).to.contain(asset)
+          })
         })
       })
     })
-  })
 
-  describe('.SUPPORTED', function () {
-    it('must return the list of supported networks', function () {
-      expect(Networks.SUPPORTED).to.deep.equal(SUPPORTED)
-    })
-  })
+    describe('.isSupported', function () {
+      it('must correctly identify supported networks', function () {
+        expect(networks.isSupported('goerli')).to.equal(true)
+        expect(networks.isSupported('sepolia')).to.equal(true)
+      })
 
-  describe('.isSupported()', function () {
-    it('must allow checking supported networks by name', function () {
-      expect(Networks).itself.to.respondTo('isSupported')
-    })
-
-    it('must return true for supported networks', function () {
-      expect(Networks.isSupported('goerli')).to.equal(true)
-      expect(Networks.isSupported('sepolia')).to.equal(true)
+      it('must correctly identify unsupported networks', function () {
+        expect(networks.isSupported('ropsten')).to.equal(false)
+      })
     })
 
-    it('must return false for unsupported networks', function () {
-      expect(Networks.isSupported('ropsten')).to.equal(false)
+    describe('.SUPPORTED', function () {
+      it('must list all supported networks', function () {
+        expect(networks.SUPPORTED).to.deep.equal(SUPPORTED)
+      })
     })
   })
 })

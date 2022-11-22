@@ -29,12 +29,28 @@ const ORDER_SIDES = ['ask', 'bid']
 const ORDER_TYPES = ['limit', 'market']
 
 /**
+ * An enum of order states
+ * @type {Array}
+ */
+const ORDER_STATUS = ['created', 'opened', 'closed']
+
+/**
  * Defines an order
  */
 module.exports = class Order {
   /**
    * Creates a new instance of an order
    * @param {Object} props Properties of the order
+   * @param {String} props.uid The unique identifier of the user
+   * @param {String} props.type The type of the order (should be limit)
+   * @param {String} props.side The side of the orderbook to add the order
+   * @param {String} props.hash The hash of the atomic swap secret
+   * @param {String} props.baseAsset The symbol of the asset being bought/sold
+   * @param {String} props.baseNetwork The parent network for the base asset
+   * @param {String} props.baseQuantity The amount of base asset being traded
+   * @param {String} props.quoteAsset The symbol of the asset used for payment
+   * @param {String} props.quoteNetwork The parent network for the quote asset
+   * @param {String} props.quoteQuantity The amount of quote asset being traded
    */
   constructor (props) {
     if (props.uid == null) {
@@ -69,7 +85,7 @@ module.exports = class Order {
       throw new Error(`"${props.quoteQuantity}" is not a valid quantity!`)
     }
 
-    Object.freeze(Object.assign(this, {
+    Object.seal(Object.assign(this, {
       id: props.id || uuid.v4(),
       ts: props.ts || Date.now(),
       uid: props.uid,
@@ -81,23 +97,35 @@ module.exports = class Order {
       baseQuantity: props.baseQuantity,
       quoteAsset: props.quoteAsset,
       quoteNetwork: props.quoteNetwork,
-      quoteQuantity: props.quoteQuantity
+      quoteQuantity: props.quoteQuantity,
+      assetPair: Order.toAssetPair(props),
+      status: ORDER_STATUS[0],
+      reason: null
     }))
   }
 
   /**
-   * Returns the age of the order in milliseconds from when it was received
+   * Returns an asset-pair, given a JSON object with the base/quote assets
+   * @param {Object} obj JSON object representing the order
+   * @param {String} obj.baseAsset The symbol of the asset being bought/sold
+   * @param {String} obj.quoteAsset The symbol of the asset used for payment
+   */
+  static toAssetPair (obj) {
+    if (obj.baseAsset == null && typeof obj.baseAsset !== 'string') {
+      return null
+    } else if (obj.quoteAsset == null && typeof obj.quoteAsset !== 'string') {
+      return null
+    } else {
+      return `${obj.baseAsset}-${obj.quoteAsset}`
+    }
+  }
+
+  /**
+   * Returns the age of the order in milliseconds from when it was created
    * @returns {Number}
    */
   get age () {
     return Date.now() - this.ts
-  }
-
-  /**
-   * Returns the asset pair the order is trading
-   */
-  get assetPair () {
-    return `${this.baseAsset}-${this.quoteAsset}`
   }
 
   /**
@@ -114,6 +142,30 @@ module.exports = class Order {
    */
   get isBid () {
     return this.side === 'bid'
+  }
+
+  /**
+   * Returns whether or not the order is in the 'created' state
+   * @returns {Boolean}
+   */
+  get isCreated () {
+    return this.status === ORDER_STATUS[0]
+  }
+
+  /**
+   * Returns whether or not the order is in the 'opened' state
+   * @returns {Boolean}
+   */
+  get isOpened () {
+    return this.status === ORDER_STATUS[1]
+  }
+
+  /**
+   * Returns whether or not the order is in the 'closed' state
+   * @returns {Boolean}
+   */
+  get isClosed () {
+    return this.status === ORDER_STATUS[2]
   }
 
   /**
@@ -137,7 +189,7 @@ module.exports = class Order {
    * @returns {Object}
    */
   toJSON () {
-    return {
+    const obj = {
       id: this.id,
       ts: this.ts,
       uid: this.uid,
@@ -149,7 +201,51 @@ module.exports = class Order {
       baseNetwork: this.baseNetwork,
       quoteAsset: this.quoteAsset,
       quoteQuantity: this.quoteQuantity,
-      quoteNetwork: this.quoteNetwork
+      quoteNetwork: this.quoteNetwork,
+      status: this.status,
+      reason: this.reason
     }
+
+    return obj
+  }
+
+  /**
+   * Opens the order on an orderbook
+   * @returns {Order}
+   */
+  open (reason) {
+    this.status = ORDER_STATUS[1]
+    this.reason = reason || null
+    return this
+  }
+
+  /**
+   * Closes the order on an orderbook
+   * @returns {Order}
+   */
+  close (reason) {
+    this.status = ORDER_STATUS[2]
+    this.reason = reason || null
+    return this
+  }
+
+  /**
+   * Determines if two orders are equal
+   * @param {Order} target The target order instance to check against this one
+   * @returns {Boolean}
+   */
+  equals (target) {
+    return this.id === target.id &&
+      this.ts === target.ts &&
+      this.uid === target.uid &&
+      this.type === target.type &&
+      this.side === target.side &&
+      this.hash === target.hash &&
+      this.baseAsset === target.baseAsset &&
+      this.baseQuantity === target.baseQuantity &&
+      this.baseNetwork === target.baseNetwork &&
+      this.quoteAsset === target.quoteAsset &&
+      this.quoteQuantity === target.quoteQuantity &&
+      this.quoteNetwork === target.quoteNetwork
   }
 }

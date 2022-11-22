@@ -44,7 +44,7 @@ module.exports = class Networks extends EventEmitter {
     this.byAssets = new Map()
 
     for (const name in props) {
-      if (!Networks.isSupported(name)) {
+      if (!this.isSupported(name)) {
         throw new Error(`unsupported network "${name}"!`)
       }
 
@@ -67,7 +67,7 @@ module.exports = class Networks extends EventEmitter {
   /**
    * Returns the list of supported blockchain networks
    */
-  static get SUPPORTED () {
+  get SUPPORTED () {
     return Array.from(SUPPORTED.keys())
   }
 
@@ -76,7 +76,7 @@ module.exports = class Networks extends EventEmitter {
    * @param {String} name The name of the network
    * @returns {Boolean}
    */
-  static isSupported (name) {
+  isSupported (name) {
     return SUPPORTED.has(name)
   }
 }

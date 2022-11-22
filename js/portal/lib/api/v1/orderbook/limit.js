@@ -12,19 +12,8 @@ const HTTP_METHODS = module.exports
  * @returns {Void}
  */
 HTTP_METHODS.PUT = function (req, res, ctx) {
-  if (req.json == null) {
-    return res.send(new Error('no order specified!'))
-  }
-
-  let orderbook
-
-  try {
-    orderbook = ctx.orderbooks.get(req.json)
-  } catch (err) {
-    return res.send(err)
-  }
-
-  orderbook.add(Object.assign({}, req.json, { type: 'limit' }))
+  const order = Object.assign({}, req.json, { type: 'limit' })
+  ctx.orderbooks.add(order)
     .then(order => res.send(order))
     .catch(err => res.send(err))
 }
@@ -37,19 +26,8 @@ HTTP_METHODS.PUT = function (req, res, ctx) {
  * @returns {Void}
  */
 HTTP_METHODS.DELETE = function (req, res, ctx) {
-  if (req.json == null) {
-    return res.send(new Error('no order specified!'))
-  }
-
-  let orderbook
-
-  try {
-    orderbook = ctx.orderbooks.get(req.json)
-  } catch (err) {
-    return res.send(err)
-  }
-
-  orderbook.delete(req.json)
+  const order = Object.assign({}, req.json, { type: 'limit' })
+  ctx.orderbooks.cancel(order)
     .then(order => res.send(order))
     .catch(err => res.send(err))
 }

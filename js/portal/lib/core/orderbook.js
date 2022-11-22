@@ -3,26 +3,21 @@
  */
 
 const { EventEmitter } = require('events')
-const Order = require('./order')
+
+const priceFn = { ask: Math.min, bid: Math.max }
+const priceDefault = { ask: Number.MAX_VALUE, bid: 0 }
 
 /**
- * A weak-map storing private data for each instance of the class
- * @type {WeakMap}
- */
-const INSTANCES = new WeakMap()
-
-/**
- * Implements an Orderbook
+ * Implements an orderbook for a single asset-pair
  * @type {Orderbook}
  */
 module.exports = class Orderbook extends EventEmitter {
   /**
-   * Creates a new instance of an orderbook
-   * @param {[Object]} props Properties of the orderbook
-   * @param {[String]} props.baseAsset The symbol of the asset being bought/sold
-   * @param {[String]} props.quoteAsset The symbol of the asset used for payment
-   * @param {[Number]} props.limitSize Reciprocal of the smallest limit price
-   * @param {[Number]} props.store A Store instance where orders are persisted
+   * Instantiates a new orderbook for the specfied asset-pair
+   * @param {Object} props Properties of the orderbook
+   * @param {String} props.baseAsset The symbol of the asset being bought/sold
+   * @param {String} props.quoteAsset The symbol of the asset used for payment
+   * @param {Number} props.limitSize Reciprocal of the smallest limit price
    */
   constructor (props) {
     if (props == null) {
@@ -37,127 +32,207 @@ module.exports = class Orderbook extends EventEmitter {
 
     super()
 
-    INSTANCES.set(this, Object.seal({
-      baseAsset: props.baseAsset,
-      quoteAsset: props.quoteAsset,
-      limitSize: props.limitSize,
-      orders: new Map(),
-      bids: {},
-      asks: {}
-    }))
+    this.assetPair = `${props.baseAsset}-${props.quoteAsset}`
+    this.baseAsset = props.baseAsset
+    this.quoteAsset = props.quoteAsset
+    this.limitSize = props.limitSize
+
+    this.side = { ask: new Map(), bid: new Map() }
+    this.best = { ...priceDefault }
+    this.orders = new Map()
+    this.queues = {
+      cancel: new Set(),
+      limit: { ask: new Set(), bid: new Set() }
+    }
+
+    this._id = null
 
     Object.seal(this)
   }
 
   /**
-   * Returns the asset-pair being traded in the orderbook
-   */
-  get assetPair () {
-    return `${this.baseAsset}-${this.quoteAsset}`
-  }
-
-  /**
-   * The symbol of the asset being bought/sold
-   * @returns {String}
-   */
-  get baseAsset () {
-    return INSTANCES.get(this).baseAsset
-  }
-
-  /**
-   * The reciprocal of the smallest limit price in the orderbook
+   * The spread of the orderbook
    * @returns {Number}
    */
-  get limitSize () {
-    return INSTANCES.get(this).limitSize
+  get spread () {
+    return this.best.ask - this.best.bid
   }
 
   /**
-   * The number of orders in the orderbook
+   * The current price of the asset, in terms of the quote asset
    * @returns {Number}
    */
-  get orderCount () {
-    return INSTANCES.get(this).orders.size
+  get price () {
+    return (this.best.ask + this.best.bid) / 2
   }
 
   /**
-   * The symbol of the asset used for payment
-   * @returns {String}
-   */
-  get quoteAsset () {
-    return INSTANCES.get(this).quoteAsset
-  }
-
-  /**
-   * Returns the current state of the instance
-   * @type {String}
-   */
-  [Symbol.for('nodejs.util.inspect.custom')] () {
-    return this.toJSON()
-  }
-
-  /**
-   * Returns the current state of the instance
-   * @returns {Object}
-   */
-  toJSON () {
-    const props = INSTANCES.get(this)
-    return {
-      type: this.constructor.name,
-      baseAsset: props.baseAsset,
-      quoteAsset: props.quoteAsset,
-      limitSize: props.limitSize
-    }
-  }
-
-  /**
-   * Adds an order to the orderbook
-   * @param {Object} order The order to be added to the orderbook
-   * @param {String} order.uid The unique identifier of the user
-   * @param {String} order.type The type of the order (should be limit)
-   * @param {String} order.side The side of the orderbook to add the order
-   * @param {String} order.hash The hash of the atomic swap secret
-   * @param {String} order.assetPair The asset-pair being traded in the order
-   * @param {String} order.baseNetwork The parent network for the base asset
-   * @param {String} order.baseQuantity The amount of base asset being traded
-   * @param {String} order.quoteNetwork The parent network for the quote asset
-   * @param {String} order.quoteQuantity The amount of quote asset being traded
-   * @returns {Promise<Order>}
+   * Adds a new order
+   * @param {Object} order The order to be added
+   * @returns {Promise<Void>}
    */
   add (order) {
-    return new Promise((resolve, reject) => {
-      const { orders } = INSTANCES.get(this)
+    if (!this.orders.has(order.id)) {
+      this.queues[order.type][order.side].add(order)
+      return this._trigger(order)
+    }
 
-      try {
-        order = new Order(order)
-      } catch (err) {
-        return reject(err)
-      }
-
-      // TODO: Add the order to all other data structures
-      orders.set(order.id, order)
-      resolve(order)
-    })
+    return Promise.reject(this.orders.get(order.id).equals(order)
+      ? Error(`order ${order.id} already exists!`)
+      : Error('order-equality error OR uuid collision!'))
   }
 
   /**
-   * Deletes an order from the orderbook
-   * @param {Object} order The order to be deleted
-   * @param {String} order.id The unique identifier of the order to be deleted
-   * @returns {Promise<Order|null>} The deleted order, if available
+   * Cancels previously added orders
+   * @param {Object} order The order to be cancelled
+   * @returns {Promise<Void>}
    */
-  delete (order) {
-    return new Promise((resolve, reject) => {
-      const { orders } = INSTANCES.get(this)
+  cancel (order) {
+    if (this.orders.has(order.id)) {
+      order = this.orders.get(order.id).order
+      this.queues.cancel.add(order)
+      return this._trigger(order)
+    }
 
-      if (orders.has(order.id)) {
-        order = orders.get(order.id)
-        // TODO: Get rid of order from all other data structures
+    return Promise.reject(Error(`order ${order.id} does not exist!`))
+  }
+
+  /**
+   * Triggers matching, if needed
+   * @param {*} args Arguments to be emitted/returned
+   * @returns {Promise<Order>}
+   */
+  _trigger (order) {
+    this._id = this._id || setImmediate(() => this._execute())
+    this.emit('created', order)
+    return Promise.resolve(order)
+  }
+
+  /**
+   * Executes all queued orders
+   * @returns {Void}
+   */
+  _execute () {
+    try {
+      const closed = []
+      const opened = []
+      const matched = []
+
+      // process any queued cancellations
+      for (const cancellation of this.queues.cancel) {
+        const orders = this.orders
+        if (!orders.has(cancellation.id)) continue
+
+        const { curPrice, order } = orders.get(cancellation.id)
+        const limitOrders = this.side[order.side].get(curPrice)
+
+        limitOrders.delete(order)
         orders.delete(order.id)
-        resolve(order)
-      } else {
-        reject(new Error(`Order ${order.id} not found!`))
+        closed.push(order.close('cancelled'))
+
+        // if the cancellation has affected the best bid/ask, then update it
+        if (this.best[order.side] !== curPrice || limitOrders.size) continue
+
+        // reset the price default to recalculate the best ask/bid price
+        this.best[order.side] = priceDefault[order.side]
+        for (const [curPrice, orders] of this.side[order.side]) {
+          if (orders.size === 0) continue
+          this.best[order.side] = priceFn[order.side](this.best[order.side], curPrice)
+        }
       }
-    })
+      this.queues.cancel.clear()
+
+      // process limit ask orders
+      for (const order of this.queues.limit.ask) {
+        const tmp = order.price * this.limitSize
+        const curPrice = (tmp - (tmp % 1)) / this.limitSize
+
+        this.side.ask.has(curPrice) || this.side.ask.set(curPrice, new Set())
+        this.side.ask.get(curPrice).add(order)
+        this.best.ask = priceFn.ask(this.best.ask, curPrice)
+        this.orders.set(order.id, { curPrice, order })
+
+        opened.push(order.open())
+      }
+      this.queues.limit.ask.clear()
+
+      // process limit bid orders
+      for (const order of this.queues.limit.bid) {
+        const tmp = order.price * this.limitSize
+        const curPrice = (tmp - (tmp % 1)) / this.limitSize
+
+        this.side.bid.has(curPrice) || this.side.bid.set(curPrice, new Set())
+        this.side.bid.get(curPrice).add(order)
+        this.best.bid = priceFn.bid(this.best.bid, curPrice)
+        this.orders.set(order.id, { curPrice, order })
+
+        opened.push(order.open())
+      }
+      this.queues.limit.bid.clear()
+
+      // resolve overlapping limit orders
+      while (this.spread <= 0) {
+        const tmp = this.price * this.limitSize
+        const curPrice = (tmp - (tmp % 1)) / this.limitSize
+        const asks = this.side.ask.get(curPrice)
+        const bids = this.side.bid.get(curPrice)
+
+        while (asks.size && bids.size) {
+          const ask = asks.values().next().value
+          const bid = bids.values().next().value
+
+          if (ask.baseQuantity === bid.baseQuantity) {
+            asks.delete(ask)
+            bids.delete(bid)
+          } else if (ask.baseQuantity > bid.baseQuantity) {
+            ask.match(bid)
+            bids.delete(bid)
+          } else if (ask.baseQuantity < bid.baseQuantity) {
+            asks.delete(ask)
+            bid.match(ask)
+          }
+
+          // if we're out of asks for the current limit price, then update it
+          if (asks.size === 0) {
+            this.best.ask = priceDefault.ask
+            for (const [curPrice, orders] of this.side.ask) {
+              if (orders.size === 0) continue
+              this.best.ask = priceFn.ask(this.best.ask, curPrice)
+            }
+          }
+
+          // if we're out of bids for the current limit price, then update it
+          if (bids.size === 0) {
+            this.best.bid = priceDefault.bid
+            for (const [curPrice, orders] of this.side.bid) {
+              if (orders.size === 0) continue
+              this.best.bid = priceFn.bid(this.best.bid, curPrice)
+            }
+          }
+
+          const maker = ask.ts <= bid.ts ? ask : bid
+          const taker = ask.ts <= bid.ts ? bid : ask
+          matched.push({ maker, taker })
+        }
+      }
+
+      // fire all events
+      for (const order of closed) {
+        this.emit(order.status, order)
+      }
+
+      for (const order of opened) {
+        this.emit(order.status, order)
+      }
+
+      for (const { maker, taker } of matched) {
+        this.emit('match', maker, taker)
+      }
+
+      // ack the execution
+      this._id = null
+    } catch (err) {
+      this.emit('error', err)
+    }
   }
 }
