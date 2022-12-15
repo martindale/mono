@@ -14,5 +14,5 @@ npm install
 == Run Portal
 [source, bash]
 ----
-node bin/portal.js
+node bin/portal
 ----
