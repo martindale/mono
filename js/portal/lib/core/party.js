@@ -25,6 +25,7 @@ module.exports = class Party {
     this.quantity = props.quantity
     this.swap = null // assigned by the swap constructor
     this.state = null // populated by the user/client over http/rpc
+    this.publicInfo = { left: {}, right: {} }
 
     Object.seal(this)
   }
@@ -45,11 +46,16 @@ module.exports = class Party {
     return this.swap.secretSeeker === this
   }
 
+  get swapHash () {
+    return this.swap.secretHash
+  }
+
   /**
    * Overridable step one function of the two-step swap
    * @returns {Promise<Party>}
    */
-  open () {
+  async open () {
+    await this.network.open(this)
     return Promise.resolve(this)
   }
 
@@ -57,7 +63,8 @@ module.exports = class Party {
    * Overridable step two function of the two-step swap
    * @returns {Promise<Party>}
    */
-  commit () {
+  async commit () {
+    await this.network.commit(this)
     return Promise.resolve(this)
   }
 
@@ -75,11 +82,39 @@ module.exports = class Party {
    * @returns {Party}
    */
   static fromOrder (order, ctx) {
+    const asset = order.isAsk ? order.baseAsset : order.quoteAsset
+    const network = order.isAsk ? order.baseNetwork : order.quoteNetwork
+    const quantity = order.isAsk ? order.baseQuantity : order.quoteQuantity
     return new Party({
       id: order.uid,
-      asset: ctx.assets[order.asset],
-      network: ctx.networks[order.network],
-      quantity: order.quantity
+      asset: ctx.assets[asset],
+      network: ctx.networks[network],
+      quantity
     })
+  }
+
+  /**
+   * Returns the current state of the instance
+   * @type {String}
+   */
+  [Symbol.for('nodejs.util.inspect.custom')] () {
+    return this.toJSON()
+  }
+
+  /**
+   * Returns the JSON representation of this instance
+   * @returns {Object}
+   */
+  toJSON () {
+    const obj = {
+      id: this.id,
+      swapId: this.swap.id,
+      state: this.state,
+      publicInfo: this.publicInfo,
+      isSecretSeeker: this.isSecretSeeker,
+      isSecretHolder: this.isSecretHolder
+    }
+
+    return obj
   }
 }

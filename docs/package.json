@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@antora/cli": "3.2.0-alpha.2",
+    "@antora/site-generator": "3.2.0-alpha.2",
+    "asciidoctor-kroki": "0.16.0",
+    "@mermaid-js/mermaid-cli": "9.2.2"
+  }
+}

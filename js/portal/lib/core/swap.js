@@ -50,14 +50,14 @@ module.exports = class Swap extends EventEmitter {
 
     SWAP_INSTANCES.set(this, {
       id: props.id || uuid(),
-      secretHash: props.secretHash,
+      secretHash: props.secretHash, // hexString
       secretHolder: props.secretHolder,
       secretSeeker: props.secretSeeker,
       status: SWAP_STATUS[0]
     })
 
-    this.secretHolder.swap = this
-    this.secretSeeker.swap = this
+    SWAP_INSTANCES.get(this).secretHolder.swap = this
+    SWAP_INSTANCES.get(this).secretSeeker.swap = this
 
     Object.seal(this)
   }
@@ -94,6 +94,10 @@ module.exports = class Swap extends EventEmitter {
     return SWAP_INSTANCES.get(this).secretSeeker
   }
 
+  getCounterpartyInfo (party) {
+    return party.isSecretHolder ? this.secretSeeker.publicInfo: this.secretHolder.publicInfo
+  }
+
   /**
    * The current status of the atomic swap
    * @returns {String}
@@ -101,6 +105,23 @@ module.exports = class Swap extends EventEmitter {
   get status () {
     return SWAP_INSTANCES.get(this).status
   }
+
+  get isOpening () {
+    return this.status === SWAP_STATUS[1]
+  }
+
+  get isOpened () {
+    return this.status === SWAP_STATUS[2]
+  }
+
+  get isCommitting () {
+    return this.status === SWAP_STATUS[3]
+  }
+
+  get isCommitted () {
+    return this.status === SWAP_STATUS[4]
+  }
+
 
   /**
    * Returns the current state of the server as a JSON string
@@ -132,10 +153,10 @@ module.exports = class Swap extends EventEmitter {
    * Handles opening of the swap by one of its parties
    * @param {Party} party The party that is opening the swap
    * @param {String} party.id The unique identifier of the party
-   * @param {*} party.state Private data that may be shared with the other party
+   * @param {*} party.state Data that may be not be shared with the other party
    * @returns {Promise<Party>}
    */
-  open (party) {
+  async open (party) {
     const { secretHolder, secretSeeker, status } = this
     const isHolder = party.id === secretHolder.id
     const isSeeker = party.id === secretSeeker.id
@@ -143,29 +164,22 @@ module.exports = class Swap extends EventEmitter {
     const isNeither = !isHolder && !isSeeker
 
     if (status !== SWAP_STATUS[0] && status !== SWAP_STATUS[1]) {
-      const err = Error(`swap "${this.id}" is already "${status}"!`)
-      return Promise.reject(err)
+      throw new Error(`swap "${this.id}" is already "${status}"!`)
     } else if (isBoth) {
-      const err = Error('self-swapping is not allowed!')
-      return Promise.reject(err)
+      throw new Error('self-swapping is not allowed!')
     } else if (isNeither) {
-      const err = Error(`"${party.id}" not a party to swap "${this.id}"!`)
-      return Promise.reject(err)
+      throw new Error(`"${party.id}" not a party to swap "${this.id}"!`)
     }
-
     const { state } = party
     party = isHolder ? secretHolder : secretSeeker
     party.state = Object.freeze(Object.assign({}, party.state, state))
 
-    return party.open()
-      .then(party => {
-        const isOpened = !!(secretHolder.state && secretSeeker.state)
-        SWAP_INSTANCES.get(this).status = isOpened
-          ? SWAP_STATUS[2]
-          : SWAP_STATUS[1]
+    party = await party.open()
+    SWAP_INSTANCES.get(this).status = this.isOpening
+      ? SWAP_STATUS[2]
+      : SWAP_STATUS[1]
 
-        return party
-      })
+    return party
   }
 
   /**
@@ -174,8 +188,7 @@ module.exports = class Swap extends EventEmitter {
    * @param {String} party.id The unique identifier of the party
    * @returns {Promise<Party>}
    */
-  commit (party) {
-    return new Promise((resolve, reject) => {
+  async commit (party) {
       const { secretHolder, secretSeeker, status } = this
       const isHolder = party.id === secretHolder.id
       const isSeeker = party.id === secretSeeker.id
@@ -183,28 +196,19 @@ module.exports = class Swap extends EventEmitter {
       const isNeither = !isHolder && !isSeeker
 
       if (status !== SWAP_STATUS[2] && status !== SWAP_STATUS[3]) {
-        const err = Error(`swap "${this.id}" is already "${status}"!`)
-        return Promise.reject(err)
+        throw new Error(`swap "${this.id}" is already "${status}"!`)
       } else if (isBoth) {
-        const err = Error('self-swapping is not allowed!')
-        return Promise.reject(err)
+        throw new Error('self-swapping is not allowed!')
       } else if (isNeither) {
-        const err = Error(`"${party.id}" not a party to swap "${this.id}"!`)
-        return Promise.reject(err)
+        throw new Error(`"${party.id}" not a party to swap "${this.id}"!`)
       }
 
       party = isHolder ? secretHolder : secretSeeker
-
-      return party.commit()
-        .then(party => {
-          const isCommitted = !!(secretHolder.state && secretSeeker.state)
-          SWAP_INSTANCES.get(this).status = isCommitted
-            ? SWAP_STATUS[4]
-            : SWAP_STATUS[3]
-
-          return party
-        })
-    })
+      party = await party.commit()
+    SWAP_INSTANCES.get(this).status = this.isCommitting
+        ? SWAP_STATUS[4]
+        : SWAP_STATUS[3]
+      return party
   }
 
   /**
@@ -219,7 +223,6 @@ module.exports = class Swap extends EventEmitter {
     const secretHash = makerOrder.hash
     const secretHolder = Party.fromOrder(makerOrder, ctx)
     const secretSeeker = Party.fromOrder(takerOrder, ctx)
-
     return new Swap({ id, secretHash, secretHolder, secretSeeker })
   }
 }

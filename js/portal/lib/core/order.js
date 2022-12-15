@@ -14,7 +14,7 @@ const ASSETS = require('./assets')
  * A list of supported networks
  * @type {Array}
  */
-const NETWORKS = ['goerli', 'sepolia']
+const NETWORKS = ['goerli', 'sepolia', 'lightning']  // to be switched back to require('./networks.js')
 
 /**
  * The side of the orderbook to put the order into
@@ -47,8 +47,10 @@ module.exports = class Order {
    * @param {String} props.hash The hash of the atomic swap secret
    * @param {String} props.baseAsset The symbol of the asset being bought/sold
    * @param {String} props.baseQuantity The amount of base asset being traded
+   * @param {String} props.baseNetwork The network of base asset being traded
    * @param {String} props.quoteAsset The symbol of the asset used for payment
    * @param {String} props.quoteQuantity The amount of quote asset being traded
+   * @param {String} props.quoteNetwork The network of quote asset being traded
    */
   constructor (props) {
     if (props.uid == null) {

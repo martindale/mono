@@ -11,7 +11,10 @@ const Asset = require('./asset')
  */
 const ASSETS = [
   new Asset({ name: 'Ether', symbol: 'ETH' }),
-  new Asset({ name: 'USD (Circle)', symbol: 'USDC' })
+  new Asset({ name: 'USD (Circle)', symbol: 'USDC' }),
+  new Asset({ name: 'Bitcoin Regtest 1', symbol: 'BTC1'}),
+  new Asset({ name: 'Bitcoin Regtest 2', symbol: 'BTC2'}),
+  new Asset({ name: 'Bitcoin', symbol: 'BTC'})
 ].sort((a, b) => a[0] - b[0])
 
 /**

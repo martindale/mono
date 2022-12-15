@@ -4,6 +4,7 @@ result*
 # Node.js
 coverage
 node_modules
+dist
 
 # Terraform
 .terraform
@@ -12,3 +13,12 @@ terraform.tfstate*
 
 # Secure content
 secure
+
+# IntelliJ
+.idea
+*.iml
+
+# Antora (docs)
+workspace
+docs/build
+docs/package-lock.json
