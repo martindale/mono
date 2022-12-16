@@ -2,7 +2,7 @@ import { useState } from "react";
 import 'semantic-ui-css/semantic.min.css';
 import { Button, Card, Image, Form } from 'semantic-ui-react';
 
-function SwapCreate({setSwapId, setSwapHash, setSecretSeekerId, setSecretHolderId, setSecret}) {
+function SwapCreate({setSwapId, setSwapHash, setSecretSeekerId, setSecretHolderId, setSecret, setBase, setQuote}) {
     const [baseQuantity, setBaseQuantity] = useState(10000)
     const [quoteQuantity, setQuoteQuantity] = useState(30000)
 
@@ -48,6 +48,8 @@ function SwapCreate({setSwapId, setSwapHash, setSecretSeekerId, setSecretHolderI
             .then(data => {
                 console.log(data.swap.id)
                 console.log(`${JSON.stringify(data)}`)
+                setBase(baseQuantity)
+                setQuote(quoteQuantity)
                 setSwapId(data.swap.id)
                 setSecretSeekerId(data.swap.secretSeeker.id)
                 setSecretHolderId(data.swap.secretHolder.id)
@@ -58,7 +60,7 @@ function SwapCreate({setSwapId, setSwapHash, setSecretSeekerId, setSecretHolderI
             .catch(err => console.log(err))
     }
     return (
-        <Card>
+        <Card centered>
           <Card.Content>
             <Card.Header>
               Initate New Swap

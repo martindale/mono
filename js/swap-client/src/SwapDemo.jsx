@@ -1,10 +1,13 @@
-import { useState } from "react";
-import { Card, Container, Table, TableRow } from "semantic-ui-react";
+import { useEffect, useState } from "react";
+import { Button, Card, Container, Table, TableRow } from "semantic-ui-react";
 
 import SwapCreate from './SwapCreate.jsx'
 import SwapForm from './SwapForm.jsx'
 
 function SwapDemo() {
+    const [amountBase, setBase] = useState(null)
+    const [amountQuote, setQuote] = useState(null)
+    const [swapState, setSwapState] = useState(null)
     const [swapId, setSwapId] = useState(null)
     const [swapHash, setSwapHash] = useState(null)
     const [secretSeekerId, setSecretSeekerId] = useState(null)
@@ -83,58 +86,103 @@ function SwapDemo() {
                 }
             }
         })
+        useEffect(() => {
+            if(swapHash) setSwapState(1)
+            if(request1!=request2 && (request1 | request2)) setSwapState(2)
+            if(request1 && request2) setSwapState(3)
+            // if() setSwapState(4)
+            // if() setSwapState(5)
+            // if() setSwapState(6)
+
+
+        }, [swapHash, request1, request2]);
+
 
     return (
         <>
-            <SwapCreate setSwapId={setSwapId} setSwapHash={setSwapHash} setSecretSeekerId={setSecretSeekerId} setSecretHolderId={setSecretHolderId} setSecret={setSecret}/>
+            { (swapId == null) ? 
+            (<SwapCreate setSwapId={setSwapId} setSwapHash={setSwapHash} setSecretSeekerId={setSecretSeekerId} setSecretHolderId={setSecretHolderId} setSecret={setSecret} setBase={setBase} setQuote={setQuote}/>) : (
+            <Card.Group centered>
+                <Card fluid>
+                    <Card.Content>
+                        <Card.Header>
+                            Swap Info
+                        </Card.Header>
+                        <Card.Description>
+                            <Table style={{ border: "0px solid rgba(0,0,0,0)" }}>
+                                <Table.Row>
+                                    <Table.Cell>
+                                        baseAmount: 
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Container style={{ wordWrap: "break-word" }}>
+                                            {amountBase}
+                                        </Container>
+                                    </Table.Cell>
+                                </Table.Row>
+                                <Table.Row>
+                                    <Table.Cell>
+                                        quoteAmount: 
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Container style={{ wordWrap: "break-word" }}>
+                                            {amountQuote}
+                                        </Container>
+                                    </Table.Cell>
+                                </Table.Row>
+                                <Table.Row>
+                                    <Table.Cell>
+                                        swapId: 
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Container style={{ wordWrap: "break-word" }}>
+                                            {swapId}
+                                        </Container>
+                                    </Table.Cell>
+                                </Table.Row>
+                                <Table.Row>
+                                    <Table.Cell>
+                                        invoice1: 
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Container style={{ wordWrap: "break-word" }}>
+                                            {request1}
+                                        </Container>
+                                    </Table.Cell>
+                                </Table.Row>
+                                <Table.Row>
+                                    <Table.Cell>
+                                        invoice2:
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        <Container style={{ wordWrap: "break-word" }}>
+                                            {request2}
+                                        </Container>
+                                    </Table.Cell>
+                                </Table.Row>
+                            </Table>
 
-            <Card fluid>
-                <Card.Content>
-                    <Card.Header>
-                        Swap Info
-                    </Card.Header>
-                    <Card.Description>
-                        <Table style={{ border: "0px solid rgba(0,0,0,0)" }}>
-                            <Table.Row>
-                                <Table.Cell>
-                                    swapId: 
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <Container style={{ wordWrap: "break-word" }}>
-                                        {swapId}
-                                    </Container>
-                                </Table.Cell>
-                            </Table.Row>
-                            <Table.Row>
-                                <Table.Cell>
-                                    invoice1: 
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <Container style={{ wordWrap: "break-word" }}>
-                                        {request1}
-                                    </Container>
-                                </Table.Cell>
-                            </Table.Row>
-                            <Table.Row>
-                                <Table.Cell>
-                                    invoice2:
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <Container style={{ wordWrap: "break-word" }}>
-                                        {request2}
-                                    </Container>
-                                </Table.Cell>
-                            </Table.Row>
-                        </Table>
+                            <Button onClick={()=>{window.location.reload()}}>Cancel Swap</Button>
+                        </Card.Description>
+                    </Card.Content>
+                </Card>
+            </Card.Group>    
+            )}
 
-
-                        
-                    </Card.Description>
-                </Card.Content>
-            </Card>
-            <SwapForm swapId={swapId} swapHash={swapHash} participant={alice} id={secretSeekerId} setRequest={setRequest1}/>
-            <SwapForm swapId={swapId} swapHash={swapHash} participant={carol} id={secretHolderId} setRequest={setRequest2} secret={secret}/>
-
+            { (swapId != null) ?
+            (<Card.Group widths='equal'>
+                <Card fluid>
+                    <Card.Content>
+                        <SwapForm swapId={swapId} swapHash={swapHash} participant={alice} id={secretSeekerId} setRequest={setRequest1} swapState={swapState}/>
+                    </Card.Content>
+                </Card>
+                <Card fluid>
+                    <Card.Content>
+                        <SwapForm swapId={swapId} swapHash={swapHash} participant={carol} id={secretHolderId} setRequest={setRequest2} secret={secret} swapState={swapState}/>
+                    </Card.Content>
+                </Card>
+            </Card.Group>)
+                : (<br/>)}
         </>);
 }
 
