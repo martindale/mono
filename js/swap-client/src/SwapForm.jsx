@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Button, Card, Container, Table, TableRow } from "semantic-ui-react";
 
-function SwapForm({swapId, swapHash, participant, id, secret, setRequest}) {
+function SwapForm({swapId, swapHash, participant, id, secret, setRequest, swapState}) {
 
+    const [openedSwap, setOpenedSwap] = useState(null)
+    const [committedSwap, setCommittedSwap] = useState(null)
     const [data, setData] = useState({
         data: {
             uid: swapId,
@@ -29,6 +31,7 @@ function SwapForm({swapId, swapHash, participant, id, secret, setRequest}) {
                 console.log(JSON.stringify(data))
                 console.log(`request: ${data.publicInfo.request}`)
                 setRequest(data.publicInfo.request)
+                setOpenedSwap(true)
             })
 
             .catch(err => console.log(err))
@@ -51,6 +54,7 @@ function SwapForm({swapId, swapHash, participant, id, secret, setRequest}) {
             })
             .then(data => {
                 console.log(JSON.stringify(data))
+                setCommittedSwap(true)
             })
 
             .catch(err => console.log(err))
@@ -88,8 +92,12 @@ function SwapForm({swapId, swapHash, participant, id, secret, setRequest}) {
                         </Table>
                         
                     </Card.Description>
-            <Button onClick={onClickOpen}>Open Swap</Button>
-            <Button onClick={onClickCommit}>Commit Swap</Button>
+            { (swapState < 3) ?
+             (openedSwap==null) ? 
+                (<Button onClick={onClickOpen}>Open Swap</Button>) : (<Button disabled>Waiting for counter party</Button>) :
+             (committedSwap==null) ? 
+                (<Button onClick={onClickCommit}>Commit Swap</Button>) : (<Button disabled>Waiting for counter party</Button>)
+            }
         </Card.Content>
         </Card>);
 
