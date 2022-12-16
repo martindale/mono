@@ -1,4 +1,6 @@
 import { useState } from "react";
+import 'semantic-ui-css/semantic.min.css';
+import { Button, Card, Image, Form } from 'semantic-ui-react';
 
 function SwapCreate({setSwapId, setSwapHash, setSecretSeekerId, setSecretHolderId, setSecret}) {
     const [baseQuantity, setBaseQuantity] = useState(10000)
@@ -40,6 +42,7 @@ function SwapCreate({setSwapId, setSwapHash, setSecretSeekerId, setSecretHolderI
             })
         })
             .then(res => {
+                console.log(res);
                 return res.json()
             })
             .then(data => {
@@ -55,11 +58,26 @@ function SwapCreate({setSwapId, setSwapHash, setSecretSeekerId, setSecretHolderI
             .catch(err => console.log(err))
     }
     return (
-        <>
-            <p><button onClick={onClick}>Create Swap</button></p>
-            <p><label>Base Quantity: <input type='number' value={baseQuantity} onChange={(evt) => setBaseQuantity(evt.target.value)}/></label></p>
-            <p><label>Quote Quantity: <input type='number' value={quoteQuantity} onChange={(evt) => setQuoteQuantity(evt.target.value)}/></label></p>
-        </>
+        <Card>
+          <Card.Content>
+            <Card.Header>
+              Initate New Swap
+            </Card.Header><br />
+            <Form>
+            <Form.Group  widths='equal'>
+              <Form.Field>
+                <label>Base Quantity: 
+                <input type='number' value={baseQuantity} onChange={(evt) => setBaseQuantity(evt.target.value)}/></label>
+              </Form.Field>
+              <Form.Field>
+                <label>Quote Quantity: 
+                <input type='number' value={quoteQuantity} onChange={(evt) => setQuoteQuantity(evt.target.value)}/></label>
+              </Form.Field>
+            </Form.Group>
+            <p><Button primary onClick={onClick}>Create Swap</Button></p>
+            </Form>
+          </Card.Content>
+      </Card>
     );
 
 }

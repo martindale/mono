@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button, Card, Container, Table, TableRow } from "semantic-ui-react";
 
 function SwapForm({swapId, swapHash, participant, id, secret, setRequest}) {
 
@@ -57,13 +58,40 @@ function SwapForm({swapId, swapHash, participant, id, secret, setRequest}) {
     }
 
     return (
-        <>
-            <button onClick={onClickOpen}>Open Swap</button>
-            <button onClick={onClickCommit}>Commit Swap</button>
-            <p>participant id: {id}</p>
-            <p>swapHash: {swapHash}</p>
-            <p>swapSecret: {secret}</p>
-        </>);
+        <Card fluid>
+        <Card.Content>
+            <Card.Header>
+                Swap UI ({id})
+            </Card.Header>
+                    <Card.Description>
+                        <Table style={{ border: "0px solid rgba(0,0,0,0)" }}>
+                            <Table.Row>
+                                <Table.Cell>
+                                swapHash: 
+                                </Table.Cell>
+                                <Table.Cell>
+                                    <Container style={{ wordWrap: "break-word" }}>
+                                        {swapHash}
+                                    </Container>
+                                </Table.Cell>
+                            </Table.Row>
+                            <Table.Row>
+                                <Table.Cell>
+                                swapSecret:
+                                </Table.Cell>
+                                <Table.Cell>
+                                    <Container style={{ wordWrap: "break-word" }}>
+                                        {swapHash}
+                                    </Container>
+                                </Table.Cell>
+                            </Table.Row>
+                        </Table>
+                        
+                    </Card.Description>
+            <Button onClick={onClickOpen}>Open Swap</Button>
+            <Button onClick={onClickCommit}>Commit Swap</Button>
+        </Card.Content>
+        </Card>);
 
 
 }
