@@ -81,7 +81,7 @@ function SwapForm({swapId, swapHash, participant, id, secret, setRequest}) {
                                 </Table.Cell>
                                 <Table.Cell>
                                     <Container style={{ wordWrap: "break-word" }}>
-                                        {swapHash}
+                                        {secret}
                                     </Container>
                                 </Table.Cell>
                             </Table.Row>
