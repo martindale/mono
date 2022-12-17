@@ -22,3 +22,6 @@ secure
 workspace
 docs/build
 docs/package-lock.json
+
+# Miscellaneous 
+.DS_Store
