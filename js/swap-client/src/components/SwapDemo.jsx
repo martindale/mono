@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Container, Table, TableRow } from "semantic-ui-react";
+import { Button, Card, Container, Table } from "semantic-ui-react";
+import { useAppSelector } from "../hooks.js";
+import { setRequest1, setRequest2 } from "../slices/swapSlice.js";
+import { SwapCreate } from './SwapCreate.jsx'
+import { SwapForm } from './SwapForm.jsx'
 
-import SwapCreate from './SwapCreate.jsx'
-import SwapForm from './SwapForm.jsx'
-
-function SwapDemo() {
-	const [amountBase, setBase] = useState(null)
-	const [amountQuote, setQuote] = useState(null)
-	const [swapState, setSwapState] = useState(null)
-	const [swapId, setSwapId] = useState(null)
-	const [swapHash, setSwapHash] = useState(null)
-	const [secretSeekerId, setSecretSeekerId] = useState(null)
-	const [secretHolderId, setSecretHolderId] = useState(null)
-	const [secret, setSecret] = useState(null)
-	const [request1, setRequest1] = useState(null)
-	const [request2, setRequest2] = useState(null)
+export const SwapDemo = ({ setRequest1, setRequest2 }) => {
+	const amountBase = useAppSelector(state => state.swap.amountBase);
+	const amountQuote = useAppSelector(state => state.swap.amountQuote);
+	const swapState = useAppSelector(state => state.swap.swapState);
+	const swapId = useAppSelector(state => state.swap.swapId);
+	const swapHash = useAppSelector(state => state.swap.swapHash);
+	const secretSeekerId = useAppSelector(state => state.swap.secretSeekerId);
+	const secretHolderId = useAppSelector(state => state.swap.secretHolderId);
+	const secret = useAppSelector(state => state.swap.secret);
+	const request1 = useAppSelector(state => state.swap.request1);
+	const request2 = useAppSelector(state => state.swap.request2);
 	const [alice, setAlice] = useState({
 		state: {
 			isSecretHolder: false,
@@ -99,13 +100,7 @@ function SwapDemo() {
 	return (
 		<>
 			{(swapId == null) 
-				? <SwapCreate 
-						setSwapId={setSwapId} 
-						setSwapHash={setSwapHash} 
-						setSecretSeekerId={setSecretSeekerId} 
-						setSecretHolderId={setSecretHolderId} 
-						setSecret={setSecret} setBase={setBase} 
-						setQuote={setQuote}/> 
+				? <SwapCreate /> 
 				: <Card.Group centered>
 						<Card fluid>
 							<Card.Content>
@@ -186,7 +181,6 @@ function SwapDemo() {
 					</Card.Group>
 				: (<br/>)
 			}
-		</>);
+		</>
+	);
 }
-
-export default SwapDemo;
