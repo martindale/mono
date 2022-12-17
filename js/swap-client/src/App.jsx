@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
 import 'semantic-ui-css/semantic.min.css';
-import { Header, Icon, Image } from 'semantic-ui-react'
+import { Header, Image } from 'semantic-ui-react'
 import './App.css'
-import SwapDemo from './SwapDemo.jsx'
+import SwapDemo from './components/SwapDemo'
 
 function App() {
   const [count, setCount] = useState(0)
