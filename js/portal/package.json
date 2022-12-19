@@ -13,13 +13,15 @@
     "posttest": "npm run lint",
     "test": "mocha test/unit",
     "test:unit": "mocha test/unit",
-    "test:integration": "mocha test/integration",
+    "test:integration:swap": "mocha test/integration/api/v1/swap",
+    "test:swap": "mocha test/unit/core/swaps-lndToLnd.spec.js",
     "watch": "npm test -- --watch"
   },
   "dependencies": {
     "uuid": "^9.0.0",
     "web3": "^1.8.0",
-    "ws": "^8.10.0"
+    "ws": "^8.10.0",
+    "lightning": "6.2.6"
   },
   "devDependencies": {
     "c8": "^7.12.0",
@@ -43,7 +45,7 @@
     "recursive": true,
     "reporter": "spec",
     "slow": 1000,
-    "timeout": 60000,
+    "timeout": 2000,
     "ui": "bdd",
     "watch-files": [
       "lib/**/*.js",

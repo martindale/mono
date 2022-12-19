@@ -4,6 +4,7 @@ result*
 # Node.js
 coverage
 node_modules
+dist
 
 # Terraform
 .terraform
@@ -15,3 +16,12 @@ secure
 
 # IntelliJ
 .idea
+*.iml
+
+# Antora (docs)
+workspace
+docs/build
+docs/package-lock.json
+
+# Miscellaneous 
+.DS_Store

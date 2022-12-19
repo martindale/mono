@@ -1,0 +1,13 @@
+= Mono Docs
+
+To generate docs, run Antora
+
+[source, bash]
+----
+cd docs
+npm install
+node_modules/.bin/antora antora-playbook.yml
+----
+
+Follow link provided in the output
+

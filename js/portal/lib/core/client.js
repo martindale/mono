@@ -19,6 +19,8 @@ module.exports = class Client extends EventEmitter {
     this.pathname = props.pathname || '/api/v1/updates'
     this.websocket = null
 
+    this.clientId = 'uid' // TODO: formalize this!
+
     Object.seal(this)
   }
 
@@ -94,6 +96,68 @@ module.exports = class Client extends EventEmitter {
       quoteAsset: order.quoteAsset
     })
   }
+
+  /**
+   * Create the required state for an atomic swap
+   * @param {Swap|Object} swap The swap to open
+   * @param {Object} state Any state required to open the swap
+   * @returns {Swap}
+   */
+  swapOpen (swap, state) {
+    return this._request({
+      method: 'PUT',
+      path: '/api/v1/swap'
+    }, { swap, party: { state } })
+  }
+
+  /**
+   * Completes the atomic swap
+   * @param {Swap|Object} swap The swap to commit
+   * @returns {Promise<Void>}
+   */
+  swapCommit (swap) {
+    return this._request({
+      method: 'POST',
+      path: '/api/v1/swap'
+    }, { swap })
+  }
+
+  /**
+   * Abort the atomic swap optimistically and returns funds to owners
+   * @param {Swap|Object} swap The swap to abort
+   * @returns {Promise<Void>}
+   */
+  swapAbort (swap) {
+    return this._request({
+      method: 'DELETE',
+      path: '/api/v1/swap'
+    }, { swap })
+  }
+
+  // /**
+  //  * Exchanges swap data with the counterparty through the server
+  //  * @param {Swap} swap The swap data to be exchanged with the counterparty
+  //  * @returns {Promise<Swap>} The swap data of the counterparty
+  //  */
+  // exchangeSwap (swap, state) {
+  //   return new Promise((resolve, reject) => {
+  //     swap.state = state
+  //     const args = { method: 'POST', path: '/api/v1/swap' }
+  //     const onTimeOut = () => reject(Error('timed out'))
+  //     const timer = setTimeout(onTimeOut, 30000)
+  //     const onMessage = msg => {
+  //       if (msg.id && msg.id === swap.id) {
+  //         this.off('message', onMessage)
+  //         clearTimeout(timer)
+  //         resolve(msg)
+  //       }
+  //     }
+  //
+  //     this
+  //       .on('message', onMessage)
+  //       ._request(args, swap)
+  //   })
+  // }
 
   /**
    * Performs an HTTP request and returns the response
