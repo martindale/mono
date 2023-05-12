@@ -89,6 +89,20 @@ module.exports = class Store extends EventEmitter {
     return Promise.resolve(oldData)
   }
 
+  update (namespace, key, modifier) {
+    const instance = INSTANCES.get(this)
+    const namespaceMap = instance.namespaces[namespace]
+
+    if (namespaceMap != null && namespaceMap.has(key)) {
+      const data = Object.assign({}, namespaceMap.get(key))
+      this.emit('get', namespace, key, data)
+      return Promise.resolve(data)
+    } else {
+      this.emit('get', namespace, key)
+      return Promise.reject(new Error('not found'))
+    }
+  }
+
   /**
    * Deletes data from the store
    * @param {String} namespace The namespace of the data

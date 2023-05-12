@@ -1,0 +1,31 @@
+.icon { margin: 0 !important; font-size: 0.5rem;}
+
+.itemContainer {
+  text-align: left;
+  cursor: pointer;
+}
+.itemContainer div i {
+  margin-left: -1em;
+}
+.itemContainer div .right {
+  text-align: right;
+  justify-content: right;
+  margin-right: -3em;
+}
+
+.cancelBtn {
+  border: none !important;
+  background: linear-gradient(to right, #7e7dfe, #a351ff) !important;
+  -webkit-background-clip: text !important;
+          background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  padding-left: 0 !important;
+}
+
+.cancelBtn:hover {
+  background: linear-gradient(to right, #5f5ff5, #8d2aff) !important;
+  -webkit-background-clip: text !important;
+          background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  padding-left: 0 !important;
+}

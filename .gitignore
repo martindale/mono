@@ -2,12 +2,30 @@
 result*
 
 # Node.js
+coverage
+dist
 node_modules
+dist
 
 # Terraform
 .terraform
 .terraform.lock.hcl
 terraform.tfstate*
 
-# Secure content
-secure
+# IntelliJ
+.idea
+*.iml
+
+# Antora (docs)
+workspace
+docs/build
+docs/package-lock.json
+
+# Miscellaneous
+.DS_Store
+
+# Playnet-related stuff
+playnet
+!playnet/bitcoind*
+!playnet/geth*
+!playnet/lnd*

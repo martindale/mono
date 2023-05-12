@@ -3,13 +3,29 @@
  */
 
 const { EventEmitter } = require('events')
+const { createReadStream, stat } = require('fs')
 const http = require('http')
+const mime = require('mime')
+const { join, normalize } = require('path')
+const { URL } = require('url')
+const { WebSocketServer } = require('ws')
 
 /**
  * A weak-map storing private data for each instance of the class
  * @type {WeakMap}
  */
 const INSTANCES = new WeakMap()
+
+/**
+ * Forwards log events
+ * @param {*} args Arguments of the log event
+ * @returns {Void}
+ */
+function forwardLogEvent (self) {
+  return function (...args) {
+    self.emit('log', ...args)
+  }
+}
 
 /**
  * Exports an implementation of a server
@@ -19,18 +35,25 @@ module.exports = class Server extends EventEmitter {
   constructor (props = {}) {
     super()
 
-    INSTANCES.set(this, Object.seal({
-      hostname: props.hostname || process.env.PORTAL_HTTP_HOSTNAME || 'localhost',
-      port: props.port || process.env.PORTAL_HTTP_PORT || 0,
-      api: require('./api')(props.api || process.env.PORTAL_HTTP_API),
-      ctx: require('./context'),
-      server: http.createServer({
-        IncomingMessage: HttpRequest,
-        ServerResponse: HttpResponse
-      })
-    }))
-
     Object.seal(this)
+
+    const env = process.env
+    const hostname = props.hostname || env.PORTAL_HTTP_HOSTNAME || 'localhost'
+    const port = props.port || env.PORTAL_HTTP_PORT || 0
+    const api = require('./api')(props.api || env.PORTAL_HTTP_API)
+    const root = props.root || env.PORTAL_HTTP_ROOT
+    const ctx = require('./context')
+    const server = http.createServer({ IncomingMessage, ServerResponse })
+    const websocket = new WebSocketServer({ noServer: true })
+
+    INSTANCES.set(this, { hostname, port, api, root, ctx, server, websocket })
+
+    // Trigger the creation of a swap whenever an order match occurs
+    ctx.orderbooks.on('match', (...args) => ctx.swaps.fromOrders(...args))
+
+    // Propagate the log events
+    ctx.orderbooks.on('log', forwardLogEvent(this))
+    ctx.swaps.on('log', forwardLogEvent(this))
   }
 
   /**
@@ -58,6 +81,14 @@ module.exports = class Server extends EventEmitter {
   }
 
   /**
+   * Returns whether or not the server is listening for connections
+   * @returns {Boolean}
+   */
+  get isListening () {
+    return INSTANCES.get(this).server.listening
+  }
+
+  /**
    * Returns the current state of the server as a JSON string
    * @type {String}
    */
@@ -70,8 +101,15 @@ module.exports = class Server extends EventEmitter {
    * @returns {Object}
    */
   toJSON () {
-    const { hostname, port } = INSTANCES.get(this)
-    return { hostname, port }
+    const { hostname, port, root } = INSTANCES.get(this)
+    const url = `http://${hostname}:${port}`
+    return {
+      '@type': this.constructor.name,
+      hostname,
+      port,
+      root,
+      url
+    }
   }
 
   /**
@@ -87,9 +125,11 @@ module.exports = class Server extends EventEmitter {
         instance.port = instance.server.address().port
         instance.server
           .removeListener('error', reject)
-          .on('error', err => this.emit('error', err))
-          .on('request', (req, res) => this._onRequest(req, res))
+          .on('error', (...args) => this._onError(...args))
+          .on('request', (...args) => this._onRequest(...args))
+          .on('upgrade', (...args) => this._onUpgrade(...args))
 
+        this.emit('log', 'info', 'server.start', this)
         this.emit('start', this)
         resolve(this)
       })
@@ -106,10 +146,21 @@ module.exports = class Server extends EventEmitter {
     return new Promise((resolve, reject) => instance.server
       .once('error', reject)
       .once('close', () => {
+        this.emit('log', 'info', 'server.stop', this)
         this.emit('stop', this)
         resolve()
       })
       .close())
+  }
+
+  /**
+   * Handles any errors on the server
+   * @param {Error} err The error that occurred
+   * @returns {Void}
+   */
+  _onError (err) {
+    this.emit('log', 'error', 'server.error', err, this)
+    this.emit('error', err, this)
   }
 
   /**
@@ -128,69 +179,285 @@ module.exports = class Server extends EventEmitter {
     })
 
     // Emit all request/response errors as logs
-    req.on('error', err => this.emit('log', 'error', err, req, res))
-    res.on('error', err => this.emit('log', 'error', err, req, res))
+    req.on('error', err => this.emit('log', 'error', 'request.error', err, req, res))
+    res.on('error', err => this.emit('log', 'error', 'response.error', err, req, res))
 
     // Parse the URL and stash it for later use
     req.parsedUrl = new URL(req.url, `http://${req.headers.host}`)
+
+    // Route the request
+    const { api } = INSTANCES.get(this)
+
+    // Parse the path components in reverse order until a match is obtained
+    let route = req.parsedUrl.pathname
+    let routed = !!api[route]
+    while (!routed && route.length > 0) {
+      route = route.slice(0, route.lastIndexOf('/'))
+      routed = !!api[route]
+    }
+
+    if (routed) {
+      const handler = api[route]
+      if (typeof handler === 'function') {
+        req.handler = handler
+      } else if (typeof handler[req.method] === 'function') {
+        req.handler = handler[req.method]
+      } else {
+        res.statusCode = (typeof handler.UPGRADE === 'function') ? 404 : 405
+        res.end()
+        return
+      }
+
+      this._handleApi(req, res)
+    } else {
+      this._handleStatic(req, res)
+    }
+  }
+
+  /**
+   * Handles incoming HTTP upgrade requests
+   * @param {HttpRequest} req The client HTTP GET request
+   * @param {Socket} socket The network socket between the server and client
+   * @param {Buffer} head The first packet of the upgraded stream
+   * @returns {Void}
+   */
+  _onUpgrade (req, socket, head) {
+    // Parse the URL and stash it for later use
+    req.parsedUrl = new URL(req.url, `http://${req.headers.host}`)
+    const { pathname } = req.parsedUrl
+
+    // Parse the client identifier and stash it for later use
+    // The authorization header is "Basic <base-64 encoded username:password>"
+    // We split out the username and stash it on req.user
+    // const auth = req.headers.authorization
+    // const [algorithm, base64] = auth.split(' ')
+    // const [user, pass] = Buffer.from(base64, 'base64').toString().split(':')
+    // req.user = user
+    // TODO: Fix this once authentication is figured out
+    req.user = pathname.substr(pathname.lastIndexOf('/') + 1)
+
+    // Route the request
+    const { api, ctx, websocket } = INSTANCES.get(this)
+
+    // Parse the path components in reverse order until a match is obtained
+    let route = req.parsedUrl.pathname
+    let routed = !!api[route]
+    while (!routed && route.length > 0) {
+      route = route.slice(0, route.lastIndexOf('/'))
+      routed = !!api[route]
+    }
+
+    // If no route exists, then return 404 Not Found
+    if (!routed) {
+      socket.destroy(Error(`route "${req.parsedUrl.pathname}" not found!`))
+      return
+    }
+
+    // Execute the request handler or return an appropriate error
+    const handler = api[route]
+    if (typeof handler.UPGRADE === 'function') {
+      websocket.handleUpgrade(req, socket, head, ws => {
+        ws.on('close', (code, reason) => {
+          reason = reason.toString()
+          this.emit('log', 'info', 'ws.close', ws, { code, reason })
+        })
+
+        ws.user = req.user
+
+        // Override send to handle serialization and websocket nuances
+        ws._send = ws.send
+        ws.send = obj => {
+          return new Promise((resolve, reject) => {
+            const buf = Buffer.from(JSON.stringify(obj))
+            const opts = { binary: false }
+
+            this.emit('log', 'info', 'ws.send', ws, obj)
+            return ws._send(buf, opts, err => err ? reject(err) : resolve())
+          })
+        }
+
+        ws.toJSON = function () {
+          return { '@type': 'websocket', user: ws.user, route }
+        }
+        ws[Symbol.for('nodejs.util.inspect.custom')] = function () {
+          return this.toJSON()
+        }
+
+        this.emit('log', 'info', 'ws.open', ws)
+        handler.UPGRADE(ws, ctx)
+      })
+    } else {
+      socket.destroy(Error(`route ${route} does not support UPGRADE!`))
+    }
+  }
+
+  /**
+   * Handles serving API requests
+   * @param {IncomingMessage} req The incoming HTTP request
+   * @param {ServerResponse} res The outgoing HTTP response
+   * @returns {Void}
+   */
+  _handleApi (req, res) {
+    // Parse the client identifier and stash it for later use
+    // The authorization header is "Basic <base-64 encoded username:password>"
+    // We split out the username and stash it on req.user
+    const auth = req.headers.authorization
+    /* eslint-disable-next-line no-unused-vars */
+    const [algorithm, base64] = auth.split(' ')
+    /* eslint-disable-next-line no-unused-vars */
+    const [user, pass] = Buffer.from(base64, 'base64').toString().split(':')
+    req.user = user
 
     // Collect the incoming HTTP body
     const chunks = []
     req
       .on('data', chunk => chunks.push(chunk))
       .once('end', () => {
+        // Parse any incoming JSON object and stash it at req.json for later use
         const str = Buffer.concat(chunks).toString('utf8')
 
         if (str === '') {
-          req.json = null
+          req.json = {}
         } else {
           try {
-            // Parse the json and stash it for later use
             req.json = JSON.parse(str)
           } catch (e) {
             const err = new Error(`unexpected non-JSON response ${str}`)
-            this.emit('log', 'error', err, req, res)
-            res.statusCode = 400
-            return res.end()
+            res.send(err)
+            this.emit('log', 'error', 'http.api', err, req, res)
+            return
           }
         }
 
-        // Route the request
-        const { api, ctx } = INSTANCES.get(this)
+        this.emit('log', 'info', 'http.api', req)
 
-        // Parse the path components in reverse order until a match is obtained
-        let route = req.parsedUrl.pathname
-        let routed = !!api[route]
-        while (!routed && route.length > 0) {
-          route = route.slice(0, route.lastIndexOf('/'))
-          routed = !!api[route]
-        }
-
-        // If no route exists, then return 404 Not Found
-        if (!routed) {
-          res.statusCode = 404
-          return res.end()
-        }
-
-        // Execute the request handler or return an appropriate error
-        const handler = api[route]
-        if (typeof handler === 'function') {
-          handler(req, res, ctx)
-        } else if (typeof handler[req.method] === 'function') {
-          handler[req.method](req, res, ctx)
-        } else {
-          res.statusCode = 405
-          res.end()
-        }
+        const { ctx } = INSTANCES.get(this)
+        req.handler(req, res, ctx)
       })
   }
+
+  /**
+   * Handles serving static content
+   * @param {IncomingMessage} req The incoming HTTP request
+   * @param {ServerResponse} res The outgoing HTTP response
+   * @returns {Void}
+   */
+  _handleStatic (req, res) {
+    // ensure the asset to tbe served exists under the HTTP path
+    const { root } = INSTANCES.get(this)
+    const pathToAsset = normalize(join(root, req.parsedUrl.pathname))
+    if (!pathToAsset.startsWith(root)) {
+      // 403 Forbidden
+      res.statusCode = 403
+      res.end()
+      this.emit('log', 'error', 'http.static', req, res)
+      return
+    }
+
+    // recursive IIFE to serve the actual asset
+    const that = this
+    ;(function serveAsset (asset) {
+      stat(asset, (err, stat) => {
+        if (err != null) {
+          switch (err.code) {
+            case 'EACCES':
+            case 'EPERM':
+              // 401 Unauthorized
+              res.statusCode = 401
+              res.end()
+              that.emit('log', 'error', 'http.static', req, res)
+              return
+
+            case 'EMFILE':
+              // 500 Internal Server Error
+              // warning: reached max. fd limit!
+              // please run "ulimit -n <limit>" to allow opening more files.
+              res.statusCode = 500
+              res.end()
+              that.emit('log', 'error', 'http.static', req, res)
+              return
+
+            case 'ENOENT':
+            default:
+              // 404 Not Found
+              res.statusCode = 404
+              res.end()
+              that.emit('log', 'error', 'http.static', req, res)
+              return
+          }
+        }
+
+        // for directories, recursively serve up index.html
+        if (stat.isDirectory()) {
+          return serveAsset(join(asset, 'index.html'))
+        }
+
+        // symbolic links don't count as they can lead to paths outside of the
+        // HTTP path
+        if (!stat.isFile()) {
+          // 404 Not Found
+          res.statusCode = 404
+          res.end()
+          that.emit('log', 'error', 'http.static', req, res)
+          return
+        }
+
+        // 200 OK
+        res.statusCode = 200
+        res.setHeader('content-type', mime.getType(asset))
+        res.setHeader('content-length', stat.size)
+        res.setHeader('content-encoding', 'identity')
+        // that.emit('log', 'info', 'http.static', req, res)
+
+        const fsStream = createReadStream(asset)
+          .once('error', err => res.destroyed || res.destroy(err))
+          .pipe(res)
+          .once('error', err => fsStream.destroyed || fsStream.destroy(err))
+      })
+    }(pathToAsset))
+  }
 }
 
 /**
  * A wrapper to improve debugging
- * @extends IncomingMessage
+ * @extends {IncomingMessage}
  */
-class HttpRequest extends http.IncomingMessage {
+class IncomingMessage extends http.IncomingMessage {
+  /**
+   * Returns the current state of the instance
+   * @type {String}
+   */
+  [Symbol.for('nodejs.util.inspect.custom')] () {
+    return this.toJSON()
+  }
+
+  /**
+   * The unique identifier of the client; returns the HTTP url of the client
+   * @returns {String}
+   */
+  get clientId () {
+    const address = this.socket.address()
+    return `${address.address}:${address.port}`
+  }
+
+  /**
+  * Returns the current state of the instance
+  * @returns {Object}
+  */
+  toJSON () {
+    const { method, url, headers, json, user } = this
+    const obj = { '@type': 'HttpRequest', method, url, headers }
+    if (json != null) obj.json = json
+    if (user != null) obj.user = user
+    return obj
+  }
+}
+
+/**
+ * A wrapper to improve debugging
+ * @extends {ServerResponse}
+ */
+class ServerResponse extends http.ServerResponse {
   /**
    * Returns the current state of the instance
    * @type {String}
@@ -204,37 +471,35 @@ class HttpRequest extends http.IncomingMessage {
   * @returns {Object}
   */
   toJSON () {
-    return {
-      type: this.constructor.name,
-      method: this.method,
-      url: this.url,
-      headers: this.headers
-    }
+    const { statusCode, json } = this
+    const headers = Object.assign({}, this.getHeaders())
+    const obj = { '@type': 'HttpResponse', statusCode, headers }
+    if (json != null) obj.json = json
+    return obj
   }
-}
 
-/**
- * A wrapper to improve debugging
- * @extends ServerResponse
- */
-class HttpResponse extends http.ServerResponse {
   /**
-   * Returns the current state of the instance
-   * @type {String}
+   * Sends the specified data to the socket and ends the response
+   * @param {Error|Object} data The data to be sent
+   * @returns {Void}
    */
-  [Symbol.for('nodejs.util.inspect.custom')] () {
-    return this.toJSON()
-  }
-
-  /**
-  * Returns the current state of the instance
-  * @returns {Object}
-  */
-  toJSON () {
-    return {
-      type: this.constructor.name,
-      statusCode: this.statusCode,
-      headers: this.headers
+  send (data) {
+    if (this.headersSent) {
+      const level = data instanceof Error ? 'error' : 'info'
+      this.emit('log', level, 'http.api', data, this.req, this)
+      return
     }
+
+    this.json = data instanceof Error
+      ? { message: data.message }
+      : data
+    this.statusCode = data instanceof Error ? 400 : 200
+
+    const buf = JSON.stringify(this.json)
+    this.setHeader('content-type', 'application/json')
+    this.setHeader('content-length', Buffer.byteLength(buf))
+    this.setHeader('content-encoding', 'identity')
+    this.end(buf)
+    this.socket.server.emit('log', 'info', 'http.api', this.req, this)
   }
 }

@@ -8,7 +8,7 @@ terraform {
   }
 
   required_providers {
-    equinix = { source = "nixpkgs/equinix" }
+    equinix = { source = "equinix/equinix" }
   }
 }
 

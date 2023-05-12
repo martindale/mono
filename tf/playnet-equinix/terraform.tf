@@ -9,7 +9,7 @@ terraform {
 
   required_providers {
     cloudflare = { source = "cloudflare/cloudflare" }
-    equinix    = { source = "nixpkgs/equinix" }
+    equinix    = { source = "equinix/equinix" }
     external   = { source = "hashicorp/external" }
     null       = { source = "hashicorp/null" }
     tls        = { source = "hashicorp/tls" }

@@ -3,7 +3,7 @@
 ################################################################################
 
 locals {
-  services  = ["goerli", "ropsten"]
+  services  = []
   dns_names = [for name in local.services : "${name}.node.${var.environment}"]
   dns_records = { for name in local.dns_names : name => {
     zone_id = var.cloudflare_zone_id

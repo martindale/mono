@@ -12,7 +12,6 @@ resource "aws_iam_group_membership" "administrators" {
   group = aws_iam_group.administrators.name
   users = [
     aws_iam_user.anand.name,
-    aws_iam_user.eric.name,
     aws_iam_user.manoj.name,
     aws_iam_user.jack.name,
   ]
@@ -31,11 +30,9 @@ resource "aws_iam_group_membership" "developers" {
     aws_iam_user.alexey.name,
     aws_iam_user.anand.name,
     aws_iam_user.casey.name,
-    aws_iam_user.eric.name,
     aws_iam_user.farid.name,
     aws_iam_user.jack.name,
     aws_iam_user.manoj.name,
-    aws_iam_user.neil.name,
     aws_iam_user.victor.name,
   ]
 }
@@ -63,12 +60,6 @@ resource "aws_iam_user" "casey" {
   tags = { Name = "Casey Bowman" }
 }
 
-resource "aws_iam_user" "eric" {
-  name = "eric"
-  path = "/contractors/"
-  tags = { Name = "Eric Martindale" }
-}
-
 resource "aws_iam_user" "farid" {
   name = "farid"
   path = "/contractors/"
@@ -85,12 +76,6 @@ resource "aws_iam_user" "manoj" {
   name = "manoj"
   path = "/employees/"
   tags = { Name = "Manoj Duggirala" }
-}
-
-resource "aws_iam_user" "neil" {
-  name = "neil"
-  path = "/contractors/"
-  tags = { Name = "Neil Player" }
 }
 
 resource "aws_iam_user" "victor" {

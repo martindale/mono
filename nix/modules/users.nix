@@ -76,14 +76,6 @@ in
         ];
       } //
 
-      # Eric Martindale
-      createNormalUser "eric" {
-        extraGroups = [ "sudo" "wheel" ];
-        openssh.authorizedKeys.keys = [
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJg4GT0PvkEI+J8wMIU1MYYHowXOPBgL0b7hmZue0iuF eric@mainstay"
-        ];
-      } //
-
       # Farid Azizov
       createNormalUser "farid" {
         extraGroups = [ "sudo" "wheel" ];

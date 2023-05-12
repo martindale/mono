@@ -1,0 +1,95 @@
+name: Pull Request
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+
+env:
+  DEPLOY_HOST: node.playnet.portaldefi.zone
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v3
+
+    - name: Install Nix
+      uses: cachix/install-nix-action@v20
+      with:
+        nix_path: nixpkgs=channel:nixos-22.05
+        extra_nix_config: "system-features = nixos-test benchmark big-parallel kvm"
+
+    - name: Setup binary cache
+      uses: cachix/cachix-action@v12
+      with:
+        name: portaldefi-demo
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+    - name: Build PortalDefi packages
+      run: nix-build nix -A portaldefi
+
+    - name: Run unit tests
+      run: nix-shell --run "npm run test:unit"
+      working-directory: ./js/portal
+
+    - name: Run integration tests
+      run: nix-shell --run "npm run test:integration"
+      working-directory: ./js/portal
+
+    # TODO: Fix these for playnet
+    # - name: Run PortalOS tests
+    #   run: nix-build nix -A portaldefi-integration-tests
+    #   if: matrix.os != 'macOS-latest'
+
+  deploy:
+    needs: build
+    runs-on: [ubuntu-latest]
+    if: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v3
+
+    - name: Install Nix
+      uses: cachix/install-nix-action@v20
+      with:
+        nix_path: nixpkgs=channel:nixos-22.05
+        extra_nix_config: "system-features = nixos-test benchmark big-parallel kvm"
+
+    - name: Setup binary cache
+      uses: cachix/cachix-action@v12
+      with:
+        name: portaldefi-demo
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+    - name: Build PortalOS closure
+      run: |
+        nix-build ./default.nix
+        system_path=$(nix-build ./default.nix)
+        echo "SYSTEM_PATH=$system_path" > $GITHUB_OUTPUT
+      id: build-machine-closure
+
+    - name: Setup NixOS deploy env
+      run: |
+        ssh_key=$(mktemp)
+        chmod 600 $ssh_key
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > $ssh_key
+        echo "SSH_KEY_PATH=$ssh_key" > $GITHUB_OUTPUT
+      id: deploy_env
+
+    - name: Deploy closure on node.playnet.portaldefi.zone
+      run: |
+        nix copy -s --to "ssh://$DEPLOY_HOST" $SYSTEM_PATH
+        ssh $NIX_SSHOPTS "$DEPLOY_HOST" "$SYSTEM_PATH"/activate
+      env:
+        SSH_KEYFILE: ${{ steps.deploy_env.outputs.SSH_KEY_PATH }}
+        SYSTEM_PATH: ${{ steps.build-machine-closure.outputs.SYSTEM_PATH }}
+        NIX_SSHOPTS: "-o StrictHostKeyChecking=no -i ${{ steps.deploy_env.outputs.SSH_KEY_PATH }} -l root"

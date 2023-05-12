@@ -3,8 +3,13 @@
  * @file Starts the Portal server
  */
 
+const { inspect } = require('util')
 const Context = require('../lib/core/context')
 const Server = require('../lib/core/server')
+
+function log (obj) {
+  return inspect(obj, { showHidden: false, depth: null, colors: true })
+}
 
 /**
  * The main() IIFE
@@ -18,10 +23,8 @@ const Server = require('../lib/core/server')
   }
 
   server
-    .on('start', Context.log.info)
     .on('error', Context.log.error)
-    .on('log', (level, ...args) => Context.log[level](...args))
-    .on('stop', Context.log.info)
+    .on('log', (level, ...args) => Context.log[level](level, ...(args.map(log)), '\n\n\n'))
     .start()
 
   process

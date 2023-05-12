@@ -1,0 +1,73 @@
+.marginBottom {
+  margin-bottom: 2rem !important;
+}
+.homeContainer {
+  color:inherit;
+}
+.menu {
+  margin: 0 !important;
+  width: 100vw;
+  height: 4em !important;
+  background-color: black !important;
+}
+.allSystemOk{
+  color: lightgreen !important;
+}
+.disconnected{
+  color: lightgoldenrodyellow !important;
+}
+
+.column { 
+  width: 500px !important; 
+  margin-top: 2em;
+}
+
+.login-dropdown {
+  background-color: black;
+  color: black;
+}
+.login-dropdown .item {
+  background-color: black;
+  color: black;
+}
+
+span.coinType {
+  padding-left: 0.85em;
+  /* margin-left: 1rem !important; */
+}
+.coinType {
+  text-align: right;
+  color: white !important;
+  border-radius: 8px !important;
+}
+.coinType i {
+  text-align: right;
+  margin-right: -1rem !important;
+  color: white !important;
+  border-radius: 8px !important;
+}
+.coinType>div {
+  background-color: #202020 !important;
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: bold;
+}
+.coinType>div:hover {
+  background-color: #2e2e2e !important;
+}
+.swapCoinSelect div {
+  text-align: right !important;
+  background-color: #202020 !important;
+  color: white !important;
+}
+.swapCoinSelect>div:first-child { 
+  padding: 0.7em !important;
+  font-size: 1.2em !important;
+  font-weight: bold !important;
+  align-items: center;
+  border-radius: 1em !important;
+}
+.swapCoinSelect>div:first-child:hover,
+.swapCoinSelect div:hover {
+  background-color: #3a3a3a !important;
+}

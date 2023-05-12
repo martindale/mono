@@ -1,0 +1,47 @@
+= Introduction
+:navtitle: Introduction
+
+
+
+Swap Client Demo *{page-component-display-version}*
+
+[cols="1,1"]
+|===
+a|
+
+[mermaid, format="svg"]
+----
+include::example$diagrams/mermaid-sequence-diagram.mermaid[]
+----
+a|
+[mermaid, format="svg"]
+----
+include::example$diagrams/mermaid-sequence-diagram2.mermaid[]
+----
+|===
+The Lightning Swap demo runs with two users _Alice_ and _Carol_ on two separate lightning networks, _Lightning Network 1_ and _Lightning Network 2_.
+
+== Polar
+
+We use Polar to run the lightning and bitcoin nodes in regtest mode.
+
+=== Who is Bob?
+Polar names the nodes automatically Alice, Bob, and Carol. The intermediate lightning node in each network is _Bob_. Bob's node represents the Portal coordinator's node with which Alice and Carol each have a channel on each network, for a total of four channels.
+
+=== Who is Alice?
+Alice initially does not know the swap _pre-image_, or _secret_. In the atomic swap, she is the _secretSeeker_
+
+Alice creates an invoice in Lightning Network 1 and receives payment there from Carol.
+
+=== Who is Carol?
+
+Carol knows the swap pre-image, or secret. In the atomic swap, she is the _secretHolder_
+
+Carol creates an invoice in Lightning Network 2 and receives payment there from Alice.
+
+== How do I set up Polar?
+
+== How do I set up the Portal Server?
+
+== How do I set up the Swap Client?
+

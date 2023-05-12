@@ -5,7 +5,6 @@ with lib;
 let
   cfg = config.portal;
 
-
 in
 {
   options.portal.nginx = {
@@ -18,14 +17,7 @@ in
     hosts = mkOption {
       description = "A set of hosts being TLS-terminated, keyed by service";
       type = types.attrs;
-      default = {
-        goerli = {
-          locations."/".proxyPass = "http://localhost:${toString config.services.geth.goerli.http.port}/";
-        };
-        ropsten = {
-          locations."/".proxyPass = "http://localhost:${toString config.services.geth.ropsten.http.port}/";
-        };
-      };
+      default = {};
     };
   };
 
@@ -34,7 +26,7 @@ in
 
     security.acme = {
       acceptTerms = true;
-      email = cfg.nginx.email;
+      defaults.email = cfg.nginx.email;
       certs."${cfg.nodeFqdn}" = {
         webroot = "/var/lib/acme/acme-challenge";
         extraDomainNames =
@@ -60,7 +52,7 @@ in
         "${cfg.nodeFqdn}" = {
           forceSSL = true;
           enableACME = true;
-          locations."/".proxyPass = "http://${cfg.server.hostname}:${toString cfg.server.port}/";
+          locations."/".proxyPass = "http://${config.portaldefi.portal.server.hostname}:${toString config.portaldefi.portal.server.port}/";
         };
       } // mapAttrs' (name: config: nameValuePair "${name}.${cfg.nodeFqdn}" ({
         forceSSL = true;

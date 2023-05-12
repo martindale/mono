@@ -2,37 +2,31 @@
 
 with lib;
 
+let
+  cfg = config.services.geth.default;
+
+in
 {
   # TODO: what should be configurable
-  options.portal.ethereum = {};
+  options.portal.ethereum = {
+    swapContractAddress = mkOption {
+      description = "The address of the Swap contract";
+      type = types.str;
+      default = "0xe2f24575862280cf6574db5b9b3f8fe0be84dc62";
+    };
+  };
 
   config = {
-    services.geth = {
-      goerli = rec {
-        enable = true;
-        port = 30000;
-        network = "goerli";
-        http.enable = true;
-        http.port = config.services.geth.goerli.port + 1;
-        websocket.enable = true;
-        websocket.port = config.services.geth.goerli.port + 2;
-        websocket.apis = ["net" "eth"];
-        metrics.enable = true;
-        metrics.port = config.services.geth.goerli.port + 9;
-      };
+    services.geth.default = {
+      enable = true;
+      extraArgs = [ "--dev" ];
+      port = 30303;
 
-      ropsten = rec {
-        enable = true;
-        port = 30010;
-        network = "ropsten";
-        http.enable = true;
-        http.port = config.services.geth.ropsten.port + 1;
-        websocket.enable = true;
-        websocket.port = config.services.geth.ropsten.port + 2;
-        websocket.apis = ["net" "eth"];
-        metrics.enable = true;
-        metrics.port = config.services.geth.ropsten.port + 9;
-      };
+      http.enable = true;
+      http.port = 8545;
+
+      websocket.enable = true;
+      websocket.port = 8546;
     };
   };
 }

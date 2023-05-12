@@ -1,0 +1,8 @@
+.signin {
+  position: absolute;
+  top: 100px;
+  right: 100px;
+}
+.signInModal, .signInModal div{
+  background-color: black !important;
+}
