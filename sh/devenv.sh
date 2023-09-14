@@ -1,5 +1,3 @@
-export PLAYNET_ROOT="${PORTAL_ROOT}/playnet"
-
 ############################################################################
 # Functions/Helpers
 ############################################################################
@@ -79,6 +77,9 @@ function on_exit() {
   echo "- terminating bitcoind for portal..."
   __run_as_user portal bitcoind stop >/dev/null
 
+  echo "- restoring ctrl + c functionality"
+  stty intr ^C
+
   echo "terminated developer environment..."
 }
 trap on_exit EXIT
@@ -89,7 +90,7 @@ set -eu
 readonly RESET_STATE=$([[ -f $PLAYNET_ROOT/.delete_to_reset ]] && echo false || echo true)
 readonly LND_WALLET_FUNDS=10       # in btc
 readonly LND_CHANNEL_FUNDS=1000000 # in satoshis
-readonly BITCOIND_BLOCKS=$(((100 + (($LND_WALLET_FUNDS * 2 + 49) / 50))))
+readonly BITCOIND_BLOCKS=$((100 + ((LND_WALLET_FUNDS * 2 + 49) / 50)))
 
 # Cleanup prior state, if needed
 if [[ $RESET_STATE == "true" ]]; then
@@ -104,23 +105,23 @@ echo "starting developer environment..."
 
 echo "- starting bitcoind for portal..."
 bitcoind -conf="$PLAYNET_ROOT/bitcoind.portal.conf" \
-         -datadir="$PLAYNET_ROOT/state/portal/bitcoind" >/dev/null
+  -datadir="$PLAYNET_ROOT/state/portal/bitcoind" >/dev/null
 
 echo "- starting geth for portal..."
 nohup geth --dev \
-           --config "$PLAYNET_ROOT/geth.portal.toml" \
-           --datadir "$PLAYNET_ROOT/state/portal/geth/data" >$PLAYNET_ROOT/log/portal/geth.log 2>&1 &
+  --config "$PLAYNET_ROOT/geth.portal.toml" \
+  --datadir "$PLAYNET_ROOT/state/portal/geth/data" >$PLAYNET_ROOT/log/portal/geth.log 2>&1 &
 
 echo "- starting lnd for alice..."
 nohup lnd --configfile "$PLAYNET_ROOT/lnd.alice.conf" \
-          --lnddir "$PLAYNET_ROOT/state/alice/lnd" \
-          --noseedbackup >$PLAYNET_ROOT/log/alice/lnd.log 2>&1 &
+  --lnddir "$PLAYNET_ROOT/state/alice/lnd" \
+  --noseedbackup >$PLAYNET_ROOT/log/alice/lnd.log 2>&1 &
 while ! $(__run_as_user alice lnd getinfo >/dev/null 2>&1); do sleep 1; done
 
 echo "- starting lnd for bob..."
 nohup lnd --configfile "$PLAYNET_ROOT/lnd.bob.conf" \
-          --lnddir "$PLAYNET_ROOT/state/bob/lnd" \
-          --noseedbackup >$PLAYNET_ROOT/log/bob/lnd.log 2>&1 &
+  --lnddir "$PLAYNET_ROOT/state/bob/lnd" \
+  --noseedbackup >$PLAYNET_ROOT/log/bob/lnd.log 2>&1 &
 while ! $(__run_as_user bob lnd getinfo >/dev/null 2>&1); do sleep 1; done
 
 echo "- creating a new geth wallet for alice..."
@@ -205,7 +206,7 @@ fi
 ############################################################################
 # Developer Environment
 ############################################################################
-export PORTAL_ETHEREUM_URL="http://$(cat $PLAYNET_ROOT/geth.portal.toml | grep -oP "(?<=HTTPHost = ')[^']+" | tr -d "'"):$(cat $PLAYNET_ROOT/geth.portal.toml | grep -oP "(?<=HTTPPort = )[0-9]+" | tr -d ' ')"
+export PORTAL_ETHEREUM_URL="http://$(awk -F "= " '/HTTPHost/ {gsub(/[\47]/, "", $2); print $2}' $PLAYNET_ROOT/geth.portal.toml):$(awk -F "= " '/HTTPPort/ {gsub(/[\47]/, "", $2); print $2}' $PLAYNET_ROOT/geth.portal.toml)"
 export PORTAL_ETHEREUM_CHAINID=$(__run_as_user portal geth attach --exec "eth.chainId()" | tr -d '"')
 export PORTAL_ETHEREUM_CONTRACTS="$PLAYNET_ROOT/contracts.json"
 

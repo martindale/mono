@@ -1,8 +1,11 @@
-{ config, lib, modulesPath, options, pkgs, ... }:
-
-with lib;
-
 {
+  config,
+  lib,
+  modulesPath,
+  pkgs,
+  ...
+}:
+with lib; {
   imports = [
     "${toString modulesPath}/profiles/minimal.nix"
   ];
@@ -50,7 +53,7 @@ with lib;
     networking = {
       hostName = mkForce config.portal.nodeName;
       domain = config.portal.nodeDomain;
-      nameservers = [ "1.1.1.1" "1.0.0.1" ];
+      nameservers = ["1.1.1.1" "1.0.0.1"];
     };
 
     security.sudo = {
@@ -61,9 +64,13 @@ with lib;
     services.openssh = {
       enable = true;
       allowSFTP = false;
-      passwordAuthentication = false;
-      /* kbdInteractiveAuthentication = false; */
-      hostKeys = [ { type = "ed25519"; path = "/etc/ssh/ed25519_key"; } ];
+      hostKeys = [
+        {
+          type = "ed25519";
+          path = "/etc/ssh/ed25519_key";
+        }
+      ];
+      settings.PasswordAuthentication = false;
     };
 
     time.timeZone = "UTC";

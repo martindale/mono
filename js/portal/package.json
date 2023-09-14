@@ -1,19 +1,20 @@
 {
-  "name": "portal",
+  "name": "@portaldefi/peer",
   "version": "0.0.0",
-  "description": "The Portal backend",
+  "description": "The Portal Peer",
   "bin": {
     "portal": "bin/portal.js"
   },
+  "main": "lib/core/server.js",
   "scripts": {
     "clean": "rm -rf coverage node_modules package-lock.json",
+    "debug": "DEBUG=* npm start",
     "coverage": "c8 mocha",
     "lint": "npm run lint:js && npm run lint:sol",
     "lint:js": "standard",
     "lint:sol": "solhint contracts/*.sol",
     "lint-fix": "npm run lint:js -- --fix && npm run lint:sol --fix",
     "posttest": "npm run lint",
-    "debug": "DEBUG=* node bin/portal",
     "start": "node bin/portal",
     "test": "mocha test/unit",
     "test:unit": "mocha test/unit",
@@ -22,6 +23,7 @@
     "watch": "npm test -- --watch"
   },
   "dependencies": {
+    "@portaldefi/core": "file:../core",
     "@ethersproject/bignumber": "^5.7.0",
     "debug": "^4.3.4",
     "ethereumjs-common": "^1.5.2",
@@ -30,12 +32,12 @@
     "level": "^8.0.0",
     "lightning": "^6.2.6",
     "mime": "^3.0.0",
-    "uuid": "^9.0.0",
-    "web3": "^1.8.2",
     "web3melnx": "github:melnx/web3.js#0.20.7",
     "ws": "^8.10.0"
   },
   "devDependencies": {
+    "@portaldefi/app": "file:../app",
+    "@portaldefi/sdk": "file:../sdk",
     "c8": "^7.12.0",
     "chai": "^4.3.7",
     "keythereum": "^2.0.0",
@@ -71,16 +73,18 @@
   },
   "standard": {
     "globals": [
+      "debug",
+
       "after",
       "afterEach",
-      "artifacts",
       "before",
       "beforeEach",
-      "context",
       "describe",
       "expect",
       "it",
-      "xit"
+
+      "fetch",
+      "WebSocket"
     ]
   }
 }

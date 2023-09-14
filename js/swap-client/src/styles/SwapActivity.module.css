@@ -1,0 +1,19 @@
+.activitiesContainer {
+  background-color: #101010;
+  padding: 2em;
+  border-radius: 2rem;
+  width: 420px;
+  margin: auto;
+}
+.activitiesHeader {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center;
+  margin-bottom: 2em;
+}
+.blankMessage {
+  width: 100%;
+  text-align: center;  
+  margin: 5em 0 !important;
+  color: #444444;
+}

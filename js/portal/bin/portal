@@ -4,7 +4,6 @@
  */
 
 const { inspect } = require('util')
-const Context = require('../lib/core/context')
 const Server = require('../lib/core/server')
 
 function log (obj) {
@@ -18,13 +17,13 @@ function log (obj) {
 ;(function main () {
   const server = new Server()
   const logAndExit = event => err => {
-    Context.log.error(event, err)
+    console.error(event, err)
     process.exit(1)
   }
 
   server
-    .on('error', Context.log.error)
-    .on('log', (level, ...args) => Context.log[level](level, ...(args.map(log)), '\n\n\n'))
+    .on('error', console.error)
+    .on('log', (level, ...args) => console.error(level, ...(args.map(log))))
     .start()
 
   process

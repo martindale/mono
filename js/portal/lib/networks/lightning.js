@@ -201,7 +201,11 @@ module.exports = class Lightning extends Network {
           // 0: Numeric error code (HTTP status code)
           // 1: String error code
           // 2: JSON object with an `err` property
-          throw Error(err[2].err.details)
+          if (err.length < 3) {
+            throw Error(err[1])
+          } else {
+            throw Error(err[2].err.details)
+          }
         } else {
           throw err
         }

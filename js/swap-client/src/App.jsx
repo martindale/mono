@@ -1,21 +1,20 @@
 import { useState } from 'react'
-import { Provider } from 'react-redux';
-import { 
-  Route, 
-  BrowserRouter as Router, 
-  Routes } from 'react-router-dom';
-import 'semantic-ui-css/semantic.min.css';
+import {
+  Route,
+  BrowserRouter as Router,
+  Routes
+} from 'react-router-dom'
 import './App.css'
-import { Swap } from './components/Swap';
-import { SwapActivity } from './components/SwapActivity/SwapActivity';
-import { store } from './store';
-import { SwapHome } from './components/SwapHome';
+import { Swap } from './components/Swap'
+import { SwapActivity } from './components/SwapActivity/SwapActivity'
+import { SwapHome } from './components/SwapHome'
+import { AppContext } from '../context'
 
-function App() {
-  const [count, setCount] = useState(0)
+function App () {
+  const [context, setContext] = useState({})
 
   return (
-    <Provider store={store}>
+    <AppContext.Provider value={{ context, setContext }}>
       <Router>
         <Routes>
           <Route path='' element={<SwapHome />} />
@@ -24,7 +23,7 @@ function App() {
           </Route>
         </Routes>
       </Router>
-    </Provider>
+    </AppContext.Provider>
   )
 }
 

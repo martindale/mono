@@ -2,10 +2,10 @@
  * @file Behavioral specification for the HTTP client and server
  */
 
+const Server = require('../../..')
+const Client = require('@portaldefi/sdk')
 const { expect } = require('chai')
 const { join } = require('path')
-const Client = require('../../../lib/core/client')
-const Server = require('../../../lib/core/server')
 
 /**
  * Endpoints exposed by the server expected to be seen publicly
@@ -14,7 +14,6 @@ const Server = require('../../../lib/core/server')
 const ENDPOINTS = [
   '/api/v1/updates',
   '/api/v1/alive',
-  '/api/v1/fees',
   '/api/v1/orderbook/limit',
   '/api/v1/swap'
 ]
@@ -39,13 +38,10 @@ describe('Client/Server', function () {
     })
 
     it('must instantiate a client with reasonable defaults', function () {
+      const props = { network: { id: 'client' } }
       let client = null
-
-      expect(() => { client = new Client({ id: 'client' }) }).to.not.throw()
-
+      expect(() => { client = new Client(props) }).to.not.throw()
       expect(client).to.be.an.instanceof(Client)
-      expect(client.hostname).to.be.a('string').that.equals('localhost')
-      expect(client.port).to.be.a('number').that.equals(80)
     })
   })
 
@@ -56,36 +52,26 @@ describe('Client/Server', function () {
      * Instantiate a Server and a Client for this section of the test suite
      * @returns {Promise} Resolves when the client/server are ready for use
      */
-    before(function () {
-      return new Server({ api: join(__dirname, 'fixtures') })
-        .start()
-        .then(instance => {
-          const { hostname, port } = instance
-          server = instance
-          client = new Client({
-            id: 'client',
-            hostname,
-            port,
-            pathname: '/fixtures'
-          })
-          return client.connect()
-        })
+    before(async function () {
+      server = new Server({ api: join(__dirname, 'fixtures') })
+      await server.start()
+
+      const { hostname, port } = server
+      const network = { id: 'client', hostname, port, pathname: '/fixtures' }
+      client = new Client({ network })
+      await client.start()
     })
 
     /**
      * Stop the client/server instances at the end of the test suite
      * @returns {Promise} Resolves once the server has stopped
      */
-    after(function (done) {
-      client
-        .once('disconnected', () => server
-          .once('stop', instance => {
-            server = null
-            client = null
-            done()
-          })
-          .stop())
-        .disconnect()
+    after(async function () {
+      await client.stop()
+      await server.stop()
+
+      server = null
+      client = null
     })
 
     /**
@@ -111,7 +97,7 @@ describe('Client/Server', function () {
             expect(data).to.be.an('object').that.deep.equals(obj)
             done()
           })
-          ._send(obj)
+          .send(obj)
       })
 
       /**
@@ -132,7 +118,7 @@ describe('Client/Server', function () {
       it('must send/receive JSON data over HTTP', function () {
         const args = { method: 'GET', path: '/fixtures/echo' }
         const data = { foo: 'bar', bar: 'baz' }
-        return client._request(args, data)
+        return client.request(args, data)
           .then(json => expect(json).to.be.an('object').that.deep.equals(data))
       })
 
@@ -146,7 +132,7 @@ describe('Client/Server', function () {
         ].forEach(method => it(method, function () {
           const args = { method, path: '/fixtures/http_methods' }
           const data = { foo: 'bar', bar: 'baz' }
-          return client._request(args, data)
+          return client.request(args, data)
             .then(json => expect(json).to.be.an('object').that.deep.equals({
               method,
               json: data
@@ -168,7 +154,7 @@ describe('Client/Server', function () {
     describe('Error Handling', function () {
       it('must return 404 for unknown/unexpected endpoints', function () {
         const args = { method: 'GET', path: '/fixtures/unknown/endpoint' }
-        return client._request(args)
+        return client.request(args)
           .then(json => { throw new Error('unexpected success!') })
           .catch(err => {
             expect(err).to.be.an.instanceof(Error)
@@ -179,7 +165,7 @@ describe('Client/Server', function () {
 
       it('must return 405 for unknown/unexpected HTTP methods', function () {
         const args = { method: 'PUT', path: '/fixtures/http_methods' }
-        return client._request(args)
+        return client.request(args)
           .then(json => { throw new Error('unexpected success!') })
           .catch(err => {
             expect(err).to.be.an.instanceof(Error)

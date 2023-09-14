@@ -78,7 +78,7 @@ module "nixos" {
     { config, lib, ... }: {
       imports = [
         ${path.module}/nix/node/configuration.nix
-        ${path.module}/../../nix/configuration.nix
+        ${path.module}/../../nix/hosts/portalos/configuration.nix
       ];
 
       # Fixes for the unused NICs on c3.small machines, as suggested by Equinix

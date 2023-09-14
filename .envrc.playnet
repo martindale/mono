@@ -1,0 +1,4 @@
+# Expose Playnet variables
+export PORTAL_ETHEREUM_URL="http://$(awk -F "= " '/HTTPHost/ {gsub(/[\47]/, "", $2); print $2}' $PLAYNET_ROOT/geth.portal.toml):$(awk -F "= " '/HTTPPort/ {gsub(/[\47]/, "", $2); print $2}' $PLAYNET_ROOT/geth.portal.toml)"
+export PORTAL_ETHEREUM_CHAINID="0x539"
+export PORTAL_ETHEREUM_CONTRACTS="$PLAYNET_ROOT/contracts.json"

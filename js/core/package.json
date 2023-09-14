@@ -1,0 +1,64 @@
+{
+  "name": "@portaldefi/core",
+  "version": "0.0.0",
+  "description": "The core types for PortalDefi",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf coverage node_modules package-lock.json",
+    "coverage": "c8 mocha",
+    "lint": "standard",
+    "lint-fix": "standard --fix",
+    "posttest": "npm run lint",
+    "test": "mocha",
+    "watch": "mocha --watch"
+  },
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "events": "^3.3.0",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "c8": "^7.12.0",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "standard": "^17.0.0"
+  },
+  "c8": {
+    "check-coverage": true,
+    "report-dir": "coverage",
+    "reporter": [
+      "html",
+      "text"
+    ]
+  },
+  "mocha": {
+    "diff": true,
+    "extension": [
+      "spec.js"
+    ],
+    "recursive": true,
+    "reporter": "spec",
+    "slow": 1000,
+    "timeout": 2000,
+    "ui": "bdd",
+    "watch-files": [
+      "**/*.js",
+      "**/*.spec.js"
+    ]
+  },
+  "standard": {
+    "globals": [
+      "after",
+      "afterEach",
+      "before",
+      "beforeEach",
+      "context",
+      "describe",
+      "expect",
+      "it"
+    ]
+  }
+}

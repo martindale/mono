@@ -5,7 +5,7 @@ set -euo pipefail
 
 DERIVATION=$(nix-instantiate --show-trace "$@")
 
-if [[ "$DERIVATION" != /nix/store/*.drv ]]; then
+if [[ $DERIVATION != /nix/store/*.drv ]]; then
   echo "{\"error\":\"${DERIVATION}\"}"
 else
   echo "{\"path\":\"${DERIVATION}\"}"

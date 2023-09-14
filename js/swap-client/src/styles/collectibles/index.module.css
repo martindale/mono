@@ -1,0 +1,31 @@
+.nft-card {
+  background-color: #3A3A3A;
+  border-radius: 1em;
+  cursor: pointer;
+}
+.nft-card img{
+  border-top-left-radius: 1em;
+  border-top-right-radius: 1em;
+}
+.nft-card h4{
+  margin:0.3em;
+}
+.ordinal-btn {
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgb(107, 107, 107);
+  border-radius: 0.5em;
+  padding: 0.3em;
+  width: fit-content;
+}
+.ordinal-btn img { margin-right: 0.3em; }
+.recipient-addr {
+  background-color: black;
+  width:97%;
+  border-color: grey;
+  border-radius: 0.4em;
+  border: 1px solid grey;
+  padding: 0.5em 0.2em;
+  font-size: 1em;
+}

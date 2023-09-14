@@ -73,6 +73,14 @@ module.exports = class Server extends EventEmitter {
   }
 
   /**
+   * Returns the root directory holding static content to be served
+   * @returns {String}
+   */
+  get root () {
+    return INSTANCES.get(this).root
+  }
+
+  /**
    * Returns the port the server is listening on
    * @returns {Number}
    */
@@ -89,6 +97,14 @@ module.exports = class Server extends EventEmitter {
   }
 
   /**
+   * Returns the URL of the server
+   * @returns {String}
+   */
+  get url () {
+    return `http://${this.hostname}:${this.port}`
+  }
+
+  /**
    * Returns the current state of the server as a JSON string
    * @type {String}
    */
@@ -102,13 +118,12 @@ module.exports = class Server extends EventEmitter {
    */
   toJSON () {
     const { hostname, port, root } = INSTANCES.get(this)
-    const url = `http://${hostname}:${port}`
     return {
       '@type': this.constructor.name,
       hostname,
       port,
       root,
-      url
+      url: this.url
     }
   }
 
@@ -302,11 +317,13 @@ module.exports = class Server extends EventEmitter {
     // The authorization header is "Basic <base-64 encoded username:password>"
     // We split out the username and stash it on req.user
     const auth = req.headers.authorization
-    /* eslint-disable-next-line no-unused-vars */
-    const [algorithm, base64] = auth.split(' ')
-    /* eslint-disable-next-line no-unused-vars */
-    const [user, pass] = Buffer.from(base64, 'base64').toString().split(':')
-    req.user = user
+    if (auth != null) {
+      /* eslint-disable-next-line no-unused-vars */
+      const [algorithm, base64] = auth.split(' ')
+      /* eslint-disable-next-line no-unused-vars */
+      const [user, pass] = Buffer.from(base64, 'base64').toString().split(':')
+      req.user = user
+    }
 
     // Collect the incoming HTTP body
     const chunks = []

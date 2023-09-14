@@ -3,7 +3,7 @@
  */
 
 const Party = require('./party')
-const { hash, uuid } = require('../helpers')
+const { Util: { hash, uuid } } = require('@portaldefi/core')
 const { EventEmitter } = require('events')
 
 /**

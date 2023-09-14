@@ -1,0 +1,80 @@
+{
+  "name": "@portaldefi/sdk",
+  "version": "0.0.0",
+  "description": "The Portal-Defi SDK",
+  "main": "index.js",
+  "exports": {
+    "import": "./index.mjs",
+    "require": "./index.js"
+  },
+  "scripts": {
+    "build": "parcel build",
+    "clean": "rm -rf .parcel-cache dist node_modules package-lock.json test/dist",
+    "coverage": "c8 mocha",
+    "lint": "standard",
+    "lint-fix": "standard --fix",
+    "posttest": "npm run lint",
+    "test": "npm run test:node",
+    "test:browser": "mocha test/browser.spec.js",
+    "test:node": "mocha test/node.spec.js",
+    "watch": "npm run test:browser -- --watch"
+  },
+  "dependencies": {
+    "@portaldefi/core": "file:../core",
+    "crypto-browserify": "^3.12.0",
+    "events": "^3.3.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "url": "^0.11.1",
+    "util": "^0.12.5",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@portaldefi/peer": "file:../portal",
+    "c8": "^7.12.0",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "parcel": "^2.9.3",
+    "puppeteer": "^20.9.0",
+    "standard": "^17.0.0"
+  },
+  "c8": {
+    "check-coverage": true,
+    "report-dir": "coverage",
+    "reporter": [
+      "html",
+      "text"
+    ]
+  },
+  "mocha": {
+    "diff": true,
+    "extension": [
+      "spec.js"
+    ],
+    "reporter": "spec",
+    "slow": 1000,
+    "timeout": 30000,
+    "ui": "bdd",
+    "watch-files": [
+      "**.*js",
+      "test/**/*.*js"
+    ]
+  },
+  "standard": {
+    "globals": [
+      "debug",
+      "after",
+      "afterEach",
+      "before",
+      "beforeEach",
+      "describe",
+      "expect",
+      "it"
+    ],
+    "ignore": [
+      "dist"
+    ]
+  }
+}

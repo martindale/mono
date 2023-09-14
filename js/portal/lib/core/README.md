@@ -2,7 +2,6 @@
 
 The `core` library contains classes that provide the most basic functionality necessary for applications to be built. These are designed to be unopinionated and without any external dependencies.
 
-
 ## `HttpServer`
 
 This class implements a very basic HTTP server with a simple interface consisting of 2 methods:
@@ -28,7 +27,6 @@ const server = new Server()
 
 process.on('SIGTERM', () => server.stop())
 ```
-
 
 ## `HttpApi`
 
@@ -59,16 +57,13 @@ module.exports = function (req, res, ctx) {
 
 Each file in the API directory tree may export a [single request handler](../../test/core/fixtures/echo.js) or [an object whose keys are HTTP methods and corresponding values are request handlers](../../test/core/fixtures/http_methods.js).
 
-
 ## `HttpContext`
 
 TODO: If you are reading this and need to know, please reach out to Anand and have him document this.
 
-
 ## `HttpClient`
 
 TODO: If you are reading this and need to know, please reach out to Anand and have him document this.
-
 
 ## `Store`
 

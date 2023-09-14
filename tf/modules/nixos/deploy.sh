@@ -83,8 +83,8 @@ execOnHost nix-env --profile $NIX_PROFILE --set $outPath
 execOnHost $outPath/bin/switch-to-configuration switch
 
 log "running garbage collection (at least 4GB free) on host ${SSH_HOST}"
-totalFree=$(df /nix/store | tail -n 1 | awk "{ print \$4 }")
-maxFree=$((4 * 1024 ** 3 - 1024 * $totalFree))
+totalFree=$(df /nix/store | tail -n 1 | awk '{ print $4 }')
+maxFree=$((4 * 1024 ** 3 - 1024 * totalFree))
 execOnHost nix-collect-garbage --max-freed $maxFree
 
 runningKernel=$(execOnHost readlink /run/booted-system/kernel)

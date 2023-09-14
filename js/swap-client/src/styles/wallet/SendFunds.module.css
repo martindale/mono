@@ -1,0 +1,35 @@
+.recipient-addr {
+  background-color: black;
+  width:97%;
+  border-color: grey;
+  border-radius: 0.4em;
+  border: 1px solid grey;
+  padding: 1em 0.2em;
+  font-size: 1em;
+}
+.recipient-addr:focus {
+  border: 1px solid grey;
+}
+.data-row>div {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.cancel-btn {
+  background: transparent !important;
+  color: #FF5959 !important;
+  border: 2px solid #FF5959 !important;
+  margin-left: 0 !important;
+}
+.cancel-btn:hover {
+  background: #ff4d4d31 !important;
+}
+.borderContainer {
+  border: 1px solid grey;
+  border-radius: 1em;
+  padding-bottom: 1em;
+}
+
+.addr-btn {
+  padding: 0.5em !important;
+  margin-top: 0.3em !important;
+}

@@ -1,11 +1,12 @@
 # Nix
 result*
+repl-result*
 
 # Node.js
+.parcel-cache
 coverage
 dist
 node_modules
-dist
 
 # Terraform
 .terraform
@@ -22,10 +23,18 @@ docs/build
 docs/package-lock.json
 
 # Miscellaneous
+.gitignore
 .DS_Store
+**/.editorconfig
+**/.vscode/settings.json
 
 # Playnet-related stuff
 playnet
 !playnet/bitcoind*
 !playnet/geth*
 !playnet/lnd*
+**/credentials/*.json
+
+# direnv
+/.direnv
+/.envrc.local

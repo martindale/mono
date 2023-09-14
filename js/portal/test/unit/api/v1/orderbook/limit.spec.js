@@ -2,8 +2,6 @@
  * @file Specification for the Limit Orderbook
  */
 
-const { expect } = require('chai')
-
 describe('Orderbook - Limit', function () {
   const PROPS = Object.freeze({
     side: 'bid',
@@ -20,15 +18,15 @@ describe('Orderbook - Limit', function () {
     let order = null // tracks the order that is first added, and then deleted
 
     it('must add a new order to the orderbook', function () {
-      const { client } = this.test.ctx
+      const { alice } = this.test.ctx
       const O = PROPS
 
-      return client.submitLimitOrder(O)
+      return alice.submitLimitOrder(O)
         .then(o => {
           expect(o).to.be.an('object')
           expect(o.id).to.be.a('string')
           expect(o.ts).to.be.a('number')
-          expect(o.uid).to.be.a('string').that.equals('client')
+          expect(o.uid).to.be.a('string').that.equals('alice')
           expect(o.type).to.be.a('string').that.equals('limit')
           expect(o.side).to.be.a('string').that.equals(O.side)
           expect(o.hash).to.be.a('string').that.equals(O.hash)
@@ -44,15 +42,15 @@ describe('Orderbook - Limit', function () {
     })
 
     it('must remove an existing order from the orderbook', function () {
-      const { client } = this.test.ctx
+      const { alice } = this.test.ctx
       const O = PROPS
 
-      return client.cancelLimitOrder(order)
+      return alice.cancelLimitOrder(order)
         .then(o => {
           expect(o).to.be.an('object')
           expect(o.id).to.be.a('string')
           expect(o.ts).to.be.a('number')
-          expect(o.uid).to.be.a('string').that.equals('client')
+          expect(o.uid).to.be.a('string').that.equals('alice')
           expect(o.type).to.be.a('string').that.equals('limit')
           expect(o.side).to.be.a('string').that.equals(O.side)
           expect(o.hash).to.be.a('string').that.equals(O.hash)

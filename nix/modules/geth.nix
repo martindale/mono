@@ -1,12 +1,5 @@
-{ config, lib, ...}:
-
-with lib;
-
-let
-  cfg = config.services.geth.default;
-
-in
-{
+{lib, ...}:
+with lib; {
   # TODO: what should be configurable
   options.portal.ethereum = {
     swapContractAddress = mkOption {
@@ -19,7 +12,7 @@ in
   config = {
     services.geth.default = {
       enable = true;
-      extraArgs = [ "--dev" ];
+      extraArgs = ["--dev"];
       port = 30303;
 
       http.enable = true;

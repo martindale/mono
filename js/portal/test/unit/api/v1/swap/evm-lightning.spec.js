@@ -2,7 +2,6 @@
  * @file Behavioral specification for an EVM/Lightning atomic swap
  */
 
-const { expect } = require('chai')
 const { createHash, randomBytes } = require('crypto')
 
 /**
@@ -46,8 +45,8 @@ describe('Swaps - EVM/Lightning', function () {
       .once('swap.opened', swap => { bobSwapOpened = swap })
       .once('swap.committed', swap => { bobSwapCommitted = swap })
 
-    console.log(`        -  Secret      : ${SECRET.toString('hex')}`)
-    console.log(`        -  Secret Hash : ${SECRET_HASH}`)
+    debug(`Secret      : ${SECRET.toString('hex')}`)
+    debug(`Secret Hash : ${SECRET_HASH}`)
   })
 
   /**

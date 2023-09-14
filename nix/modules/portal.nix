@@ -1,15 +1,16 @@
-{ config, lib, pkgs, ...}:
-
-with lib;
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
   cfg = config.portaldefi.portal.server;
-
-  cfgBitcoin = config.services.bitcoind.default;
   cfgEthereum = config.services.geth.default;
 
-in
-{
+  # TODO: Harcoded values for contracts for now, it should come from custom derivation
+  contracts = ../../playnet/contracts.json;
+in {
   options.portaldefi.portal.server = {
     hostname = mkOption {
       description = "The interface/IP address to listen on";
@@ -25,26 +26,24 @@ in
   };
 
   config = {
-    environment.systemPackages = [ pkgs.portaldefi.demo ];
+    environment.systemPackages = [pkgs.portaldefi.demo];
 
     systemd.services.portal = {
       description = "Portal Server";
-      wantedBy = [ "multi-user.target" ];
+      wantedBy = ["multi-user.target"];
       after = [
         "network.target"
-        "bitcoind-default.service"
-        "geth-default.service"
+        "bitcoind-regest.service" # TODO: Don't hardcode this value, obtain it properly from defined service
+        "geth-default.service" # TODO: Don't hardcode this value, obtain it properly from defined service
       ];
       environment = {
         PORTAL_HTTP_ROOT = toString pkgs.portaldefi.demo;
         PORTAL_HTTP_HOSTNAME = cfg.hostname;
         PORTAL_HTTP_PORT = toString cfg.port;
 
-        PORTAL_GOERLI_URL = "http://${cfgEthereum.http.address}:${toString cfgEthereum.http.port}";
-        PORTAL_GOERLI_CONTRACT_ADDRESS=config.portal.ethereum.swapContractAddress;
-
-        PORTAL_SEPOLIA_URL = "http://${cfgEthereum.http.address}:${toString cfgEthereum.http.port}";
-        PORTAL_SEPOLIA_CONTRACT_ADDRESS=config.portal.ethereum.swapContractAddress;
+        PORTAL_ETHEREUM_URL = "http://${cfgEthereum.http.address}:${toString cfgEthereum.http.port}";
+        PORTAL_ETHEREUM_CHAINID = "0x539";
+        PORTAL_ETHEREUM_CONTRACTS = contracts; # pkgs.portaldefi.demo.contracts
       };
       serviceConfig = {
         # Dynamic user prevents connection to geth

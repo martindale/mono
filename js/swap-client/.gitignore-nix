@@ -1,0 +1,56 @@
+# NOTE: This is a special gitignore file used by nix that allows copying folders from playnet/state/{alice,bob}
+
+# Nix
+result*
+
+# Node.js
+.parcel-cache
+coverage
+dist
+node_modules
+
+# Terraform
+.terraform
+.terraform.lock.hcl
+terraform.tfstate*
+
+# IntelliJ
+.idea
+*.iml
+
+# Antora (docs)
+workspace
+docs/build
+docs/package-lock.json
+
+# Miscellaneous
+.DS_Store
+**/.editorconfig
+**/.vscode/settings.json
+
+# Other stuff
+**/credentials/*.json
+
+# ---------------------------------------------------------------------
+# Extra stuff for copying correctly necessary info into the nix closure
+# ---------------------------------------------------------------------
+
+# Remove unnecessary folders as well
+docs
+tf
+nix
+*.nix
+
+# Playnet-related stuff
+playnet/*
+
+!playnet/state/
+playnet/state/*
+
+!playnet/state/alice/
+!playnet/state/bob/
+
+!playnet/lnd.alice.conf
+!playnet/lnd.bob.conf
+
+!playnet/contracts.json

@@ -1,4 +1,16 @@
 {
+    "devshell": {
+        "branch": "main",
+        "description": "Per project developer environments",
+        "homepage": "https://numtide.github.io/devshell/",
+        "owner": "numtide",
+        "repo": "devshell",
+        "rev": "d208c58e2f7afef838add5f18a9936b12a71d695",
+        "sha256": "1xiwi33f1jwwqlj1zzw20vlvwgjlhaidwwhgaydxg35s2a546cjl",
+        "type": "tarball",
+        "url": "https://github.com/numtide/devshell/archive/d208c58e2f7afef838add5f18a9936b12a71d695.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "niv": {
         "branch": "master",
         "description": "Easy dependency management for Nix projects",
@@ -24,15 +36,27 @@
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "npmlock2nix": {
-        "branch": "nin/npm-extra-args",
+        "branch": "master",
         "description": "nixify npm based packages [maintainer=@andir] ",
         "homepage": "",
-        "owner": "NinjaTrappeur",
+        "owner": "nix-community",
         "repo": "npmlock2nix",
-        "rev": "e6a156ddc001316993a994e7d1118417d0389e34",
-        "sha256": "1nsk93pdssndzx9k1apx3qhr1q7dmsg7sbx33p5rhk7452zq3k4w",
+        "rev": "c381fd1a69c4e81a492e34863b6d98bd470af7c3",
+        "sha256": "0jnbq4fkkc2mvqx756nqh68bcs6cx3212w4nxndw1fw2v7r3c2w1",
         "type": "tarball",
-        "url": "https://github.com/NinjaTrappeur/npmlock2nix/archive/e6a156ddc001316993a994e7d1118417d0389e34.tar.gz",
+        "url": "https://github.com/nix-community/npmlock2nix/archive/c381fd1a69c4e81a492e34863b6d98bd470af7c3.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "treefmt-nix": {
+        "branch": "main",
+        "description": "treefmt nix configuration",
+        "homepage": "https://numtide.github.io/treefmt/",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "e2761d701581d8dcc4e0e88aecfde317ddf6f0cd",
+        "sha256": "1k45nmfmy0b6db73h1ynydcmyrz7a2309p6gvlffhy2xxp1dz5y0",
+        "type": "tarball",
+        "url": "https://github.com/numtide/treefmt-nix/archive/e2761d701581d8dcc4e0e88aecfde317ddf6f0cd.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

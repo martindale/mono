@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccessOptionComponent should work 1`] = `
+<div
+  className="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-direction-xs-column MuiGrid-grid-xs-3 css-1y066f1-MuiGrid-root"
+  onClick={[Function]}
+>
+  <div
+    className="MuiStack-root css-nen11g-MuiStack-root"
+  >
+    <div
+      className="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
+    >
+      <img
+        src="123"
+        width="100%"
+      />
+    </div>
+    <div
+      className="MuiGrid-root MuiGrid-item flex-center flex-middle css-13i4rnv-MuiGrid-root"
+    >
+      <h4>
+        <img
+          src="https://github.com/dapphub/trustwallet-assets/blob/master/blockchains/bitcoin/info/logo.png?raw=true"
+          width="20px"
+        />
+        Ordinal
+      </h4>
+    </div>
+    <div
+      className="MuiGrid-root MuiGrid-item css-10omzie-MuiGrid-root"
+    >
+      <h4>
+        card
+      </h4>
+    </div>
+  </div>
+</div>
+`;

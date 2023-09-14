@@ -3,7 +3,7 @@
 # Usage: die [exit_code] [error message]
 die() {
   local code=$? now=$(date +%T.%N)
-  if [ "$1" -ge 0 ] 2>/dev/null; then  # assume $1 is an error code if numeric
+  if [ "$1" -ge 0 ] 2>/dev/null; then # assume $1 is an error code if numeric
     code="$1"
     shift
   fi
@@ -21,11 +21,15 @@ help() {
 datadir="."
 while getopts ":hd:" option; do
   case $option in
-    h) help
-       exit;;
-    d) datadir=$OPTARG;;
-   \?) echo "Invalid option"
-       exit;;
+  h)
+    help
+    exit
+    ;;
+  d) datadir=$OPTARG ;;
+  \?)
+    echo "Invalid option"
+    exit
+    ;;
   esac
 done
 
@@ -39,9 +43,8 @@ walletsPath=$(cat ../../wallets.json | grep -q 'alice' && echo "../../wallets.js
 
 # Returns all wif without null values
 cat ${walletsPath} | jq -r '.[][] | (.wif // empty)' |
-# Iterate
-while read -r wif
-do
+  # Iterate
+  while read -r wif; do
     wallet=${wallets[count]}
     echo ${wallet}
     descriptor1="pk(${wif})"
@@ -49,10 +52,10 @@ do
     descriptor3="wpkh(${wif})"
     descriptor4="sh(wpkh(${wif}))"
 
-    checksum1=$(bitcoin-cli -datadir="${datadir}"  -rpcwallet="${wallet}" getdescriptorinfo "${descriptor1}" | jq -r '.checksum')
-    checksum2=$(bitcoin-cli -datadir="${datadir}"  -rpcwallet="${wallet}" getdescriptorinfo "${descriptor2}" | jq -r '.checksum')
-    checksum3=$(bitcoin-cli -datadir="${datadir}"  -rpcwallet="${wallet}" getdescriptorinfo "${descriptor3}" | jq -r '.checksum')
-    checksum4=$(bitcoin-cli -datadir="${datadir}"  -rpcwallet="${wallet}" getdescriptorinfo "${descriptor4}" | jq -r '.checksum')
+    checksum1=$(bitcoin-cli -datadir="${datadir}" -rpcwallet="${wallet}" getdescriptorinfo "${descriptor1}" | jq -r '.checksum')
+    checksum2=$(bitcoin-cli -datadir="${datadir}" -rpcwallet="${wallet}" getdescriptorinfo "${descriptor2}" | jq -r '.checksum')
+    checksum3=$(bitcoin-cli -datadir="${datadir}" -rpcwallet="${wallet}" getdescriptorinfo "${descriptor3}" | jq -r '.checksum')
+    checksum4=$(bitcoin-cli -datadir="${datadir}" -rpcwallet="${wallet}" getdescriptorinfo "${descriptor4}" | jq -r '.checksum')
 
     command0="bitcoin-cli -datadir="${datadir}" createwallet "${wallet}" || die"
 
@@ -72,13 +75,13 @@ do
     command7="bitcoin-cli -datadir="${datadir}" getdescriptorinfo \""${descriptor2}"\""
     command8="bitcoin-cli -datadir="${datadir}" getdescriptorinfo \""${descriptor3}"\""
     command9="bitcoin-cli -datadir="${datadir}" getdescriptorinfo \""${descriptor4}"\""
-#    eval $command6
-#    eval $command7
-#    eval $command8
-#    eval $command9
+    #    eval $command6
+    #    eval $command7
+    #    eval $command8
+    #    eval $command9
 
     command10="bitcoin-cli -datadir="${datadir}" -rpcwallet="${wallet}" listdescriptors"
-#    eval $command10
+    #    eval $command10
 
-    ((count ++))s
-done
+    ((count++))
+  done
