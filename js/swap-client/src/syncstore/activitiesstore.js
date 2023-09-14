@@ -22,7 +22,8 @@ const activitiesStore = {
         newState.pop()
         return newState
       case 'CANCEL_SWAP':
-        newState.splice(action.payload, 1)
+        const id = newState.length - 1 - action.payload
+        newState.splice(id, 1)
         return newState
       case 'UPDATE_SWAP_INFO':
         newState.filter(activity => activity.orderId === action.payload.index)[0][action.payload.field] = action.payload.info

@@ -1,3 +1,5 @@
+// TODO: merge with newer, this may be older code
+
 const testBTCETH = require('./test2')
 const testUnisat = require('./ntest_unisat')
 const testXverse = require('./ntest_xverse')

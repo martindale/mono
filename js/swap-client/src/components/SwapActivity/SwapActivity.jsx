@@ -26,16 +26,16 @@ export const SwapActivity = () => {
   return (
     <>
       <Box className={`${styles.activitiesContainer} activitiesContainer`}>
-        <Stack spacing={3}>
+        <Stack spacing={2}>
           <Grid className={styles.activitiesHeader}>
             <h3>Activity</h3>
           </Grid>
           {
             [...activities].reverse().map((row, index) =>
-              <>
-                {index > 0 && <Divider style={{ borderColor: 'grey', margin: '1em' }} />}
+              <div>
+                {index > 0 && <Divider style={{ borderColor: 'grey', marginBottom: '1em' }} />}
                 <ActivityItem activity={row} index={index} onShowDetails={onShowDetails} handleClick={() => onItemClick(index)} />
-              </>)
+              </div>)
           }
           {
             activities.length === 0 && <div className={styles.blankMessage}>No activity yet</div>

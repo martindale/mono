@@ -9,7 +9,7 @@
   display: flex !important;
   justify-content: space-between !important;
   align-items: center;
-  margin-bottom: 2em;
+  margin-bottom: 1em;
 }
 .blankMessage {
   width: 100%;

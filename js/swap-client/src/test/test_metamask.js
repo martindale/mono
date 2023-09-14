@@ -1,3 +1,5 @@
+// TODO: merge with newer, this may be older code
+
 const webdriver = require('selenium-webdriver')
 const chrome = require('selenium-webdriver/chrome.js')
 

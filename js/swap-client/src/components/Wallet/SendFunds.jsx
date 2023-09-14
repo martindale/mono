@@ -188,12 +188,12 @@ export const SendFunds = () => {
             {sendingProcess == 3 && <><Grid item xs={6}>
               <Button className={`${styles['cancel-btn']} w-100 p-1`} onClick={onClickClose}>
                 Cancel
-            </Button>
+              </Button>
             </Grid>
               <Grid item xs={6}>
                 <Button className='gradient-btn w-100 h-100 p-1' onClick={() => walletStore.dispatch({ type: 'SET_SENDING_PROCESS', payload: 4 })}>
-               Continue
-              </Button>
+                  Continue
+                </Button>
               </Grid>
             </>}
             {sendingProcess == 4 && <CircularProgress />}

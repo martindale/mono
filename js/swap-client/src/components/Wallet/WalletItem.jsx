@@ -9,7 +9,7 @@ export const WalletItem = ({ item, setNodeModalOpen, setWalletModalOpen }) => {
   const onClick = [setNodeModalOpen, setWalletModalOpen][typeId]
 
   return (
-    <Grid container direction='row' spacing={1}>
+    <Grid container direction='row' spacing={1} style={{ paddingTop: 15 }}>
       <Grid item xs={1} textAlign='left'>
         <img width={32} className='ui avatar image' src={item.img_url} />
       </Grid>
