@@ -4,8 +4,8 @@
 
 const Peer = require('@portaldefi/peer')
 const chai = require('chai')
-const { resolve } = require('path')
 const vite = require('vite')
+const config = require('../vite.dev')
 
 /**
  * Returns whether the tests are being run in debug mode
@@ -24,20 +24,6 @@ const isDebugEnabled = process.argv.includes('--debug')
 const GLOBALS = {
   debug: isDebugEnabled ? console.debug : function () {},
   expect: chai.expect
-}
-
-/**
- * The vite build
- * @type {Config}
- */
-const config = {
-  root: resolve(__dirname, '..'),
-  build: {
-    outDir: resolve(__dirname, '..', 'dist'),
-    watch: {}
-  },
-  mode: 'development',
-  clearScreen: false
 }
 
 /**

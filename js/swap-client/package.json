@@ -1,6 +1,5 @@
 {
   "name": "swap-client",
-  "proxy": "http://localhost:34011/api",
   "private": true,
   "version": "0.0.2",
   "scripts": {
@@ -8,11 +7,10 @@
     "clean": "rm -rf dist node_modules package-lock.json",
     "coverage": "c8 mocha",
     "credentials": "export PORTAL_ROOT=../../ && node credentials.js",
-    "dev": "npm run credentials && vite",
+    "dev": "npm run credentials && node test/dev.js",
     "lint": "standard",
     "lint-fix": "standard --fix",
     "posttest": "npm run lint",
-    "preview": "vite preview --port 7500",
     "test": "mocha",
     "test:all": "npm run dev & node src/test/test_all.js",
     "test:cucumber": "cucumber-js",
