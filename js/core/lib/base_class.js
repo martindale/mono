@@ -123,6 +123,32 @@ module.exports = class BaseClass {
   }
 
   /**
+   * Alias of off()
+   * Removes the handler from the list of handlers for the event
+   * @param {String} eventName The name of the event
+   * @param {Function} handler The function to remove
+   * @returns {BaseClass}
+   */
+  removeAllListener (eventName, handler) {
+    return this.off(eventName, handler)
+  }
+
+  /**
+   * Removes all listeners
+   * @param {String} eventName The name of the event
+   * @returns {BaseClass}
+   */
+  removeAllListeners (eventName) {
+    const { events } = INSTANCES.get(this)
+    events.has(eventName) || events.set(eventName, new Set())
+
+    const handlers = events.get(eventName)
+    handlers.clear()
+
+    return this
+  }
+
+  /**
    * Emits a debug log event
    * @param {String} eventName The name of the event that triggered the log
    * @param {*} args Arguments supplied to the event handler(s)

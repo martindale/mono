@@ -13,8 +13,8 @@ export const ConnectionComponent = () => {
     // dispatch(signOut());
     walletStore.dispatch({ type: 'CLEAR_NODE_DATA' })
     walletStore.dispatch({ type: 'CLEAR_WALLET_DATA' })
-    // return Promise.all([alice.disconnect(), bob.disconnect()]);
-    return Promise.all([user.user.disconnect()])
+    // return Promise.all([alice.stop(), bob.stop()]);
+    return //Promise.all([user.user.stop()])
   }, [walletStore])
 
   useEffect(() => {

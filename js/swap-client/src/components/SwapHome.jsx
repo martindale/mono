@@ -7,6 +7,7 @@ import { ConnectionComponent } from './Wallet/Connection'
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter'
 import { getAlice, getBob } from '../utils/constants'
 import Client from '../utils/client'
+import Sdk from '@portaldefi/sdk'
 import { Menu, MenuItem, Button, Grid } from '@mui/material'
 import styles from '../styles/SwapHome.module.css'
 import { userStore } from '../syncstore/userstore'
@@ -46,7 +47,7 @@ export const SwapHome = () => {
       walletStore.dispatch({ type: 'SET_WALLET_DATA', payload: aliceCred.ethereum })
       walletStore.dispatch({ type: 'SET_WALLET_BALANCE', payload: 1000 })
     }
-    const alice = new Client({ network: { id: 'alice', hostname, port }, credentials: aliceCred })
+    const alice = new Sdk({ network: { id: 'alice', hostname, port }, credentials: aliceCred })
     userStore.dispatch({ type: 'SIGN_IN', payload: alice })
     walletStore.dispatch({ type: 'SET_NODE_DATA', payload: alice.credentials.lightning })
     walletStore.dispatch({ type: 'SET_NODE_BALANCE', payload: 1000 })
@@ -58,7 +59,7 @@ export const SwapHome = () => {
       walletStore.dispatch({ type: 'SET_WALLET_DATA', payload: bobCred.ethereum })
       walletStore.dispatch({ type: 'SET_WALLET_BALANCE', payload: 1000 })
     }
-    const bob = new Client({ network: { id: 'bob', hostname, port }, credentials: bobCred })
+    const bob = new Sdk({ network: { id: 'bob', hostname, port }, credentials: bobCred })
     userStore.dispatch({ type: 'SIGN_IN', payload: bob })
     walletStore.dispatch({ type: 'SET_NODE_DATA', payload: bob.credentials.lightning })
     walletStore.dispatch({ type: 'SET_NODE_BALANCE', payload: 1000 })
@@ -69,7 +70,9 @@ export const SwapHome = () => {
     userStore.dispatch({ type: 'SIGN_OUT' })
     walletStore.dispatch({ type: 'CLEAR_NODE_DATA' })
     walletStore.dispatch({ type: 'CLEAR_WALLET_DATA' })
-    return Promise.all([user.user.disconnect()])
+    console.log("user")
+    console.log(user)
+    return // Promise.all([user.user.stop()])
   }, [userStore, walletStore])
 
   return (

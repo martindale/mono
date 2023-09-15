@@ -1,5 +1,6 @@
 /**
  * @file An HTTP client implementation
+ * TODO: deprecate, use Sdk without wrapping
  */
 
 'use strict'

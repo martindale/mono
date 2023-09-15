@@ -67,11 +67,11 @@ export const SwapCreate = () => {
   }, [user])
 
   const logOut = useCallback(() => {
-    dispatch(signOut())
+    // dispatch(signOut())
     dispatch(clearNodeData())
     dispatch(clearWalletData())
     setOpen(false)
-    return Promise.all([user.user.disconnect()])
+    return //Promise.all([user.user.stop()])
   }, [user])
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export const SwapCreate = () => {
     if (user.isLoggedIn) {
       try {
         log('user', user)
-        const connected = user.user.connect()
+        const connected = user.user.start()
       } catch (error) {
         // console.warn(`sorry an error occurred, due to ${error.message} `);
         // logOut();
@@ -102,7 +102,7 @@ export const SwapCreate = () => {
     };
 
     return () => { // clean up function to clear user connection from ws
-      if (user.isLoggedIn) user.user.disconnect()
+      if (user.isLoggedIn) user.user.stop()
       log('useEffect cleanup')
     }
   }, [user])
@@ -493,6 +493,8 @@ export const SwapCreate = () => {
 
       const ordinalLocation = !args.ordinalLocation ? args.ordinalLocation : false
 
+      console.log("user")
+      console.log(user)
       await user.user.submitLimitOrder(
         {
           uid: user.user.id,

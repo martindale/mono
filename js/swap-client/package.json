@@ -8,6 +8,7 @@
     "coverage": "c8 mocha",
     "credentials": "export PORTAL_ROOT=../../ && node credentials.js",
     "dev": "npm run credentials && node test/dev.js",
+    "dev:force": "npm run credentials && vite --force",
     "lint": "standard",
     "lint-fix": "standard --fix",
     "posttest": "npm run lint",
@@ -28,7 +29,8 @@
     "test:unisat0": "node src/test/ntest_unisat.js",
     "test:xverse0": "node src/test/ntest_xverse.js",
     "test1": "node src/test/test2.js",
-    "watch": "npm run test -- --watch"
+    "watch": "npm run test -- --watch",
+    "debug": "npm run test -- --debug"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.21.5",

@@ -5,6 +5,7 @@ module.exports = {
   root: resolve(__dirname),
   build: {
     outDir: resolve(__dirname, 'dist'),
+    sourcemap: true,
     watch: {}
   },
   mode: 'development',

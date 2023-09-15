@@ -74,7 +74,7 @@ module.exports = class Network extends BaseClass {
     return new Promise((resolve, reject) => {
       const creds = `${this.id}:${this.id}`
       const buf = (data && JSON.stringify(data)) || ''
-      const req = fetch(Object.assign(args, {
+      const req = fetch(args.path, Object.assign(args, {
         headers: Object.assign(args.headers || {}, {
           /* eslint-disable quote-props */
           'accept': 'application/json',
