@@ -38,9 +38,7 @@ module.exports = class Store extends BaseClass {
    * @returns {Object}
    */
   toJSON () {
-    return {
-      '@type': this.constructor.name
-    }
+    return Object.assign(super.toJSON(), { })
   }
 
   /**

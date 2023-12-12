@@ -3,9 +3,8 @@
  */
 
 const { BaseClass } = require('@portaldefi/core')
-const Bitcoind = require('./bitcoind')
-const Geth = require('./geth')
-const Lnd = require('./lnd')
+const Ethereum = require('./ethereum')
+const Lightning = require('./lightning')
 
 /**
  * Expose the interface to all supported blockchains
@@ -15,39 +14,73 @@ const Lnd = require('./lnd')
  * @type {Blockchains}
  */
 module.exports = class Blockchains extends BaseClass {
-  constructor (sdk) {
-    super()
+  constructor (sdk, props) {
+    super({ id: 'blockchains' })
 
     this.sdk = sdk
 
-    this.bitcoind = new Bitcoind(this)
-    this.geth = new Geth(this)
-    this.lnd = new Lnd(this)
+    this.ethereum = new Ethereum(sdk, props.ethereum)
+      .on('log', (level, ...args) => this[level](...args))
+    this.lightning = new Lightning(sdk, props.lightning)
+      .on('log', (level, ...args) => this[level](...args))
 
-    Object.seal(this)
+    Object.freeze(this)
+  }
+
+  /**
+   * Returns the current state of the server as a JSON string
+   * @type {String}
+   */
+  [Symbol.for('nodejs.util.inspect.custom')] () {
+    return this.toJSON()
+  }
+
+  /**
+   * Returns the JSON representation of the swap
+   * @returns {Object}
+   */
+  toJSON () {
+    return Object.assign(super.toJSON(), {
+      ethereum: this.ethereum,
+      lightning: this.lightning
+    })
   }
 
   /**
    * Initializes connections to all supported blockchains
    * @returns {Blockchain[]}
    */
-  connect () {
-    return Promise.all([
-      this.bitcoind.connect(),
-      this.geth.connect(),
-      this.lnd.connect()
+  async connect () {
+    const blockchains = await Promise.all([
+      this.ethereum.connect(),
+      this.lightning.connect()
     ])
+    this.emit('connect', blockchains)
+    return blockchains
   }
 
   /**
    * Gracefully closes connections to all supported blockchains
    * @returns {Blockchain[]}
    */
-  disconnect () {
-    return Promise.all([
-      this.bitcoind.disconnect(),
-      this.geth.disconnect(),
-      this.lnd.disconnect()
+  async disconnect () {
+    const blockchains = await Promise.all([
+      this.ethereum.disconnect(),
+      this.lightning.disconnect()
     ])
+    this.emit('disconnect', blockchains)
+    return blockchains
+  }
+
+  /**
+   * Iterates over all the blockchains
+   * @param {Function} fn The function that operates on each blockchain
+   * @returns {Blockchain[]}
+   */
+  forEach (fn) {
+    return [
+      this.ethereum,
+      this.lightning
+    ].forEach(fn)
   }
 }

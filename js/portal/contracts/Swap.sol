@@ -3,221 +3,144 @@ pragma solidity "*";
 
 import "./IERC20.sol";
 
-
-/// A smart contract that implements one-half of a swap, enabling the transfer
-/// of native ETH or any ERC-20 token on one EVM chain.
+/// A smart contract that implements one half of a cross-chain atomic swap,
+/// enabling the transfer of native ETH or any ERC-20 token on one EVM chain.
 contract Swap {
-    ////////////////////////////////////////////////////////////////////
-    // Invoices
-    ////////////////////////////////////////////////////////////////////
-    uint public invoiceCount = 0;
-    mapping(uint => address) public invoiceCreators;
-    mapping(uint => address) public invoiceTokenAddresses;
-    mapping(uint => uint) public invoiceTokenNetworks;
-    mapping(uint => uint) public invoiceTokenAmounts;
-    mapping(uint => uint) public hashToInvoice;
-    mapping(uint => bytes32) public invoiceToHash;
+    ///////////////////////////////////////////////////////////////////////////
+    // Internal state
+    ///////////////////////////////////////////////////////////////////////////
+    mapping(bytes32 => bool) private ids;
+    mapping(bytes32 => bytes32) private swaps;
+    mapping(bytes32 => address payable) private payees;
+    mapping(bytes32 => address) private payers;
+    mapping(bytes32 => address) private assets;
+    mapping(bytes32 => uint) private quantities;
 
+    /// Fired when an invoice is created by the payee
     event InvoiceCreated(
-        uint invoiceId,
-        address tokenAddress,
-        uint tokenAmount,
-        uint tokenNetwork,
-        address indexed invoicer);
+        bytes32 indexed id,
+        bytes32 indexed swap,
+        address payee,
+        address asset,
+        uint quantity
+    );
 
+    /// Fired when an invoice is paid by the payer
     event InvoicePaid(
-        uint indexed invoiceId,
-        bytes32 secretHash,
-        address indexed payee,
-        address indexed payer);
+        bytes32 indexed id,
+        bytes32 indexed swap,
+        address payer,
+        address asset,
+        uint quantity
+    );
 
+    /// Fired when an invoice is settled by the payer
+    event InvoiceSettled(
+        bytes32 indexed id,
+        bytes32 indexed swap,
+        address payer,
+        address payee,
+        address asset,
+        uint quantity,
+        bytes32 secret
+    );
+
+    /// Creates a new invoice
     function createInvoice(
-        address tokenAddress,
-        uint tokenAmount,
-        uint tokenNetwork) public returns(uint) {
+        bytes32 id,
+        bytes32 swap,
+        address asset,
+        uint quantity) public {
 
-        invoiceCount++;
+        // ensure the hash of secret is not already in use
+        require(ids[id] == false, "Secret hash already in use!");
 
-        invoiceCreators[invoiceCount] = msg.sender;
-        invoiceTokenAddresses[invoiceCount] = tokenAddress;
-        invoiceTokenAmounts[invoiceCount] = tokenAmount;
-        invoiceTokenNetworks[invoiceCount] = tokenNetwork;
+        // update the internal state of the contract
+        ids[id] = true;
+        swaps[id] = swap;
+        payees[id] = payable(msg.sender);
+        assets[id] = asset;
+        quantities[id] = quantity;
 
+        // emit the invoice created event
         emit InvoiceCreated(
-            invoiceCount,
-            tokenAddress,
-            tokenAmount,
-            tokenNetwork,
-            msg.sender);
-
-        return invoiceCount;
+            id,
+            swaps[id],
+            payees[id],
+            assets[id],
+            quantities[id]
+        );
     }
 
+    /// Pays an invoice
     function payInvoice(
-        uint invoiceId,
-        bytes32 secretHash) public payable returns (bool) {
+        bytes32 id,
+        bytes32 swap,
+        address asset,
+        uint quantity) public payable {
 
-        //if it's native ETH call payable function, otherwise pull token funds
-        if (invoiceTokenAddresses[invoiceId] == address(0x0)) {
-            require(
-                invoiceTokenAmounts[invoiceId] == msg.value,
-                "wrong eth amount");
+        // ensure the invoice is valid
+        require(ids[id] == true, "Incorrect invoice!");
+        require(swaps[id] == swap, "Incorrect swap!");
+        require(assets[id] == asset, "Incorrect asset!");
+        require(quantities[id] == quantity, "Incorrect asset quantity!");
 
-            //TODO: replace the ZERO placeholders with actual desired token info
-            depositEth(
-                address(0x0),
-                0, //TODO: put actual desired token data
-                0, //TODO: put actual desired token data
-                secretHash,
-                invoiceCreators[invoiceId]);
+        // For native ETH, validate the ETH amount sent
+        // For ERC-20 tokens, transfer the tokens into the contract
+        if (asset == address(0x0)) {
+            require(quantities[id] == msg.value, "Incorrect asset quantity!");
         } else {
-            //TODO: replace the ZERO placeholders with actual desired token info
-            deposit(
-                invoiceTokenAddresses[invoiceId],
-                invoiceTokenAmounts[invoiceId],
-                address(0x0),
-                0, //TODO: put actual desired token data
-                0, //TODO: put actual desired token data
-                secretHash,
-                invoiceCreators[invoiceId]);
+            IERC20 erc20 = IERC20(asset);
+            erc20.transferFrom(msg.sender, address(this), quantity);
         }
+        payers[id] = msg.sender;
 
-        invoiceToHash[invoiceId] = secretHash;
-        hashToInvoice[uint(secretHash)] = invoiceId;
-
-        emit InvoicePaid(invoiceId, secretHash, invoiceCreators[invoiceCount], msg.sender);
-        return true;
+        // emit the invoice paid event
+        emit InvoicePaid(
+            id,
+            swaps[id],
+            payers[id],
+            assets[id],
+            quantities[id]
+        );
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Token Deposit and Claim
-    ////////////////////////////////////////////////////////////////////////////
-    mapping(uint => bool) public hashes;
-    mapping(uint => bool) public claimed;
-    mapping(uint => uint) public amounts;
-    mapping(uint => uint) public secrets;
-    mapping(uint => address) public recipients;
-    mapping(uint => address) public senders;
-    mapping(uint => address) public tokenAddresses;
-
-    ////////////////////////////////////////////////////////////////////////////
-    // deposit and claim
-    ////////////////////////////////////////////////////////////////////////////
-    event Deposited(
-        uint trade,
-        address tokenDeposited,
-        uint amountDeposited,
-        address tokenDesired,
-        uint amountDesired,
-        uint networkDesired,
-        bytes32 indexed secretHash,
-        address indexed recipient,
-        address indexed sender);
-
-    event Claimed(
-        uint trade,
+    /// Settles an invoice
+    function settleInvoice(
         bytes32 secret,
-        bytes32 indexed secretHash,
-        address indexed claimant,
-        address indexed sender);
+        bytes32 swap) public {
 
-    function deposit(
-        address tokenDeposited,
-        uint amountDeposited,
-        address tokenDesired,
-        uint amountDesired,
-        uint networkDesired,
-        bytes32 secretHash,
-        address recipient) public returns (uint secretHashNumber) {
+        // generate the hash of the secret
+        bytes32 id = sha256(abi.encodePacked(secret));
 
-        secretHashNumber = uint(secretHash);
+        // ensure the invoice is valid
+        require(ids[id] == true, "No invoice found for the provided secret!");
+        require(swaps[id] == swap, "No swap found for the provided secret!");
+        require(payees[id] == msg.sender, "Incorrect payee!");
 
-        hashes[secretHashNumber] = true;
-        recipients[secretHashNumber] = recipient;
-        senders[secretHashNumber] = msg.sender;
-        amounts[secretHashNumber] = amountDeposited;
-        tokenAddresses[secretHashNumber] = tokenDeposited;
+        // save the state locally before clearing it out
+        address payable payee = payees[id];
+        address payer = payers[id];
+        address asset = assets[id];
+        uint quantity = quantities[id];
 
-        IERC20 erc20 = IERC20(tokenDeposited);
-        erc20.transferFrom(msg.sender, address(this), amountDeposited);
+        // delete all state
+        delete ids[id];
+        delete swaps[id];
+        delete payees[id];
+        delete payers[id];
+        delete assets[id];
+        delete quantities[id];
 
-        emit Deposited(
-            secretHashNumber,
-            tokenDeposited,
-            amountDeposited,
-            tokenDesired,
-            amountDesired,
-            networkDesired,
-            secretHash,
-            recipient,
-            msg.sender);
-
-        return secretHashNumber;
-    }
-
-    function depositEth(
-        address tokenDesired,
-        uint amountDesired,
-        uint networkDesired,
-        bytes32 secretHash,
-        address recipient) public payable returns(uint secretHashNumber) {
-
-        secretHashNumber = uint(secretHash);
-
-        hashes[secretHashNumber] = true;
-        amounts[secretHashNumber] = msg.value;
-        recipients[secretHashNumber] = recipient;
-        tokenAddresses[secretHashNumber] = address(0x0);
-        senders[secretHashNumber] = msg.sender;
-
-        emit Deposited(
-            secretHashNumber,
-            address(0x0),
-            msg.value,
-            tokenDesired,
-            amountDesired,
-            networkDesired,
-            secretHash,
-            recipient,
-            msg.sender);
-
-        return secretHashNumber;
-    }
-
-    function claim(uint secret) public returns (bool) {
-        bytes32 secretHash = toHash(secret);
-        uint secretHashNumber = uint(secretHash);
-
-        require(hashes[secretHashNumber], "Invalid secret!");
-        require(!claimed[secretHashNumber], "Already claimed!");
-        require(recipients[secretHashNumber] == msg.sender, "Invalid claimant!");
-
-        secrets[secretHashNumber] = secret;
-        claimed[secretHashNumber] = true;
-
-        if (tokenAddresses[secretHashNumber] == address(0x0)) {
-            msg.sender.transfer(amounts[secretHashNumber]);
+        // transfer the asset to the payee
+        if (asset == address(0x0)) {
+            payee.transfer(quantity);
         } else {
-            IERC20 erc20 = IERC20(tokenAddresses[secretHashNumber]);
-            erc20.transfer(msg.sender, amounts[secretHashNumber]);
+            IERC20 erc20 = IERC20(asset);
+            erc20.transfer(payee, quantity);
         }
 
-        emit Claimed(secretHashNumber, bytes32(secret), secretHash, msg.sender, senders[secretHashNumber]);
-
-        return true;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // Utility functions
-    ////////////////////////////////////////////////////////////////////////////
-    function toHash(uint secret) public pure returns (bytes32 secretHash) {
-        secretHash = sha256(toBytes(secret));
-    }
-
-    function toBytes(uint256 x) internal pure returns (bytes memory b) {
-        b = new bytes(32);
-        // solhint-disable-next-line no-inline-assembly
-        assembly { mstore(add(b, 32), x) }
-        return b;
+        // emit the invoice settled event
+        emit InvoiceSettled(id, swap, payer, payee, asset, quantity, secret);
     }
 }

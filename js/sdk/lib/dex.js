@@ -1,14 +1,14 @@
 /**
- * @file An interface to all orderbooks
+ * @file The interface to the decentralized exchange
  */
 
-const { BaseClass } = require('@portaldefi/core')
+const { BaseClass, Util: { uuid } } = require('@portaldefi/core')
 
 /**
- * Expose the interface to all orderbooks
- * @type {Orderbooks}
+ * The interface to the decentralized exchange
+ * @type {Dex}
  */
-module.exports = class Orderbooks extends BaseClass {
+module.exports = class Dex extends BaseClass {
   constructor (sdk) {
     super()
 
@@ -22,10 +22,18 @@ module.exports = class Orderbooks extends BaseClass {
     Object.seal(this)
   }
 
+  /**
+   * Opens the orderbooks
+   * @returns {Promise<Dex>}
+   */
   open () {
     return Promise.resolve(this)
   }
 
+  /**
+   * Closes the orderbooks
+   * @returns {Promise<Dex>}
+   */
   close () {
     return Promise.resolve(this)
   }
@@ -33,15 +41,16 @@ module.exports = class Orderbooks extends BaseClass {
   /**
    * Adds a limit order to the orderbook
    * @param {Object} order The limit order to add the orderbook
+   * @returns {Promise<Object>}
    */
   submitLimitOrder (order) {
-    return this.sdk.helpers.request({
+    return this.sdk.network.request({
       method: 'PUT',
       path: '/api/v1/orderbook/limit'
     }, {
-      uid: this.id,
+      id: uuid(),
+      uid: this.sdk.id,
       side: order.side,
-      hash: order.hash,
       baseAsset: order.baseAsset,
       baseNetwork: order.baseNetwork,
       baseQuantity: order.baseQuantity,
@@ -54,9 +63,10 @@ module.exports = class Orderbooks extends BaseClass {
   /**
    * Adds a limit order to the orderbook
    * @param {Object} order The limit order to delete the orderbook
+   * @returns {Promise<Object>}
    */
   cancelLimitOrder (order) {
-    return this.sdk.helpers.request({
+    return this.sdk.network.request({
       method: 'DELETE',
       path: '/api/v1/orderbook/limit'
     }, {

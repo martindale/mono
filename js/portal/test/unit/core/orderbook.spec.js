@@ -2,8 +2,8 @@
  * @file Behavioral specification for the Orderbook
  */
 
+const { Order } = require('@portaldefi/core')
 const { expect } = require('chai')
-const Order = require('../../../lib/core/order')
 const Orderbook = require('../../../lib/core/orderbook')
 
 describe('Orderbook', function () {

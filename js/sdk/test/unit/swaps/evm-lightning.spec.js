@@ -1,1 +1,0 @@
-../../../../portal/test/unit/api/v1/swap/evm-lightning.spec.js

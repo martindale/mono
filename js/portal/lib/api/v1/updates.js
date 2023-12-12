@@ -21,11 +21,9 @@ module.exports.UPGRADE = function (ws, ctx) {
 
   ctx.swaps
     .on('error', onError)
-    .on('created', onSwap)
-    .on('opening', onSwap)
-    .on('opened', onSwap)
-    .on('committing', onSwap)
-    .on('committed', onSwap)
+    .on('received', onSwap)
+    .on('holder.invoice.sent', onSwap)
+    .on('seeker.invoice.sent', onSwap)
 
   // unregister all event handlers when the websocket closes
   ws.on('close', () => {
@@ -37,10 +35,8 @@ module.exports.UPGRADE = function (ws, ctx) {
 
     ctx.swaps
       .off('error', onError)
-      .off('created', onSwap)
-      .off('opening', onSwap)
-      .off('opened', onSwap)
-      .off('committing', onSwap)
-      .off('committed', onSwap)
+      .off('received', onSwap)
+      .off('holder.invoice.sent', onSwap)
+      .off('seeker.invoice.sent', onSwap)
   })
 }

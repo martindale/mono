@@ -11,13 +11,19 @@ const WebSocket = require('ws')
  * @type {Network}
  */
 module.exports = class Network extends BaseClass {
-  constructor (props) {
+  constructor (sdk, props) {
+    props = Object.assign({
+      hostname: 'localhost',
+      port: 80,
+      pathname: '/api/v1/updates'
+    }, props)
+
     super()
 
-    this.id = props.id
-    this.hostname = props.hostname || 'localhost'
-    this.port = props.port || 80
-    this.pathname = props.pathname || '/api/v1/updates'
+    this.sdk = sdk
+    this.hostname = props.hostname
+    this.port = props.port
+    this.pathname = props.pathname
     this.websocket = null
 
     Object.seal(this)
@@ -36,13 +42,11 @@ module.exports = class Network extends BaseClass {
    * @returns {Object}
    */
   toJSON () {
-    return {
-      '@type': this.constructor.name,
-      id: this.id,
+    return Object.assign(super.toJSON(), {
       hostname: this.hostname,
       port: this.port,
       pathname: this.pathname
-    }
+    })
   }
 
   /**
@@ -50,7 +54,9 @@ module.exports = class Network extends BaseClass {
    * @returns {Promise<Void>}
    */
   connect () {
-    const url = `ws://${this.hostname}:${this.port}${this.pathname}/${this.id}`
+    const { id } = this.sdk
+    const { hostname, port, pathname } = this
+    const url = `ws://${hostname}:${port}${pathname}/${id}`
     const ws = this.websocket = new WebSocket(url)
     return new Promise((resolve, reject) => ws
       .on('message', (...args) => this._onMessage(...args))
@@ -67,7 +73,8 @@ module.exports = class Network extends BaseClass {
    */
   request (args, data) {
     return new Promise((resolve, reject) => {
-      const creds = `${this.id}:${this.id}`
+      const { id } = this.sdk
+      const creds = `${id}:${id}`
       const buf = (data && JSON.stringify(data)) || ''
       const req = http.request(Object.assign(args, {
         hostname: this.hostname,
@@ -153,14 +160,22 @@ module.exports = class Network extends BaseClass {
     let event, arg
     try {
       arg = JSON.parse(data)
-      event = (arg['@type'] != null && arg.status != null)
-        ? `${arg['@type'].toLowerCase()}.${arg.status}`
-        : 'message'
+
+      if (arg['@type'] != null && arg.status != null) {
+        event = `${arg['@type'].toLowerCase()}.${arg.status}`
+        arg = [arg]
+      } else if (arg['@event'] != null && arg['@data'] != null) {
+        event = arg['@event']
+        arg = arg['@data']
+      } else {
+        event = 'message'
+        arg = [arg]
+      }
     } catch (err) {
       event = 'error'
       arg = err
     } finally {
-      this.emit(event, arg)
+      this.emit(event, ...arg)
     }
   }
 }

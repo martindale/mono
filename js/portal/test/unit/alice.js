@@ -39,13 +39,14 @@ const LND_CONF = readFileSync(PATH_LND_CONF).toString('utf8')
  */
 module.exports = {
   lightning: {
-    socket: LND_CONF.rpclisten,
-    cert: readFileSync(join(PATH_LND, 'tls.cert')).toString('base64'),
-    admin: LND_ADMIN.toString('base64'),
-    invoice: LND_INVOICE.toString('base64')
+    hostname: LND_CONF.restlisten.split(':')[0],
+    port: Number(LND_CONF.restlisten.split(':')[1]),
+    cert: readFileSync(join(PATH_LND, 'tls.cert')).toString('hex'),
+    admin: LND_ADMIN.toString('hex'),
+    invoice: LND_INVOICE.toString('hex')
   },
   ethereum: {
     public: `0x${GETH_KEYSTORE.address}`,
-    private: keythereum.recover(NAME, GETH_KEYSTORE).toString('hex')
+    private: `0x${keythereum.recover(NAME, GETH_KEYSTORE).toString('hex')}`
   }
 }

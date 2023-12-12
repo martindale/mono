@@ -2,17 +2,15 @@
  * @file Defines all the orderbooks in the system
  */
 
-const Order = require('./order')
+const { BaseClass, Order } = require('@portaldefi/core')
 const Orderbook = require('./orderbook')
-const { EventEmitter } = require('events')
 
 /**
  * A list of asset pairs that can be traded
  * @type {Array<Object>}
  */
 const PROPS = [
-  { baseAsset: 'BTC', quoteAsset: 'ETH', limitSize: 100000 },
-  { baseAsset: 'ETH', quoteAsset: 'USDC', limitSize: 100 }
+  { baseAsset: 'BTC', quoteAsset: 'ETH', limitSize: 100000 }
 ]
 
 /**
@@ -20,7 +18,7 @@ const PROPS = [
  * @param {EventEmitter} self The EventEmitter instance that will fire the event
  * @param {Orderbook} orderbook The orderbook that is firing the event
  * @param {String} event The event being fired by the orderbook
- * @returns {[Void}
+ * @returns {Void}
  */
 function handleOrderbookEvent (self, orderbook, event) {
   return function (...args) {
@@ -33,7 +31,7 @@ function handleOrderbookEvent (self, orderbook, event) {
  * Exposes all supported orderbooks under a single class
  * @type {Orderbooks}
  */
-module.exports = class Orderbooks extends EventEmitter {
+module.exports = class Orderbooks extends BaseClass {
   constructor (props, ctx) {
     super()
 

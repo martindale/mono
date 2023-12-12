@@ -1,14 +1,14 @@
 /**
- * @file The Unit Test Environment builder
+ * @file Behavioral specification for the Portal SDK
  */
 
+const Peer = require('@portaldefi/peer')
 const Sdk = require('@portaldefi/sdk')
 const chai = require('chai')
 const { writeFileSync } = require('fs')
 const { inspect } = require('util')
 const { Web3 } = require('web3')
-const { compile, deploy } = require('../../../portal/test/helpers')
-const Peer = require('../../lib/core/server')
+const { compile, deploy, generate } = require('../../lib/helpers')
 
 /**
  * Returns whether the tests are being run in debug mode
@@ -26,7 +26,7 @@ const log = !isDebugEnabled
       showHidden: false,
       depth: null,
       colors: true
-    }))))
+    }))), '\n\n')
 
 /**
  * Maps globally visible keys to their values for the duration of the tests
@@ -37,7 +37,7 @@ const log = !isDebugEnabled
  * @type {Object}
  */
 const GLOBALS = {
-  debug: isDebugEnabled ? console.debug : function () { },
+  debug: isDebugEnabled ? console.debug : function () {},
   expect: chai.expect
 }
 
@@ -57,7 +57,7 @@ const USERS = ['alice', 'bob']
  * - Initializes and starts a peer
  * - Initializes and starts SDK instances for each user
  */
-before(async function () {
+before('setup the test environment', async function () {
   // override/install globals
   for (const key in GLOBALS) {
     const existing = global[key]
@@ -70,32 +70,23 @@ before(async function () {
   const contracts = this.contracts = await deploy(await compile(), web3)
   const abiFile = process.env.PORTAL_ETHEREUM_CONTRACTS
   writeFileSync(abiFile, JSON.stringify(contracts, null, 2))
-
   // load the configuration
   // NOTE: This MUST happen after the smart-contract compilation/deployment
-  const config = require('../../../sdk/etc/config.dev')
+  const config = require('../../etc/config.dev')
 
   // start the peer
   const props = Object.assign({ id: 'portal' }, config.network)
   this.peer = await new Peer(props)
     .on('log', log)
+    .on('error', err => console.error(err))
     .start()
 
   // start all sdk instances
   for (const id of USERS) {
-    const { blockchains } = config
-    const creds = require(`../../../portal/test/unit/${id}`)
-    const props = Object.assign({ id }, config, {
-      blockchains: Object.assign({}, blockchains, {
-        bitcoin: Object.assign({}, blockchains.bitcoin, creds.bitcoin),
-        ethereum: Object.assign({}, blockchains.ethereum, creds.ethereum),
-        lightning: Object.assign({}, blockchains.lightning, creds.lightning)
-      })
-    })
-
-    this[id] = new Sdk(props)
+    this[id] = new Sdk(generate(id, config))
     await this[id]
       .on('log', log)
+      .on('error', err => console.error(err))
       .start()
   }
 })
@@ -106,13 +97,9 @@ before(async function () {
  * - Stops the peer
  * - Restores the global functions that were overridden during setup
  */
-after(async function () {
+after('teardown the test environment', async function () {
   // stop the SDK instance
-  await Promise.all(USERS.map(id => {
-    const promise = this.test.ctx[id].stop()
-    this.test.ctx[id] = null
-    return promise
-  }))
+  await Promise.all(USERS.map(id => this.test.ctx[id].stop()))
 
   // stop the peer
   await this.test.ctx.peer.stop()

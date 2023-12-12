@@ -41,7 +41,7 @@ in {
         PORTAL_HTTP_HOSTNAME = cfg.hostname;
         PORTAL_HTTP_PORT = toString cfg.port;
 
-        PORTAL_ETHEREUM_URL = "http://${cfgEthereum.http.address}:${toString cfgEthereum.http.port}";
+        PORTAL_ETHEREUM_URL = "ws://${cfgEthereum.http.address}:${toString cfgEthereum.http.port}";
         PORTAL_ETHEREUM_CHAINID = "0x539";
         PORTAL_ETHEREUM_CONTRACTS = contracts; # pkgs.portaldefi.demo.contracts
       };

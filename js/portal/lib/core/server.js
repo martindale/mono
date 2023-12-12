@@ -2,7 +2,7 @@
  * @file An HTTP server implementation
  */
 
-const { EventEmitter } = require('events')
+const { BaseClass } = require('@portaldefi/core')
 const { createReadStream, stat } = require('fs')
 const http = require('http')
 const mime = require('mime')
@@ -17,23 +17,12 @@ const { WebSocketServer } = require('ws')
 const INSTANCES = new WeakMap()
 
 /**
- * Forwards log events
- * @param {*} args Arguments of the log event
- * @returns {Void}
- */
-function forwardLogEvent (self) {
-  return function (...args) {
-    self.emit('log', ...args)
-  }
-}
-
-/**
  * Exports an implementation of a server
  * @type {Server}
  */
-module.exports = class Server extends EventEmitter {
+module.exports = class Server extends BaseClass {
   constructor (props = {}) {
-    super()
+    super({ id: props.id || 'server' })
 
     Object.seal(this)
 
@@ -52,8 +41,8 @@ module.exports = class Server extends EventEmitter {
     ctx.orderbooks.on('match', (...args) => ctx.swaps.fromOrders(...args))
 
     // Propagate the log events
-    ctx.orderbooks.on('log', forwardLogEvent(this))
-    ctx.swaps.on('log', forwardLogEvent(this))
+    ctx.orderbooks.on('log', (level, ...args) => this[level](...args))
+    ctx.swaps.on('log', (level, ...args) => this[level](...args))
   }
 
   /**
@@ -144,7 +133,7 @@ module.exports = class Server extends EventEmitter {
           .on('request', (...args) => this._onRequest(...args))
           .on('upgrade', (...args) => this._onUpgrade(...args))
 
-        this.emit('log', 'info', 'server.start', this)
+        this.info('start', this)
         this.emit('start', this)
         resolve(this)
       })
@@ -161,7 +150,7 @@ module.exports = class Server extends EventEmitter {
     return new Promise((resolve, reject) => instance.server
       .once('error', reject)
       .once('close', () => {
-        this.emit('log', 'info', 'server.stop', this)
+        this.info('stop', this)
         this.emit('stop', this)
         resolve()
       })
@@ -174,7 +163,7 @@ module.exports = class Server extends EventEmitter {
    * @returns {Void}
    */
   _onError (err) {
-    this.emit('log', 'error', 'server.error', err, this)
+    this.error('error', err, this)
     this.emit('error', err, this)
   }
 
@@ -194,8 +183,8 @@ module.exports = class Server extends EventEmitter {
     })
 
     // Emit all request/response errors as logs
-    req.on('error', err => this.emit('log', 'error', 'request.error', err, req, res))
-    res.on('error', err => this.emit('log', 'error', 'response.error', err, req, res))
+    req.on('error', err => this.error('request.error', err, req, res))
+    res.on('error', err => this.error('response.error', err, req, res))
 
     // Parse the URL and stash it for later use
     req.parsedUrl = new URL(req.url, `http://${req.headers.host}`)
@@ -274,7 +263,7 @@ module.exports = class Server extends EventEmitter {
       websocket.handleUpgrade(req, socket, head, ws => {
         ws.on('close', (code, reason) => {
           reason = reason.toString()
-          this.emit('log', 'info', 'ws.close', ws, { code, reason })
+          this.info('ws.close', ws, { code, reason })
         })
 
         ws.user = req.user
@@ -286,7 +275,7 @@ module.exports = class Server extends EventEmitter {
             const buf = Buffer.from(JSON.stringify(obj))
             const opts = { binary: false }
 
-            this.emit('log', 'info', 'ws.send', ws, obj)
+            this.info('ws.send', ws, obj)
             return ws._send(buf, opts, err => err ? reject(err) : resolve())
           })
         }
@@ -298,7 +287,7 @@ module.exports = class Server extends EventEmitter {
           return this.toJSON()
         }
 
-        this.emit('log', 'info', 'ws.open', ws)
+        this.info('ws.open', ws)
         handler.UPGRADE(ws, ctx)
       })
     } else {
@@ -341,12 +330,12 @@ module.exports = class Server extends EventEmitter {
           } catch (e) {
             const err = new Error(`unexpected non-JSON response ${str}`)
             res.send(err)
-            this.emit('log', 'error', 'http.api', err, req, res)
+            this.error('http.api', err, req, res)
             return
           }
         }
 
-        this.emit('log', 'info', 'http.api', req)
+        this.info('http.api', req)
 
         const { ctx } = INSTANCES.get(this)
         req.handler(req, res, ctx)
@@ -367,7 +356,7 @@ module.exports = class Server extends EventEmitter {
       // 403 Forbidden
       res.statusCode = 403
       res.end()
-      this.emit('log', 'error', 'http.static', req, res)
+      this.error('http.static', req, res)
       return
     }
 
@@ -503,7 +492,7 @@ class ServerResponse extends http.ServerResponse {
   send (data) {
     if (this.headersSent) {
       const level = data instanceof Error ? 'error' : 'info'
-      this.emit('log', level, 'http.api', data, this.req, this)
+      this[level]('http.api', data, this.req, this)
       return
     }
 

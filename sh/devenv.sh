@@ -206,7 +206,7 @@ fi
 ############################################################################
 # Developer Environment
 ############################################################################
-export PORTAL_ETHEREUM_URL="http://$(awk -F "= " '/HTTPHost/ {gsub(/[\47]/, "", $2); print $2}' $PLAYNET_ROOT/geth.portal.toml):$(awk -F "= " '/HTTPPort/ {gsub(/[\47]/, "", $2); print $2}' $PLAYNET_ROOT/geth.portal.toml)"
+export PORTAL_ETHEREUM_URL="ws://$(awk -F "= " '/WSHost/ {gsub(/[\47]/, "", $2); print $2}' $PLAYNET_ROOT/geth.portal.toml):$(awk -F "= " '/WSPort/ {gsub(/[\47]/, "", $2); print $2}' $PLAYNET_ROOT/geth.portal.toml)"
 export PORTAL_ETHEREUM_CHAINID=$(__run_as_user portal geth attach --exec "eth.chainId()" | tr -d '"')
 export PORTAL_ETHEREUM_CONTRACTS="$PLAYNET_ROOT/contracts.json"
 

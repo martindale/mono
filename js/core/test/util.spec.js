@@ -9,7 +9,7 @@ const { createHash } = require('crypto')
 describe('Utility Functions', function () {
   describe('hash()', function () {
     it('must generate a 256-bit sha3 hash', function () {
-      const arg = 'foo'
+      const arg = 'foobarbaz'
       const actual = Util.hash(arg)
       const expected = createHash('sha256').update(arg).digest('hex')
       expect(actual).to.equal(expected)

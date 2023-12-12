@@ -38,9 +38,7 @@ module.exports = class Store extends BaseClass {
    * @returns {Object}
    */
   toJSON () {
-    return {
-      '@type': this.constructor.name
-    }
+    return Object.assign(super.toJSON(), { })
   }
 
   /**
@@ -92,16 +90,26 @@ module.exports = class Store extends BaseClass {
     return Promise.resolve(oldData)
   }
 
+  /**
+   * Updates existing data in the store
+   * @param {String} namespace The namespace of the data
+   * @param {String} key The unique identifier of the data
+   * @param {Function} modifier Function that updates old data to new data
+   * @returns {Promise<Object>} The previously stored data
+   */
   update (namespace, key, modifier) {
     const instance = INSTANCES.get(this)
     const namespaceMap = instance.namespaces[namespace]
 
     if (namespaceMap != null && namespaceMap.has(key)) {
-      const data = Object.assign({}, namespaceMap.get(key))
-      this.emit('get', namespace, key, data)
-      return Promise.resolve(data)
+      const oldData = namespaceMap.get(key)
+      const newData = Object.freeze(Object.assign({}, modifier(oldData)))
+      namespaceMap.set(key, newData)
+
+      this.emit('update', namespace, key, newData, oldData)
+      return Promise.resolve(oldData)
     } else {
-      this.emit('get', namespace, key)
+      this.emit('update', namespace, key)
       return Promise.reject(new Error('not found'))
     }
   }

@@ -5,7 +5,6 @@
 describe('Orderbook - Limit', function () {
   const PROPS = Object.freeze({
     side: 'bid',
-    hash: 'myhash',
     baseAsset: 'BTC',
     baseNetwork: 'lightning.btc',
     baseQuantity: 1,
@@ -29,7 +28,6 @@ describe('Orderbook - Limit', function () {
           expect(o.uid).to.be.a('string').that.equals('alice')
           expect(o.type).to.be.a('string').that.equals('limit')
           expect(o.side).to.be.a('string').that.equals(O.side)
-          expect(o.hash).to.be.a('string').that.equals(O.hash)
           expect(o.baseAsset).to.be.a('string').that.equals(O.baseAsset)
           expect(o.baseNetwork).to.be.a('string').that.equals(O.baseNetwork)
           expect(o.baseQuantity).to.be.a('number').that.equals(O.baseQuantity)
@@ -53,7 +51,6 @@ describe('Orderbook - Limit', function () {
           expect(o.uid).to.be.a('string').that.equals('alice')
           expect(o.type).to.be.a('string').that.equals('limit')
           expect(o.side).to.be.a('string').that.equals(O.side)
-          expect(o.hash).to.be.a('string').that.equals(O.hash)
           expect(o.baseAsset).to.be.a('string').that.equals(O.baseAsset)
           expect(o.baseNetwork).to.be.a('string').that.equals(O.baseNetwork)
           expect(o.baseQuantity).to.be.a('number').that.equals(O.baseQuantity)
@@ -76,7 +73,6 @@ describe('Orderbook - Limit', function () {
         expect(o.uid).to.be.a('string').that.equals('alice')
         expect(o.type).to.be.a('string').that.equals('limit')
         expect(o.side).to.be.a('string').that.equals(O.side)
-        expect(o.hash).to.be.a('string').that.equals(O.hash)
         expect(o.baseAsset).to.be.a('string').that.equals(O.baseAsset)
         expect(o.baseNetwork).to.be.a('string').that.equals(O.baseNetwork)
         expect(o.baseQuantity).to.be.a('number').that.equals(O.baseQuantity)
@@ -99,31 +95,6 @@ describe('Orderbook - Limit', function () {
         .submitLimitOrder(O)
         .then(o => {
           validateOrder(o)
-          expect(o.status).to.be.a('string').that.equals('created')
-          expect(o.reason).to.equal(null)
-        })
-    })
-
-    it('must submit a counter-order to match previous order', function () {
-      const { bob } = this.test.ctx
-      const O = Object.assign({}, PROPS, { side: 'ask' })
-
-      return bob
-        .submitLimitOrder(O)
-        .then(o => {
-          expect(o).to.be.an('object')
-          expect(o.id).to.be.a('string')
-          expect(o.ts).to.be.a('number')
-          expect(o.uid).to.be.a('string').that.equals('bob')
-          expect(o.type).to.be.a('string').that.equals('limit')
-          expect(o.side).to.be.a('string').that.equals(O.side)
-          expect(o.hash).to.be.a('string').that.equals(O.hash)
-          expect(o.baseAsset).to.be.a('string').that.equals(O.baseAsset)
-          expect(o.baseNetwork).to.be.a('string').that.equals(O.baseNetwork)
-          expect(o.baseQuantity).to.be.a('number').that.equals(O.baseQuantity)
-          expect(o.quoteAsset).to.be.a('string').that.equals(O.quoteAsset)
-          expect(o.quoteNetwork).to.be.a('string').that.equals(O.quoteNetwork)
-          expect(o.quoteQuantity).to.be.a('number').that.equals(O.quoteQuantity)
           expect(o.status).to.be.a('string').that.equals('created')
           expect(o.reason).to.equal(null)
         })

@@ -58,10 +58,7 @@ describe('Must have initialized the test environment', function () {
 
     expect(contracts).to.be.an('object')
     expect(contracts).to.have.all.deep.keys(
-      'ECDSA',
       'IERC20',
-      'PaymentChannel',
-      'ReentrancyGuard',
       'Swap'
     )
   })

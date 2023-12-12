@@ -3,7 +3,7 @@
  */
 
 const { expect } = require('chai')
-const Assets = require('../../../lib/core/assets')
+const Assets = require('../lib/assets')
 
 const SUPPORTED = [
   'BTC',

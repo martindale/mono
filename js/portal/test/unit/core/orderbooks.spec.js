@@ -2,8 +2,8 @@
  * @file Behavioral specification for interface to supported blockchain orderbooks
  */
 
+const { Order } = require('@portaldefi/core')
 const { expect } = require('chai')
-const Order = require('../../../lib/core/order')
 const Orderbooks = require('../../../lib/core/orderbooks')
 
 describe('Orderbooks', function () {

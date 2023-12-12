@@ -21,13 +21,13 @@ Helpers.random = function (length = 32) {
 }
 
 /**
- * Returns hex-formatted sha256 hash of the concatenation of all input strings
- * @param {String[]} args
+ * Returns hex-formatted sha256 hash of the provided input
+ * @param {String} data The data whose hash is to be calculated
  * @returns {String}
  */
-Helpers.hash = function (...args) {
+Helpers.hash = function (data) {
   return crypto.createHash('sha256')
-    .update(args.join(''))
+    .update(data)
     .digest('hex')
 }
 

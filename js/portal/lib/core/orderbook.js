@@ -2,7 +2,7 @@
  * @file Implements an orderbook for a single asset-pair
  */
 
-const { EventEmitter } = require('events')
+const { BaseClass } = require('@portaldefi/core')
 
 const priceFn = { ask: Math.min, bid: Math.max }
 const priceDefault = { ask: Number.MAX_VALUE, bid: 0 }
@@ -11,7 +11,7 @@ const priceDefault = { ask: Number.MAX_VALUE, bid: 0 }
  * Implements an orderbook for a single asset-pair
  * @type {Orderbook}
  */
-module.exports = class Orderbook extends EventEmitter {
+module.exports = class Orderbook extends BaseClass {
   /**
    * Instantiates a new orderbook for the specfied asset-pair
    * @param {Object} props Properties of the orderbook
@@ -30,9 +30,8 @@ module.exports = class Orderbook extends EventEmitter {
       throw new Error('instantiated with invalid limitSize!')
     }
 
-    super()
+    super({ id: `${props.baseAsset}-${props.quoteAsset}` })
 
-    this.assetPair = `${props.baseAsset}-${props.quoteAsset}`
     this.baseAsset = props.baseAsset
     this.quoteAsset = props.quoteAsset
     this.limitSize = props.limitSize
@@ -48,6 +47,13 @@ module.exports = class Orderbook extends EventEmitter {
     this._id = null
 
     Object.seal(this)
+  }
+
+  /**
+   * The asset pair tracked/traded by the orderbook
+   */
+  get assetPair () {
+    return this.id
   }
 
   /**

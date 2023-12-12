@@ -17,7 +17,7 @@ function log (obj) {
  * @returns {Void}
  */
 ;(function main () {
-  const peer = new Peer({ root: config.build.outDir })
+  const peer = new Peer({ id: 'portal', root: config.build.outDir })
   const logAndExit = event => err => {
     console.error(event, err)
     process.exit(1)

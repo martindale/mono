@@ -14,30 +14,35 @@ module.exports = class SDK extends BaseClass {
     super()
 
     /**
-     * Client credentials for the blockchains
-     * @type {Object}
-     * @todo Refactor these out of the client altogether!
-     */
-    this.credentials = props.credentials
-
-    /**
      * The Portal SDK instance
      * @type {Sdk}
      */
+    const onSwap = swap => this.emit(`swap.${swap.status}`, swap)
     this.sdk = new Sdk(props)
+      // DEX events
       .on('order.created', (...args) => this.emit('order.created', ...args))
       .on('order.opened', (...args) => this.emit('order.opened', ...args))
       .on('order.closed', (...args) => this.emit('order.closed', ...args))
-      .on('swap.created', (...args) => this.emit('swap.created', ...args))
-      .on('swap.opening', (...args) => this.emit('swap.opening', ...args))
-      .on('swap.opened', (...args) => this.emit('swap.opened', ...args))
-      .on('swap.committing', (...args) => this.emit('swap.committing', ...args))
-      .on('swap.committed', (...args) => this.emit('swap.committed', ...args))
+      // Swap events
+      .on('swap.received', onSwap)
+      .on('swap.created', onSwap)
+      .on('swap.holder.invoice.created', onSwap)
+      .on('swap.holder.invoice.sent', onSwap)
+      .on('swap.seeker.invoice.created', onSwap)
+      .on('swap.seeker.invoice.sent', onSwap)
+      .on('swap.holder.invoice.paid', onSwap)
+      .on('swap.seeker.invoice.paid', onSwap)
+      .on('swap.holder.invoice.settled', onSwap)
+      .on('swap.seeker.invoice.settled', onSwap)
+      .on('swap.completed', onSwap)
+      // All other events
       .on('message', (...args) => this.emit('message', ...args))
+      .on('log', (...args) => this.emit('log', ...args))
+      .on('error', (...args) => this.emit('error', ...args))
   }
 
   get id () {
-    return this.sdk.network.id
+    return this.sdk.id
   }
 
   get isConnected () {
@@ -49,8 +54,7 @@ module.exports = class SDK extends BaseClass {
    * @returns {Object}
    */
   toJSON () {
-    const { network, store, blockchains, orderbooks, swaps } = this
-    return { network, store, blockchains, orderbooks, swaps }
+    return Object.assign(super.toJSON(), { sdk: this.sdk })
   }
 
   /**
@@ -70,77 +74,19 @@ module.exports = class SDK extends BaseClass {
   }
 
   /**
-   * Adds a limit order to the orderbook
-   * @param {Object} order The limit order to add the orderbook
+   * Submits a limit order to the DEX
+   * @param {Object} order The limit order to add to the DEX
    */
   submitLimitOrder (order) {
-    return this.sdk.network.request({
-      method: 'PUT',
-      path: '/api/v1/orderbook/limit'
-    }, {
-      side: order.side,
-      hash: order.hash,
-      baseAsset: order.baseAsset,
-      baseNetwork: order.baseNetwork,
-      baseQuantity: order.baseQuantity,
-      quoteAsset: order.quoteAsset,
-      quoteNetwork: order.quoteNetwork,
-      quoteQuantity: order.quoteQuantity
-    })
+    return this.sdk.dex.submitLimitOrder(order)
   }
 
   /**
-   * Adds a limit order to the orderbook
-   * @param {Object} order The limit order to delete the orderbook
+   * Cancels a previously submitted limit order
+   * @param {Object} order The limit order to delete the DEX
    */
   cancelLimitOrder (order) {
-    return this.sdk.network.request({
-      method: 'DELETE',
-      path: '/api/v1/orderbook/limit'
-    }, {
-      id: order.id,
-      baseAsset: order.baseAsset,
-      quoteAsset: order.quoteAsset
-    })
-  }
-
-  /**
-   * Create the required state for an atomic swap
-   * @param {Swap|Object} swap The swap to open
-   * @param {Object} opts Options for the operation
-   * @returns {Swap}
-   */
-  swapOpen (swap, opts) {
-    return this.sdk.network.request({
-      method: 'PUT',
-      path: '/api/v1/swap'
-    }, { swap, opts })
-  }
-
-  /**
-   * Completes the atomic swap
-   * @param {Swap|Object} swap The swap to commit
-   * @param {Object} opts Options for the operation
-   * @returns {Promise<Void>}
-   */
-  swapCommit (swap, opts) {
-    return this.sdk.network.request({
-      method: 'POST',
-      path: '/api/v1/swap'
-    }, { swap, opts })
-  }
-
-  /**
-   * Abort the atomic swap optimistically and returns funds to owners
-   * @param {Swap|Object} swap The swap to abort
-   * @param {Object} opts Options for the operation
-   * @returns {Promise<Void>}
-   */
-  swapAbort (swap, opts) {
-    return this.sdk.network.request({
-      method: 'DELETE',
-      path: '/api/v1/swap'
-    }, { swap, opts })
+    return this.sdk.dex.cancelLimitOrder(order)
   }
 
   request (...args) {

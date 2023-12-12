@@ -2,13 +2,9 @@
  * @file Defines an order
  */
 
-const { Util: { uuid } } = require('@portaldefi/core')
-
-/**
- * A list of supported assets
- * @type {Map}
- */
-const ASSETS = require('./assets')
+const Assets = require('./assets')
+const BaseClass = require('./base_class')
+const { uuid } = require('./util')
 
 /**
  * A list of supported networks
@@ -29,7 +25,7 @@ const ORDER_SIDES = ['ask', 'bid']
  * Types of orders
  * @type {Array}
  */
-const ORDER_TYPES = ['limit', 'market']
+const ORDER_TYPES = ['limit']
 
 /**
  * An enum of order states
@@ -40,14 +36,13 @@ const ORDER_STATUS = ['created', 'opened', 'closed']
 /**
  * Defines an order
  */
-module.exports = class Order {
+module.exports = class Order extends BaseClass {
   /**
    * Creates a new instance of an order
    * @param {Object} props Properties of the order
    * @param {String} props.uid The unique identifier of the user
    * @param {String} props.type The type of the order (should be limit)
    * @param {String} props.side The side of the orderbook to add the order
-   * @param {String} props.hash The hash of the atomic swap secret
    * @param {String} props.baseAsset The symbol of the asset being bought/sold
    * @param {String} props.baseQuantity The amount of base asset being traded
    * @param {String} props.baseNetwork The network of base asset being traded
@@ -68,11 +63,9 @@ module.exports = class Order {
       throw new Error('no side specified!')
     } else if (!ORDER_SIDES.includes(props.side)) {
       throw new Error(`type must one of "${ORDER_SIDES.join(', ')}"`)
-    } else if (props.hash == null) {
-      throw new Error('no hash specified!')
     }
 
-    if (ASSETS[props.baseAsset] == null) {
+    if (Assets[props.baseAsset] == null) {
       throw new Error(`"${props.baseAsset}" is not a supported base asset!`)
     } else if (!NETWORKS.includes(props.baseNetwork)) {
       throw new Error(`"${props.baseNetwork}" is not a supported blockchain!`)
@@ -80,7 +73,7 @@ module.exports = class Order {
       throw new Error(`"${props.baseQuantity}" is not a valid quantity!`)
     }
 
-    if (ASSETS[props.quoteAsset] == null) {
+    if (Assets[props.quoteAsset] == null) {
       throw new Error(`"${props.quoteAsset}" is not a supported quote asset!`)
     } else if (!NETWORKS.includes(props.quoteNetwork)) {
       throw new Error(`"${props.quoteNetwork}" is not a supported blockchain!`)
@@ -88,13 +81,13 @@ module.exports = class Order {
       throw new Error(`"${props.quoteQuantity}" is not a valid quantity!`)
     }
 
+    super({ id: props.id || uuid() })
+
     Object.seal(Object.assign(this, {
-      id: props.id || uuid(),
       ts: props.ts || Date.now(),
       uid: props.uid,
       type: props.type,
       side: props.side,
-      hash: props.hash,
       baseAsset: props.baseAsset,
       baseNetwork: props.baseNetwork,
       baseQuantity: props.baseQuantity,
@@ -105,22 +98,6 @@ module.exports = class Order {
       status: ORDER_STATUS[0],
       reason: null
     }))
-  }
-
-  /**
-   * Returns an asset-pair, given a JSON object with the base/quote assets
-   * @param {Object} obj JSON object representing the order
-   * @param {String} obj.baseAsset The symbol of the asset being bought/sold
-   * @param {String} obj.quoteAsset The symbol of the asset used for payment
-   */
-  static toAssetPair (obj) {
-    if (obj.baseAsset == null && typeof obj.baseAsset !== 'string') {
-      return null
-    } else if (obj.quoteAsset == null && typeof obj.quoteAsset !== 'string') {
-      return null
-    } else {
-      return `${obj.baseAsset}-${obj.quoteAsset}`
-    }
   }
 
   /**
@@ -192,14 +169,11 @@ module.exports = class Order {
    * @returns {Object}
    */
   toJSON () {
-    const obj = {
-      '@type': this.constructor.name,
-      id: this.id,
+    return Object.assign(super.toJSON(), {
       ts: this.ts,
       uid: this.uid,
       type: this.type,
       side: this.side,
-      hash: this.hash,
       baseAsset: this.baseAsset,
       baseQuantity: this.baseQuantity,
       baseNetwork: this.baseNetwork,
@@ -208,9 +182,7 @@ module.exports = class Order {
       quoteNetwork: this.quoteNetwork,
       status: this.status,
       reason: this.reason
-    }
-
-    return obj
+    })
   }
 
   /**
@@ -253,13 +225,28 @@ module.exports = class Order {
       this.quoteNetwork === target.quoteNetwork
   }
 
+  static fromJSON (obj) {
+    if (obj['@type'] !== 'Order') {
+      this.warn('order.error', obj)
+      throw Error(`expected type "Order", but got "${obj['@type']}"!`)
+    }
+
+    return new Order(obj)
+  }
+
   /**
-   * Validates a matched order-pair
-   * @param {Object<Order>} maker The maker order of the match order-pair
-   * @param {Object<Order>} taker The taker order of the match order-pair
-   * @returns {Boolean}
+   * Returns an asset-pair, given a JSON object with the base/quote assets
+   * @param {Object} obj JSON object representing the order
+   * @param {String} obj.baseAsset The symbol of the asset being bought/sold
+   * @param {String} obj.quoteAsset The symbol of the asset used for payment
    */
-  static validateMatch (maker, taker) {
-    return true
+  static toAssetPair (obj) {
+    if (obj.baseAsset == null && typeof obj.baseAsset !== 'string') {
+      return null
+    } else if (obj.quoteAsset == null && typeof obj.quoteAsset !== 'string') {
+      return null
+    } else {
+      return `${obj.baseAsset}-${obj.quoteAsset}`
+    }
   }
 }

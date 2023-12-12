@@ -3,14 +3,13 @@
  */
 
 const { expect } = require('chai')
-const Order = require('../../../lib/core/order')
+const Order = require('../lib/order')
 
 describe('Order', function () {
   const PROPS = {
     uid: 'uid',
     type: 'limit',
     side: 'bid',
-    hash: 'myhash',
     baseAsset: 'BTC',
     baseNetwork: 'lightning.btc',
     baseQuantity: 1,
@@ -47,7 +46,6 @@ describe('Order', function () {
       expect(o.uid).to.be.a('string').that.equals(PROPS.uid)
       expect(o.type).to.be.a('string').that.equals(PROPS.type)
       expect(o.side).to.be.a('string').that.equals(PROPS.side)
-      expect(o.hash).to.be.a('string').that.equals(PROPS.hash)
       expect(o.baseAsset).to.be.a('string').that.equals(PROPS.baseAsset)
       expect(o.baseNetwork).to.be.a('string').that.equals(PROPS.baseNetwork)
       expect(o.baseQuantity).to.be.a('number').that.equals(PROPS.baseQuantity)
