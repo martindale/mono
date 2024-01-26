@@ -51,7 +51,10 @@ in {
           "${cfg.nodeFqdn}" = {
             forceSSL = true;
             enableACME = true;
-            locations."/".proxyPass = "http://${config.portaldefi.portal.server.hostname}:${toString config.portaldefi.portal.server.port}/";
+            locations."/" = {
+              proxyPass = "http://${config.portaldefi.portal.server.hostname}:${toString config.portaldefi.portal.server.port}/";
+              proxyWebsockets = true;
+            };
           };
         }
         // mapAttrs' (name: config:
