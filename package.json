@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/FabricLabs/mono#readme",
   "dependencies": {
-    "@fabric/core": "github:FabricLabs/fabric#feature/lightning"
+    "@fabric/core": "github:FabricLabs/fabric#feature/noise-channels"
   }
 }
