@@ -1,9 +1,9 @@
 /**
- * @fle Behavioral specification for interface to supported blockchain orderbooks
+ * @file Behavioral specification for interface to supported blockchain orderbooks
  */
 
+const { Order } = require('@portaldefi/core')
 const { expect } = require('chai')
-const Order = require('../../../lib/core/order')
 const Orderbooks = require('../../../lib/core/orderbooks')
 
 describe('Orderbooks', function () {
@@ -28,10 +28,10 @@ describe('Orderbooks', function () {
     const BASE_ORDER = {
       uid: 'uid',
       type: 'limit',
-      baseAsset: 'ETH',
-      baseNetwork: 'goerli',
-      quoteAsset: 'USDC',
-      quoteNetwork: 'sepolia'
+      baseAsset: 'BTC',
+      baseNetwork: 'lightning.btc',
+      quoteAsset: 'ETH',
+      quoteNetwork: 'ethereum'
     }
 
     let orderbooks, order

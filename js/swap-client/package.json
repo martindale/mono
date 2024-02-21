@@ -1,33 +1,141 @@
 {
   "name": "swap-client",
-  "proxy": "http://localhost:34011/api",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "0.0.2",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@reduxjs/toolkit": "^1.9.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-redux": "^8.0.5",
-    "redux": "^4.2.0",
-    "semantic-ui-css": "^2.5.0",
-    "semantic-ui-react": "^2.1.4"
+    "build": "npm run credentials && vite build",
+    "clean": "rm -rf dist node_modules package-lock.json",
+    "coverage": "c8 mocha",
+    "credentials": "export PORTAL_ROOT=../../ && node credentials.js",
+    "dev": "npm run credentials && node test/dev.js",
+    "dev:force": "npm run credentials && vite --force",
+    "lint": "standard",
+    "lint-fix": "standard --fix",
+    "posttest": "npm run lint",
+    "preview": "vite preview --port 7500",
+    "test:all": "npm run dev & node test/ui/test_all.js",
+    "test:ord": "node test/ui/test_btcord2btc.js",
+    "test:swap": "node test/ui/test_btc2eth.js",
+    "test:cucumber": "cucumber-js test/features",
+    "test:unisat": "node test/ui/test_unisat.js",
+    "test:xverse": "node test/ui/test_xverse.js",
+    "test:metamask": "node test/ui/test_metamask.js",
+    "test:alby": "node test/ui/test_alby.js",
+    "test:ui": "mocha test/ui",
+    "test": "mocha",
+    "test:cucumber2": "cucumber-js",
+    "test:metamask0": "node src/test/ntest_metamask.js",
+    "test:swap0": "node src/test/test_btc-eth.js",
+    "test:unisat0": "node src/test/ntest_unisat.js",
+    "test:xverse0": "node src/test/ntest_xverse.js",
+    "test1": "node src/test/test2.js",
+    "watch": "npm run test -- --watch",
+    "debug": "npm run test -- --debug"
   },
   "devDependencies": {
-    "@antora/cli": "3.1.2",
-    "@antora/site-generator": "3.1.2",
-    "@mermaid-js/mermaid-cli": "9.2.2",
+    "@babel/preset-env": "^7.21.5",
+    "@babel/preset-react": "^7.18.6",
+    "@babel/preset-typescript": "^7.21.5",
+    "@babel/register": "^7.22.5",
+    "@cucumber/cucumber": "^9.3.0",
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@mui/icons-material": "^5.11.11",
+    "@mui/material": "^5.11.13",
+    "@portaldefi/core": "file:../core",
+    "@portaldefi/peer": "file:../portal",
+    "@portaldefi/sdk": "file:../sdk",
+    "@reduxjs/toolkit": "^1.9.1",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.9",
-    "@vitejs/plugin-react": "2.2.0",
+    "@vitejs/plugin-react": "^2.2.0",
+    "@walletconnect/web3wallet": "^1.7.5",
+    "@web3modal/sign-react": "^2.4.7",
     "autoprefixer": "10.4.13",
+    "babel": "^6.23.0",
+    "babel-jest": "^29.5.0",
+    "bolt11": "^1.4.0",
+    "browserify": "^17.0.0",
+    "buffer": "^6.0.3",
+    "chai": "^4.3.7",
+    "classnames": "^2.3.2",
+    "cucumber-puppeteer": "^1.0.16",
+    "fs": "^0.0.1-security",
+    "jest-environment-jsdom": "^29.5.0",
+    "mocha": "^10.2.0",
+    "path": "^0.12.7",
     "postcss": "8.4.19",
-    "tailwindcss": "3.2.4",
-    "vite": "3.2.4"
+    "puppeteer": "^21.1.1",
+    "qrcode": "^1.5.3",
+    "react": "18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.5",
+    "react-router-dom": "^6.6.1",
+    "react-test-renderer": "^18.2.0",
+    "react-toastify": "^9.1.2",
+    "redux": "^4.2.0",
+    "redux-mock-store": "^1.5.4",
+    "sats-connect": "^0.2.0",
+    "semantic-ui-css": "^2.5.0",
+    "semantic-ui-react": "^2.1.4",
+    "standard": "^17.0.0",
+    "uglify-es": "^3.3.9",
+    "vite": "3.2.4",
+    "web3": "^1.9.0"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "<rootDir>/.yalc/",
+      "<rootDir>/node_modules/"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|scss)$": "<rootDir>/__mocks__/styleMock.js"
+    },
+    "globals": {
+      "window": {}
+    }
+  },
+  "c8": {
+    "check-coverage": true,
+    "report-dir": "coverage",
+    "reporter": [
+      "html",
+      "text"
+    ]
+  },
+  "mocha": {
+    "diff": true,
+    "extension": [
+      "spec.js"
+    ],
+    "recursive": true,
+    "reporter": "spec",
+    "slow": 1000,
+    "timeout": 120000,
+    "ui": "bdd",
+    "watch-files": [
+      "src/**/*.js",
+      "test/**/*.js"
+    ]
+  },
+  "standard": {
+    "ignore": [
+      "dist/",
+      "src/test/crx"
+    ],
+    "globals": [
+      "debug",
+
+      "after",
+      "afterEach",
+      "before",
+      "beforeEach",
+      "describe",
+      "expect",
+      "it",
+
+      "fetch",
+      "WebSocket"
+    ]
   }
 }

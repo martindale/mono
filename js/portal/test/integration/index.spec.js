@@ -2,9 +2,9 @@
  * @file Client/Server Interface Specification
  */
 
+const Client = require('@portaldefi/sdk')
 const { expect } = require('chai')
-const Client = require('../../../lib/core/client')
-const Server = require('../../../lib/core/server')
+const Server = require('../../lib/core/server')
 
 before('Initialize client/server', function () {
   return new Server()
@@ -14,30 +14,19 @@ before('Initialize client/server', function () {
 
       // For basic client/server tests
       const server = instance
-      const client = new Client({ hostname, port })
+      const client = new Client({ id: 'client', hostname, port })
 
-      // For advanced multi-client test suites
-      const alice = new Client({ hostname, port })
-      const bob = new Client({ hostname, port })
+      Object.assign(this, { client, server })
 
-      Object.assign(this, { alice, bob, client, server })
-
-      return Promise.all([
-        client.connect(),
-        alice.connect(),
-        bob.connect()
-      ])
+      return client.connect()
     })
 })
 
 after('Destroy client/server', function () {
-  const { alice, bob, client, server } = this.test.ctx
+  const { client, server } = this.test.ctx
 
-  return Promise.all([
-    client.disconnect(),
-    alice.disconnect(),
-    bob.disconnect()
-  ]).then(() => server.stop())
+  return client.disconnect()
+    .then(() => server.stop())
     .then(() => {
       this.test.ctx.alice = null
       this.test.ctx.bob = null

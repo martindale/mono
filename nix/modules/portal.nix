@@ -1,18 +1,21 @@
-{ config, lib, pkgs, ...}:
-
-with lib;
-
-let
-  cfg = config.portaldefi.portal.server;
-in
 {
-  options.portaldefi.portal.server = {
-    enable = mkEnableOption "portal";
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
+  cfg = config.portaldefi.portal.server;
+  cfgEthereum = config.services.geth.default;
 
+  # TODO: Harcoded values for contracts for now, it should come from custom derivation
+  contracts = ../../playnet/contracts.json;
+in {
+  options.portaldefi.portal.server = {
     hostname = mkOption {
       description = "The interface/IP address to listen on";
       type = types.str;
-      default = "localhost";
+      default = "127.0.0.1";
     };
 
     port = mkOption {
@@ -22,17 +25,29 @@ in
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = {
+    environment.systemPackages = [pkgs.portaldefi.demo];
+
     systemd.services.portal = {
       description = "Portal Server";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      wantedBy = ["multi-user.target"];
+      after = [
+        "network.target"
+        "bitcoind-regest.service" # TODO: Don't hardcode this value, obtain it properly from defined service
+        "geth-default.service" # TODO: Don't hardcode this value, obtain it properly from defined service
+      ];
       environment = {
+        PORTAL_HTTP_ROOT = toString pkgs.portaldefi.demo;
         PORTAL_HTTP_HOSTNAME = cfg.hostname;
         PORTAL_HTTP_PORT = toString cfg.port;
+
+        PORTAL_ETHEREUM_URL = "ws://${cfgEthereum.http.address}:${toString cfgEthereum.http.port}";
+        PORTAL_ETHEREUM_CHAINID = "0x539";
+        PORTAL_ETHEREUM_CONTRACTS = contracts; # pkgs.portaldefi.demo.contracts
       };
       serviceConfig = {
-        DynamicUser = true;
+        # Dynamic user prevents connection to geth
+        # DynamicUser = true;
         Restart = "always";
         StateDirectory = "portal";
         ExecStart = "${pkgs.portaldefi.portal}/bin/portal";

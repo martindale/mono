@@ -1,8 +1,11 @@
 # Nix
 result*
+repl-result*
 
 # Node.js
+.parcel-cache
 coverage
+dist
 node_modules
 dist
 
@@ -10,9 +13,6 @@ dist
 .terraform
 .terraform.lock.hcl
 terraform.tfstate*
-
-# Secure content
-secure
 
 # IntelliJ
 .idea
@@ -23,5 +23,19 @@ workspace
 docs/build
 docs/package-lock.json
 
-# Miscellaneous 
+# Miscellaneous
+.gitignore
 .DS_Store
+**/.editorconfig
+**/.vscode/settings.json
+
+# Playnet-related stuff
+playnet
+!playnet/bitcoind*
+!playnet/geth*
+!playnet/lnd*
+**/credentials/*.json
+
+# direnv
+/.direnv
+/.envrc.local

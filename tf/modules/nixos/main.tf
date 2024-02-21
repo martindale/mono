@@ -3,8 +3,6 @@ terraform {
     external = { source = "hashicorp/external" }
     null     = { source = "hashicorp/null" }
   }
-
-  experiments = [module_variable_optional_attrs]
 }
 
 

@@ -1,33 +1,47 @@
 {
-  "name": "portal",
+  "name": "@portaldefi/peer",
   "version": "0.0.0",
-  "description": "The Portal backend",
+  "description": "The Portal Peer",
   "bin": {
     "portal": "bin/portal.js"
   },
+  "main": "lib/core/server.js",
   "scripts": {
     "clean": "rm -rf coverage node_modules package-lock.json",
+    "debug": "DEBUG=* npm start",
     "coverage": "c8 mocha",
-    "lint": "standard",
-    "lint-fix": "standard --fix",
+    "lint": "npm run lint:js && npm run lint:sol",
+    "lint:js": "standard",
+    "lint:sol": "solhint contracts/*.sol",
+    "lint-fix": "npm run lint:js -- --fix && npm run lint:sol --fix",
     "posttest": "npm run lint",
+    "start": "node bin/portal",
+    "dev": "PORTAL_HTTP_PORT=42297 node bin/portal",
     "test": "mocha test/unit",
     "test:unit": "mocha test/unit",
-    "test:integration:swap": "mocha test/integration/api/v1/swap",
-    "test:swap": "mocha test/unit/core/swaps-lndToLnd.spec.js",
+    "test:contracts": "mocha test/contracts",
+    "test:integration": "mocha test/integration",
     "watch": "npm test -- --watch"
   },
   "dependencies": {
-    "uuid": "^9.0.0",
-    "web3": "^1.8.0",
-    "ws": "^8.10.0",
-    "lightning": "6.2.6"
+    "@portaldefi/core": "file:../core",
+    "debug": "^4.3.4",
+    "level": "^8.0.0",
+    "lightning": "^6.2.6",
+    "mime": "^3.0.0",
+    "ws": "^8.10.0"
   },
   "devDependencies": {
+    "@portaldefi/app": "file:../app",
+    "@portaldefi/sdk": "file:../sdk",
     "c8": "^7.12.0",
-    "chai": "^4.3.6",
-    "mocha": "^10.0.0",
-    "standard": "^17.0.0"
+    "chai": "^4.3.7",
+    "keythereum": "^2.0.0",
+    "mocha": "^10.2.0",
+    "solc": "^0.7.6",
+    "solhint": "^3.3.7",
+    "standard": "^17.0.0",
+    "web3": "^4.1.2"
   },
   "c8": {
     "check-coverage": true,
@@ -45,23 +59,26 @@
     "recursive": true,
     "reporter": "spec",
     "slow": 1000,
-    "timeout": 2000,
+    "timeout": 120000,
     "ui": "bdd",
     "watch-files": [
+      "contracts/**/*.sol",
       "lib/**/*.js",
       "test/**/*.js"
     ]
   },
   "standard": {
     "globals": [
+      "debug",
       "after",
       "afterEach",
       "before",
       "beforeEach",
-      "context",
       "describe",
       "expect",
-      "it"
+      "it",
+      "fetch",
+      "WebSocket"
     ]
   }
 }

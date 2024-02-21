@@ -1,5 +1,5 @@
 /**
- * @fle Behavioral specification for the HTTP server
+ * @file Behavioral specification for the Store
  */
 
 const { expect } = require('chai')

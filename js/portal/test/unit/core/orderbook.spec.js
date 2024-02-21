@@ -2,14 +2,14 @@
  * @file Behavioral specification for the Orderbook
  */
 
+const { Order } = require('@portaldefi/core')
 const { expect } = require('chai')
-const Order = require('../../../lib/core/order')
 const Orderbook = require('../../../lib/core/orderbook')
 
 describe('Orderbook', function () {
   const PROPS = {
-    baseAsset: 'ETH',
-    quoteAsset: 'USDC',
+    baseAsset: 'BTC',
+    quoteAsset: 'ETH',
     limitSize: 100
   }
 
@@ -20,8 +20,8 @@ describe('Orderbook', function () {
     it('must throw when instantiated without required arguments', function () {
       expect(() => new Orderbook()).to.throw()
       expect(() => new Orderbook({})).to.throw()
-      expect(() => new Orderbook({ baseAsset: 'ETH' })).to.throw()
-      expect(() => new Orderbook({ quoteAsset: 'USDC' })).to.throw()
+      expect(() => new Orderbook({ baseAsset: 'BTC' })).to.throw()
+      expect(() => new Orderbook({ quoteAsset: 'ETH' })).to.throw()
       expect(() => new Orderbook({ limitPrice: 0 })).to.throw()
       expect(() => new Orderbook({ limitPrice: -10 })).to.throw()
       expect(() => new Orderbook({ limitPrice: 10 })).to.throw()
@@ -33,9 +33,9 @@ describe('Orderbook', function () {
       expect(ob).to.be.an.instanceof(Orderbook)
       /* eslint-disable-next-line no-unused-expressions */
       expect(ob).to.be.sealed
-      expect(ob.assetPair).to.be.a('string').that.equals('ETH-USDC')
-      expect(ob.baseAsset).to.be.a('string').that.equals('ETH')
-      expect(ob.quoteAsset).to.be.a('string').that.equals('USDC')
+      expect(ob.assetPair).to.be.a('string').that.equals('BTC-ETH')
+      expect(ob.baseAsset).to.be.a('string').that.equals('BTC')
+      expect(ob.quoteAsset).to.be.a('string').that.equals('ETH')
       expect(ob.limitSize).to.be.a('number').that.equals(100)
       expect(ob.side.ask).to.be.an.instanceof(Map)
       expect(ob.side.bid).to.be.an.instanceof(Map)
@@ -78,10 +78,10 @@ describe('Orderbook', function () {
       const BASE_ORDER = {
         uid: 'uid',
         type: 'limit',
-        baseAsset: 'ETH',
-        baseNetwork: 'goerli',
-        quoteAsset: 'USDC',
-        quoteNetwork: 'sepolia'
+        baseAsset: 'BTC',
+        baseNetwork: 'lightning.btc',
+        quoteAsset: 'ETH',
+        quoteNetwork: 'ethereum'
       }
       const askOrder = new Order(Object.assign({}, BASE_ORDER, {
         side: 'ask',
@@ -378,11 +378,11 @@ describe('Orderbook', function () {
         uid: 'uid',
         type: 'limit',
         hash: 'hash',
-        baseAsset: 'ETH',
-        baseNetwork: 'goerli',
+        baseAsset: 'BTC',
+        baseNetwork: 'lightning.btc',
         baseQuantity: 1,
-        quoteAsset: 'USDC',
-        quoteNetwork: 'sepolia',
+        quoteAsset: 'ETH',
+        quoteNetwork: 'ethereum',
         quoteQuantity: 1000
       }
       const askOrder = new Order(Object.assign({}, BASE_ORDER, { side: 'ask' }))

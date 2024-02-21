@@ -2,21 +2,20 @@
  * @file Exposes all in-progress atomic swaps
  */
 
-const { EventEmitter } = require('events')
-const Swap = require('./swap')
+const { BaseClass, Swap } = require('@portaldefi/core')
 
 /**
  * Exposes all in-progress atomic swaps
  * @type {Swaps}
  */
-module.exports = class Swaps extends EventEmitter {
+module.exports = class Swaps extends BaseClass {
   constructor (props, ctx) {
     super()
 
     this.ctx = ctx
     this.swaps = new Map()
 
-    Object.seal(this)
+    Object.freeze(this)
   }
 
   /**
@@ -27,72 +26,49 @@ module.exports = class Swaps extends EventEmitter {
    */
   fromOrders (maker, taker) {
     return new Promise((resolve, reject) => {
-      let swap
-
       try {
-        swap = Swap.fromOrders(maker, taker, this.ctx)
-          .once('open', () => this.emit('open', swap))
-          .once('abort', () => this.emit('abort', swap))
-          .once('commit', () => this.emit('commit', swap))
+        const swap = Swap.fromOrders(maker, taker, this.ctx)
 
-        this.swaps.has(swap.id) || this.swaps.set(swap.id, swap)
+        if (this.swaps.has(swap.id)) {
+          reject(Error(`swap "${swap.id}" already exists!`))
+        } else {
+          this.swaps.set(swap.id, swap)
+          this.emit(swap.status, swap)
+          resolve(swap)
+        }
       } catch (err) {
-        return reject(err)
+        reject(err)
       }
-
-      resolve(swap)
     })
   }
 
   /**
-   * Handles the opening of a swap by a user that is a party to the swap
-   * @param {Swap} swap The swap to open
-   * @param {String} swap.id The unique identifier of the swap to be opened
-   * @param {Party} party The party that is opening the swap
-   * @param {String} party.id The unique identifier of the party
-   * @param {*} party.public.state Data that may be shared with the other party
-   * @param {*} party.private.state Data that may not be shared with the other party
-   * @returns {Promise<Party>}
+   * Handles incoming swap updates
+   * @param {Object} swapObj The JSON representation of the swap
+   * @param {Object} partyObj The JSON representation of the party that sent the update
    */
-  async open (swap, party) {
-    if (swap == null || swap.id == null) {
-      return Promise.reject(Error('unknown swap!'))
-    } else if (!this.swaps.has(swap.id)) {
-      return Promise.reject(Error(`unknown swap "${swap.id}"!`))
-    } else {
-      const returnedParty = await this.swaps.get(swap.id).open(party)
-      return returnedParty
-    }
-  }
-
-  /**
-   * Handles commiting to a swap by a user that is a party to id
-   * @param {Swap} swap The swap being committed
-   * @param {String} swap.id The unique identifier of the swap to be opened
-   * @param {Party} party The party that is opening the swap
-   * @param {String} party.id The unique identifier of the party
-   * @returns {Promise<Void>}
-   */
-  async commit (swap, party) {
-    if (swap == null || swap.id == null) {
-      throw new Error('unknown swap!')
-    } else if (!this.swaps.has(swap.id)) {
-      throw new Error(`unknown swap "${swap.id}"!`)
-    } else {
-      const swapObject = this.swaps.get(swap.id)
-      const returnedParty = await swapObject.commit(party)
-      return returnedParty
-    }
-  }
-
-  /**
-   * Aborts a swap gracefully
-   * @param {Swap} swap The swap to be aborted
-   * @returns {Promise<Void>}
-   */
-  abort (swap, party) {
+  onSwap (swapObj, partyObj) {
     return new Promise((resolve, reject) => {
-      reject(Error('not implemented yet!'))
+      if (swapObj == null || swapObj.id == null) {
+        return reject(Error('unknown swap!'))
+      } else if (!this.swaps.has(swapObj.id)) {
+        return reject(Error(`unknown swap "${swapObj.id}"!`))
+      }
+
+      const swap = this.swaps.get(swapObj.id)
+
+      if (!swap.isParty(partyObj)) {
+        return reject(Error('unauthorized swap update!'))
+      }
+
+      try {
+        swap.update(swapObj)
+      } catch (err) {
+        reject(err)
+      }
+
+      resolve(swap)
+      this.emit(swap.status, swap)
     })
   }
 }

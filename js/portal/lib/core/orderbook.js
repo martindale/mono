@@ -2,7 +2,7 @@
  * @file Implements an orderbook for a single asset-pair
  */
 
-const { EventEmitter } = require('events')
+const { BaseClass } = require('@portaldefi/core')
 
 const priceFn = { ask: Math.min, bid: Math.max }
 const priceDefault = { ask: Number.MAX_VALUE, bid: 0 }
@@ -11,7 +11,7 @@ const priceDefault = { ask: Number.MAX_VALUE, bid: 0 }
  * Implements an orderbook for a single asset-pair
  * @type {Orderbook}
  */
-module.exports = class Orderbook extends EventEmitter {
+module.exports = class Orderbook extends BaseClass {
   /**
    * Instantiates a new orderbook for the specfied asset-pair
    * @param {Object} props Properties of the orderbook
@@ -26,13 +26,12 @@ module.exports = class Orderbook extends EventEmitter {
       throw new Error('instantiated without baseAsset!')
     } else if (props.quoteAsset == null) {
       throw new Error('instantiated without quoteAsset!')
-    } else if (+props.limitSize <= 0) {
+    } else if (isNaN(+props.limitSize) || +props.limitSize <= 0) {
       throw new Error('instantiated with invalid limitSize!')
     }
 
-    super()
+    super({ id: `${props.baseAsset}-${props.quoteAsset}` })
 
-    this.assetPair = `${props.baseAsset}-${props.quoteAsset}`
     this.baseAsset = props.baseAsset
     this.quoteAsset = props.quoteAsset
     this.limitSize = props.limitSize
@@ -48,6 +47,13 @@ module.exports = class Orderbook extends EventEmitter {
     this._id = null
 
     Object.seal(this)
+  }
+
+  /**
+   * The asset pair tracked/traded by the orderbook
+   */
+  get assetPair () {
+    return this.id
   }
 
   /**
@@ -67,6 +73,36 @@ module.exports = class Orderbook extends EventEmitter {
   }
 
   /**
+   * Returns the current state of the instance
+   * @type {String}
+   */
+  [Symbol.for('nodejs.util.inspect.custom')] () {
+    return this.toJSON()
+  }
+
+  /**
+  * Returns the current state of the instance
+  * @returns {Object}
+  */
+  toJSON () {
+    return {
+      '@type': this.constructor.name,
+      assetPair: this.assetPair,
+      limitSize: this.limitSize,
+      price: this.price,
+      spread: this.spread,
+      orders: this.orders.size,
+      queues: {
+        cancel: this.queues.cancel.size,
+        limit: {
+          ask: this.queues.limit.ask.size,
+          bid: this.queues.limit.bid.size
+        }
+      }
+    }
+  }
+
+  /**
    * Adds a new order
    * @param {Object} order The order to be added
    * @returns {Promise<Void>}
@@ -83,7 +119,7 @@ module.exports = class Orderbook extends EventEmitter {
   }
 
   /**
-   * Cancels previously added orders
+   * Cancels a previously added order
    * @param {Object} order The order to be cancelled
    * @returns {Promise<Void>}
    */

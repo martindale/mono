@@ -2,35 +2,47 @@
  * @file Defines all the orderbooks in the system
  */
 
-const Order = require('./order')
+const { BaseClass, Order } = require('@portaldefi/core')
 const Orderbook = require('./orderbook')
-const { EventEmitter } = require('events')
 
 /**
  * A list of asset pairs that can be traded
  * @type {Array<Object>}
  */
 const PROPS = [
-  { baseAsset: 'ETH', quoteAsset: 'USDC', limitPrice: 100 }
+  { baseAsset: 'BTC', quoteAsset: 'ETH', limitSize: 100000 }
 ]
+
+/**
+ * Creates an event handler for the orderbook
+ * @param {EventEmitter} self The EventEmitter instance that will fire the event
+ * @param {Orderbook} orderbook The orderbook that is firing the event
+ * @param {String} event The event being fired by the orderbook
+ * @returns {Void}
+ */
+function handleOrderbookEvent (self, orderbook, event) {
+  return function (...args) {
+    self.emit('log', 'info', `order.${event}`, ...args, orderbook)
+    self.emit(event, ...args, orderbook)
+  }
+}
 
 /**
  * Exposes all supported orderbooks under a single class
  * @type {Orderbooks}
  */
-module.exports = class Orderbooks extends EventEmitter {
+module.exports = class Orderbooks extends BaseClass {
   constructor (props, ctx) {
     super()
 
     for (const obj of PROPS) {
       const orderbook = new Orderbook(obj)
-        .on('error', (...args) => this.emit('error', ...args, orderbook))
-        .on('created', (...args) => this.emit('created', ...args, orderbook))
-        .on('opened', (...args) => this.emit('opened', ...args, orderbook))
-        .on('closed', (...args) => this.emit('closed', ...args, orderbook))
-        .on('match', (...args) => this.emit('match', ...args, orderbook))
-
       this[orderbook.assetPair] = orderbook
+        .on('created', handleOrderbookEvent(this, orderbook, 'created'))
+        .on('opened', handleOrderbookEvent(this, orderbook, 'opened'))
+        .on('closed', handleOrderbookEvent(this, orderbook, 'closed'))
+        .on('match', handleOrderbookEvent(this, orderbook, 'match'))
+        .on('error', handleOrderbookEvent(this, orderbook, 'error'))
     }
 
     Object.seal(this)

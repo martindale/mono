@@ -1,0 +1,90 @@
+
+.connectModal {
+  background: #2B2B2B !important;
+  border-radius: 1.5em !important;
+  width: 500px !important;
+  border: 1px solid #6b6b6b !important;
+}
+.logoIcon {
+  padding: 0 !important;
+}
+.item {
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 1rem !important;
+  cursor: pointer;
+}
+.flex-between {
+  display: flex !important;
+  justify-content: space-between !important;
+}
+.copy-btn {
+  background-color: transparent !important;
+  width: 100% !important;
+  color: white !important;
+  border: 2px solid #fc77fc !important;
+  border-radius: 2em !important;
+  margin-top: 0.5em !important;
+}
+.copy-btn:hover { background-color: rgba(255, 255, 255, 0.123) !important; }
+.copy-btn svg { outline-style: none !important; }
+.copy-btn-active {
+  margin-top: 0.5em !important;
+  background-color: transparent !important;
+  width: 100% !important;
+  color: #31DB6B !important;
+  border: 2px solid #31DB6B !important;
+  border-radius: 2em !important;
+}
+.copy-btn-active svg {
+  fill: #31DB6B !important;
+}
+
+.copy-btn-active:hover { background-color: rgba(255, 255, 255, 0.123) !important; }
+.copy-btn-active i { outline-style: none !important; }
+
+
+.add-amount {
+  cursor: pointer;
+}
+.add-amount-modal {
+  background: #2B2B2B !important;
+  border-radius: 1.5em !important;
+  width: 350px !important;
+  border: 1px solid #6b6b6b !important;
+}
+.add-modal-header {
+  background: none !important;
+  font-size: 1rem !important;
+  text-align: center;
+}
+.add-amount-content {
+  width: 320px !important;
+  background-color: #1A1A1A !important;
+  border: 1px solid grey !important;
+  border-radius: 12px !important;
+  margin: 15px !important;
+  padding: 1rem 0.5rem 1rem 0.5rem !important;
+}
+.exchange-btn {
+  background: none !important;
+  border: none !important;
+}
+.exchange-btn i {
+  transform: rotate(90deg);
+  color: lightgrey;
+}
+.cancel-btn {
+  background: transparent !important;
+  color: #FF5959 !important;
+  border: 2px solid #FF5959 !important;
+  width: 140px !important;
+}
+.cancel-btn:hover {
+  background: #ff4d4d31 !important;
+}
+.add-amount-btn {
+  width: 140px !important;
+  height: 36px !important;
+  font-weight: bold !important;
+}

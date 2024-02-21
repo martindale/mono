@@ -1,0 +1,17 @@
+.cancel-btn {
+  background: transparent;
+  color: #FF5959 !important;
+  border: 2px solid #FF5959 !important;
+  border-radius: 1em !important;
+  padding: 0 !important;
+  width: 80px;
+  margin-top:0.3em !important;
+}
+.cancel-btn:hover {
+  background: #ff4d4d31 !important;
+}
+.activity-item {
+  font-size: 15px;
+  padding: 0 0.5em;
+  cursor: pointer;
+}

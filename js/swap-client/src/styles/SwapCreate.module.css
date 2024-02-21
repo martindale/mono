@@ -1,0 +1,63 @@
+.SwapCreateContainer {
+  background-color: #101010;
+  padding: 2em;
+  border-radius: 2rem;
+  width: 420px;
+  margin: auto;
+}
+
+.qty-input {
+  background: none;
+  color: white;
+  border: none;
+  font-size: 1.3em;
+}
+.qty-input:focus {
+  outline: none;
+}
+
+.swapExCont {
+  background-color: black;
+  border-radius: 1rem;
+  border: 2px solid #3a3a3a;
+  padding: 1em;
+}
+
+
+.exchange {
+  margin: -25px 0 0 -25px !important;
+  background-color: #202020 !important;
+  color: white !important;
+}
+.exchange:hover {
+  background-color: #4e4e4e !important;
+}
+.exchange svg { 
+  transform: rotate(90deg);
+}
+.prices {
+  text-align: left;
+  color: darkgrey !important;
+  width: 100%;
+}
+.coin-select {
+  color: white !important;
+  background-color: #202020 !important;
+  border-radius: 0.7em !important;
+  font-size: 1em !important;
+}
+.coin-select>div {
+  padding: 0.7em !important;
+  display: flex;
+  align-items: center
+}
+.coin-select img{
+  width: 1.5em;
+  margin-right: 0.3em;
+}
+.nft-asset-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 0.5em;
+  margin-right: 0.5em;
+}

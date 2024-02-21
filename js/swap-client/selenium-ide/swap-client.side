@@ -1,0 +1,174 @@
+{
+  "id": "9e10b50d-1d7c-4036-9d3d-66fd4e832767",
+  "version": "2.0",
+  "name": "swap-client",
+  "url": "http://localhost:5173",
+  "tests": [{
+    "id": "4db1633f-ee9a-4cde-b06d-80cae9f3c265",
+    "name": "Unisat Wallet Connect",
+    "commands": [{
+      "id": "535e77ae-e4fa-48bb-b421-e3ef39890c3b",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "8ba5f8cd-cac4-4960-97d1-b551170cff55",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1379x1020",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "5cfce05d-c40a-4f32-9fb9-980af7cce2b0",
+      "comment": "",
+      "command": "mouseOver",
+      "target": "css=.connect-bitcoin",
+      "targets": [
+        ["css=.connect-bitcoin", "css:finder"],
+        ["xpath=(//button[@type='button'])[2]", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[3]/div/div/div/div/div[2]/div[3]/button", "xpath:idRelative"],
+        ["xpath=//div[3]/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Connect Networks')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "3bba8510-e419-4772-8ec6-95db021b0e84",
+      "comment": "",
+      "command": "click",
+      "target": "css=.connect-bitcoin",
+      "targets": [
+        ["css=.connect-bitcoin", "css:finder"],
+        ["xpath=(//button[@type='button'])[2]", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[3]/div/div/div/div/div[2]/div[3]/button", "xpath:idRelative"],
+        ["xpath=//div[3]/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Connect Networks')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "a01ad0e7-97b3-4b8e-b20c-1cd742f27b62",
+      "comment": "",
+      "command": "mouseOut",
+      "target": "css=.connect-bitcoin",
+      "targets": [
+        ["css=.connect-bitcoin", "css:finder"],
+        ["xpath=(//button[@type='button'])[2]", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[3]/div/div/div/div/div[2]/div[3]/button", "xpath:idRelative"],
+        ["xpath=//div[3]/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Connect Networks')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "a51ff290-404a-4eb4-8a57-827d4d2d10cc",
+      "comment": "",
+      "command": "answerOnNextPrompt",
+      "target": "1",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "35334158-b1af-4660-a5b4-c2b229a51768",
+      "comment": "",
+      "command": "click",
+      "target": "id=connect-l1",
+      "targets": [
+        ["id=connect-l1", "id"],
+        ["css=#connect-l1", "css:finder"],
+        ["xpath=//button[@id='connect-l1']", "xpath:attributes"],
+        ["xpath=//div[3]/div/div[2]/div/div[2]/button", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "7313b0ac-c3bf-48e9-80c1-fe396b321bd1",
+      "comment": "",
+      "command": "assertPrompt",
+      "target": "Which wallet would you like to connect? 1 - Unisat, 2 - Xverse",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "025db00e-a522-40f9-8cdc-9e9ef7309c81",
+      "comment": "",
+      "command": "webdriverAnswerOnVisiblePrompt",
+      "target": "1",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "27e62065-70e1-4bd6-978a-8d2fc1f763d3",
+      "comment": "",
+      "command": "click",
+      "target": "css=.simulate-l1",
+      "targets": [
+        ["css=.simulate-l1", "css:finder"],
+        ["xpath=(//button[@type='button'])[11]", "xpath:attributes"],
+        ["xpath=//div[2]/div/div[3]/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Simulate')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "162cfcb0-98ce-4692-838e-893765749b67",
+    "name": "Alby Wallet Connect",
+    "commands": [{
+      "id": "9af153e5-e10a-4d40-9a31-a745da6af4f4",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "a5faf58b-7f66-4b18-828b-2611786be8ca",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "945x1020",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "fe282e3d-4aa1-45d8-93dd-ab4f309d8741",
+      "comment": "",
+      "command": "click",
+      "target": "css=.connect-bitcoin",
+      "targets": [
+        ["css=.connect-bitcoin", "css:finder"],
+        ["xpath=(//button[@type='button'])[2]", "xpath:attributes"],
+        ["xpath=//div[@id='root']/div/div[3]/div/div/div/div/div[2]/div[3]/button", "xpath:idRelative"],
+        ["xpath=//div[3]/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Connect Networks')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "5eabc0fa-0c1c-4dc9-b0e1-e3f183f95dd0",
+      "comment": "",
+      "command": "click",
+      "target": "id=connect-lightning",
+      "targets": [
+        ["id=connect-lightning", "id"],
+        ["css=#connect-lightning", "css:finder"],
+        ["xpath=//button[@id='connect-lightning']", "xpath:attributes"],
+        ["xpath=//div[3]/div/div[2]/div[2]/div[2]/button", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "1e46f9a7-93ee-4122-93e6-40aa8124d65f",
+      "comment": "",
+      "command": "click",
+      "target": "id=simulate-lightning",
+      "targets": [
+        ["id=simulate-lightning", "id"],
+        ["css=#simulate-lightning", "css:finder"],
+        ["xpath=//button[@id='simulate-lightning']", "xpath:attributes"],
+        ["xpath=//div[2]/div[2]/div[3]/button", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "63a592b5-2ebb-4d5e-9b9d-f7063e6eaf37",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["4db1633f-ee9a-4cde-b06d-80cae9f3c265"]
+  }],
+  "urls": ["http://localhost:5173/"],
+  "plugins": []
+}

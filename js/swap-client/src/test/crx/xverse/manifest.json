@@ -1,0 +1,39 @@
+{
+   "action": {
+      "default_icon": "xverse_icon.png",
+      "default_popup": "popup.html",
+      "default_title": "Xverse Wallet"
+   },
+   "background": {
+      "service_worker": "background.js",
+      "type": "module"
+   },
+   "chrome_url_overrides": {
+   },
+   "content_scripts": [ {
+      "all_frames": true,
+      "js": [ "browser-polyfill.js", "content-script.js" ],
+      "matches": [ "*://*/*" ]
+   } ],
+   "content_security_policy": {
+      "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; frame-src 'none'; frame-ancestors 'none';"
+   },
+   "description": "A Bitcoin Wallet for Web3",
+   "devtools_page": "devtools.html",
+   "differential_fingerprint": "1.1f27522b229113772f91f9974df982c0568556959cc233fbc934bceac0df0f88",
+   "host_permissions": [ "*://*/*" ],
+   "icons": {
+      "128": "xverse_icon.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu/Dqr/Sx/dAsHTL7G813DMjK5/dfaKp5g87jzmZOuMMFKX5bt4Th9WBbpRwbO2v0sva5tXa6+zBXgMeOYuUh6LMzWvXbp9Yrs5RwJY0StRJrELn9/9kv2tGeMKzGCC0NMucZxyzI43YCp6Q/wDl7rMcS758I8iloRJbA9y3QtduypO8wnpA5DAs1TZnOP8gUzskV9Ts1opyuuxQeKlAWUiloxi+sY/pDn8kCPgMlcxbTM8j57swd09V3XvZBeA/sM9DvdMWnkM8AAMOcJpSNR2R/WAhPOdwH990kOnfvGivY1oRaFg0lhO6xNkCbe4MrqHYkvGZwW82/WQtrsfKcbwIDAQAB",
+   "manifest_version": 3,
+   "name": "Xverse Wallet",
+   "options_page": "options.html",
+   "permissions": [ "storage" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "0.15.0",
+   "web_accessible_resources": [ {
+      "matches": [ "*://*/*" ],
+      "resources": [ "inpage.js" ]
+   } ]
+}

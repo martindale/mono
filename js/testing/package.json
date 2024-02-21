@@ -1,0 +1,70 @@
+{
+  "name": "@portaldefi/testing",
+  "version": "0.0.0",
+  "description": "PortalDefi Testing Framework",
+  "bin": {
+    "portal": "bin/portal.js"
+  },
+  "main": "lib/core/server.js",
+  "scripts": {
+    "clean": "rm -rf coverage node_modules package-lock.json",
+    "coverage": "c8 mocha",
+    "lint": "standard",
+    "lint-fix": "standard --fix",
+    "posttest": "npm run lint",
+    "test": "mocha test/integration",
+    "test:contracts": "mocha test/contracts",
+    "test:integration": "mocha test/integration",
+    "watch": "npm test -- --watch"
+  },
+  "devDependencies": {
+    "@portaldefi/core": "file:../core",
+    "@portaldefi/peer": "file:../portal",
+    "@portaldefi/sdk": "file:../sdk",
+    "c8": "^7.12.0",
+    "chai": "^4.3.7",
+    "keythereum": "^2.0.0",
+    "mocha": "^10.2.0",
+    "solc": "^0.7.6",
+    "solhint": "^3.3.7",
+    "standard": "^17.0.0",
+    "web3": "^4.1.2"
+  },
+  "c8": {
+    "check-coverage": true,
+    "report-dir": "coverage",
+    "reporter": [
+      "html",
+      "text"
+    ]
+  },
+  "mocha": {
+    "bail": true,
+    "diff": true,
+    "extension": [
+      "spec.js"
+    ],
+    "recursive": true,
+    "reporter": "spec",
+    "slow": 1000,
+    "timeout": 120000,
+    "ui": "bdd",
+    "watch-files": [
+      "../**/*.js"
+    ]
+  },
+  "standard": {
+    "globals": [
+      "debug",
+      "after",
+      "afterEach",
+      "before",
+      "beforeEach",
+      "describe",
+      "expect",
+      "it",
+      "fetch",
+      "WebSocket"
+    ]
+  }
+}

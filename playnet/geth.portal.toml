@@ -1,0 +1,3 @@
+[Node]
+WSHost = '127.0.0.1'
+WSPort = 8545

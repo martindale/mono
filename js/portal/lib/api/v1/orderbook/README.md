@@ -4,7 +4,6 @@ The Portal Orderbook is an API endpoint used to add/remove orders to buy/sell as
 
 - Limit Orders (`/api/v1/orderbook/limit`)
 
-
 ## Endpoints
 
 ### `PUT /api/v1/orderbook/limit`

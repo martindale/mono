@@ -3,7 +3,7 @@
 ################################################################################
 
 locals {
-  services  = ["goerli", "ropsten"]
+  services  = []
   dns_names = [for name in local.services : "${name}.node.${var.environment}"]
   dns_records = { for name in local.dns_names : name => {
     zone_id = var.cloudflare_zone_id
@@ -78,7 +78,7 @@ module "nixos" {
     { config, lib, ... }: {
       imports = [
         ${path.module}/nix/node/configuration.nix
-        ${path.module}/../../nix/configuration.nix
+        ${path.module}/../../nix/hosts/portalos/configuration.nix
       ];
 
       # Fixes for the unused NICs on c3.small machines, as suggested by Equinix

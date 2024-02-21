@@ -1,0 +1,296 @@
+{
+   "Add__New__Account": {
+      "message": "Add New Account"
+   },
+   "Add__a__new__account": {
+      "message": "Add a new account"
+   },
+   "Amount": {
+      "message": "Amount"
+   },
+   "Are__you__Sure": {
+      "message": "Are you Sure"
+   },
+   "Available": {
+      "message": "Available"
+   },
+   "Back": {
+      "message": "Back"
+   },
+   "British__Pound": {
+      "message": "British Pound"
+   },
+   "Canadian__Dollar": {
+      "message": "Canadian Dollar"
+   },
+   "Cancel": {
+      "message": "Cancel"
+   },
+   "Change__Password": {
+      "message": "Change Password"
+   },
+   "Change__your__lockscreen__password": {
+      "message": "Change your lockscreen password"
+   },
+   "Chinese": {
+      "message": "中文"
+   },
+   "Clear__the__inputted": {
+      "message": "Clear the inputted"
+   },
+   "Confirm": {
+      "message": "Confirm"
+   },
+   "Confirm__Password": {
+      "message": "Confirm Password"
+   },
+   "Confirm__payment": {
+      "message": "Confirm payment"
+   },
+   "Continue": {
+      "message": "Continue"
+   },
+   "Create__Account": {
+      "message": "Create Account"
+   },
+   "Create__a__new__account": {
+      "message": "Create a new account"
+   },
+   "Create__a__password": {
+      "message": "Create a password"
+   },
+   "Create__new__wallet": {
+      "message": "Create new wallet"
+   },
+   "Currency": {
+      "message": "Currency"
+   },
+   "Current__Password": {
+      "message": "Current Password"
+   },
+   "Deposit": {
+      "message": "Deposit"
+   },
+   "Do__NOT__share__it__with__anyone": {
+      "message": "Do NOT share it with anyone"
+   },
+   "English": {
+      "message": "English"
+   },
+   "Enter__your__password": {
+      "message": "Enter your password"
+   },
+   "Entered__passwords__differ": {
+      "message": "Entered passwords differ"
+   },
+   "Error": {
+      "message": "Error"
+   },
+   "Euro": {
+      "message": "Euro"
+   },
+   "Export__Private__Key": {
+      "message": "Export Private Key"
+   },
+   "Fee": {
+      "message": "Fee"
+   },
+   "Generate__a__new__address": {
+      "message": "Generate a new address"
+   },
+   "Get__Started": {
+      "message": "Get Started"
+   },
+   "I__already__have__a__wallet": {
+      "message": "I already have a wallet"
+   },
+   "I__saved__My__Secret__Recovery__Phrase": {
+      "message": "I saved My Secret Recovery Phrase"
+   },
+   "If__you__ever__change__browsers__or__move__computers": {
+      "message": "If you ever change browsers or move computers"
+   },
+   "Import__Private__Key": {
+      "message": "Import Private Key"
+   },
+   "Import__an__existing__account": {
+      "message": "Import an existing account"
+   },
+   "Import__an__existing__wallet__with__your__12__word__secret__recovery__phrase": {
+      "message": "Import an existing wallet with your 12-word secret recovery phrase"
+   },
+   "Import__wallet": {
+      "message": "Import wallet"
+   },
+   "Imported__accounts__will__not__be__associated__with__your__originally__created__Unisat__account__Secret__Recovery__Phrase": {
+      "message": "Imported accounts will not be associated with your originally created UniSat Wallet account Secret Recovery Phrase"
+   },
+   "Inscription": {
+      "message": "Inscription"
+   },
+   "Invalid__address": {
+      "message": "Invalid address"
+   },
+   "Invalid__amount": {
+      "message": "Invalid amount"
+   },
+   "Japanese": {
+      "message": "日本"
+   },
+   "Japanese__Yen": {
+      "message": "Japanese Yen"
+   },
+   "Language": {
+      "message": "Language"
+   },
+   "Latest__Transactions": {
+      "message": "Latest Transactions"
+   },
+   "Login": {
+      "message": "Login"
+   },
+   "Login__Success": {
+      "message": "Login Success"
+   },
+   "NFT__list__is__empty": {
+      "message": "NFT list is empty"
+   },
+   "New__Password": {
+      "message": "New Password"
+   },
+   "Next": {
+      "message": "Next"
+   },
+   "PASSWORD__ERROR": {
+      "message": "PASSWORD ERROR"
+   },
+   "Password": {
+      "message": "Password"
+   },
+   "Password_must_contain_at_least_5_characters": {
+      "message": "Password must contain at least 5 characters"
+   },
+   "Payment__Faild": {
+      "message": "Payment Faild"
+   },
+   "Payment__Sent": {
+      "message": "Payment Sent"
+   },
+   "Private__Key": {
+      "message": "Private Key"
+   },
+   "Receive": {
+      "message": "Receive"
+   },
+   "Recipient": {
+      "message": "Recipient"
+   },
+   "Recipients__BTC__address": {
+      "message": "Recipient’s BTC address"
+   },
+   "Remove__Account": {
+      "message": "Remove Account"
+   },
+   "Save__it__somewhere__safe__and__secret": {
+      "message": "Save it somewhere safe and secret"
+   },
+   "Secret__Recovery__Phrase": {
+      "message": "Secret Recovery Phrase"
+   },
+   "Send": {
+      "message": "Send"
+   },
+   "Sending": {
+      "message": "Sending"
+   },
+   "Show__Private__Key": {
+      "message": "Show Private Key"
+   },
+   "Show__Secret__Recovery__Phrase": {
+      "message": "Show Secret Recovery Phrase"
+   },
+   "Spanish": {
+      "message": "Español"
+   },
+   "Success": {
+      "message": "Success"
+   },
+   "Successfully__created": {
+      "message": "Successfully created"
+   },
+   "Successfully__imported": {
+      "message": "Successfully imported"
+   },
+   "Swiss__Franc": {
+      "message": "Swiss Franc"
+   },
+   "Switch__Account": {
+      "message": "Switch Account"
+   },
+   "This__account__has__no__transactions": {
+      "message": "This account has no transactions"
+   },
+   "This__address__can__only__receive__Btc": {
+      "message": "This address can only receive Btc"
+   },
+   "This__is__an__imported__account": {
+      "message": "This is an imported account"
+   },
+   "This__phrase__is__the__ONLY__way__to": {
+      "message": "This phrase is the ONLY way to"
+   },
+   "Type__your__Unisat__password": {
+      "message": "Type your UniSat Wallet password"
+   },
+   "US__Dollar": {
+      "message": "US Dollar"
+   },
+   "Unlock": {
+      "message": "Unlock"
+   },
+   "Very__Long__Account__Name": {
+      "message": "Very Long Account Name"
+   },
+   "View__on__Block__Explorer": {
+      "message": "View on Block Explorer"
+   },
+   "YesRemove": {
+      "message": "Yes, Remove"
+   },
+   "You__will__not__be__able__to__recover__this__account__with__your__Secret__Recovery__Phrase": {
+      "message": "You will not be able to recover this account with your Secret Recovery Phrase"
+   },
+   "You__will__use__this__to__unlock__your__wallet": {
+      "message": "You will use this to unlock your wallet"
+   },
+   "Your__transaction__had__not__succesfully__sent": {
+      "message": "Your transaction had not succesfully sent"
+   },
+   "Your__transaction__has__been__succesfully__sent": {
+      "message": "Your transaction has been succesfully sent"
+   },
+   "appDescription": {
+      "message": "Inscribe and store your inscriptions in the world's first Open Source Chrome wallet for Ordinals! "
+   },
+   "appName": {
+      "message": "UniSat Wallet"
+   },
+   "at__least__five__characters": {
+      "message": "at least five characters"
+   },
+   "click__to__copy": {
+      "message": "click to copy"
+   },
+   "copied": {
+      "message": "copied"
+   },
+   "mnemonic__phrase__is__invalid": {
+      "message": "mnemonic phrase is invalid"
+   },
+   "recover__your__wallet": {
+      "message": "recover your wallet"
+   },
+   "you__will__need__this__Private__Key__to__access__this__account": {
+      "message": "you will need this Private Key to access this account"
+   }
+}

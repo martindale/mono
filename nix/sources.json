@@ -1,14 +1,14 @@
 {
-    "fabric": {
-        "branch": "feature/node-16",
-        "description": "Fabric is an experimental protocol for exchanging information.",
-        "homepage": "https://fabric.pub",
-        "owner": "fabriclabs",
-        "repo": "fabric",
-        "rev": "0f461f322e9cf88362ad116bf36cde981d691068",
-        "sha256": "103bwgrx5fzb2aw6j3r9piv0xsxcrivxxrfj30ixvfpb8xn2r93a",
+    "devshell": {
+        "branch": "main",
+        "description": "Per project developer environments",
+        "homepage": "https://numtide.github.io/devshell/",
+        "owner": "numtide",
+        "repo": "devshell",
+        "rev": "d208c58e2f7afef838add5f18a9936b12a71d695",
+        "sha256": "1xiwi33f1jwwqlj1zzw20vlvwgjlhaidwwhgaydxg35s2a546cjl",
         "type": "tarball",
-        "url": "https://github.com/fabriclabs/fabric/archive/0f461f322e9cf88362ad116bf36cde981d691068.tar.gz",
+        "url": "https://github.com/numtide/devshell/archive/d208c58e2f7afef838add5f18a9936b12a71d695.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -29,36 +29,34 @@
         "homepage": "https://nixos.org/",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "79d3ca08920364759c63fd3eb562e99c0c17044a",
-        "sha256": "1zz72k161yl9dxs5nxgy5p6nh8zsz4fbpclm99r12jw39zrlzhhw",
+        "rev": "4a729ce4b1fe5ec4fffc71c67c96aa5184ebb462",
+        "sha256": "130qhasfvyvvb3rbmjd118j4grz8dylxsfqqj61w3ap2f3420lsl",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/79d3ca08920364759c63fd3eb562e99c0c17044a.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/4a729ce4b1fe5ec4fffc71c67c96aa5184ebb462.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "npmlock2nix": {
-        "branch": "nin/npm-extra-args",
+        "branch": "master",
         "description": "nixify npm based packages [maintainer=@andir] ",
         "homepage": "",
-        "owner": "NinjaTrappeur",
+        "owner": "nix-community",
         "repo": "npmlock2nix",
-        "rev": "e6a156ddc001316993a994e7d1118417d0389e34",
-        "sha256": "1nsk93pdssndzx9k1apx3qhr1q7dmsg7sbx33p5rhk7452zq3k4w",
+        "rev": "c381fd1a69c4e81a492e34863b6d98bd470af7c3",
+        "sha256": "0jnbq4fkkc2mvqx756nqh68bcs6cx3212w4nxndw1fw2v7r3c2w1",
         "type": "tarball",
-        "url": "https://github.com/NinjaTrappeur/npmlock2nix/archive/e6a156ddc001316993a994e7d1118417d0389e34.tar.gz",
+        "url": "https://github.com/nix-community/npmlock2nix/archive/c381fd1a69c4e81a492e34863b6d98bd470af7c3.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
-    "terraform-provider-equinix": {
-        "branch": "master",
-        "description": "Terraform Equinix provider",
-        "homepage": "https://registry.terraform.io/providers/equinix/equinix/latest/docs",
-        "owner": "equinix",
-        "repo": "terraform-provider-equinix",
-        "rev": "v1.7.0",
-        "sha256": "1qxixznlb5mbcs0kbr9qqz7b3vsb653q9s69vrj9372rrcj2yrqz",
+    "treefmt-nix": {
+        "branch": "main",
+        "description": "treefmt nix configuration",
+        "homepage": "https://numtide.github.io/treefmt/",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "e2761d701581d8dcc4e0e88aecfde317ddf6f0cd",
+        "sha256": "1k45nmfmy0b6db73h1ynydcmyrz7a2309p6gvlffhy2xxp1dz5y0",
         "type": "tarball",
-        "url": "https://github.com/equinix/terraform-provider-equinix/archive/v1.7.0.tar.gz",
-        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz",
-        "vendorSha256": "sha256-oANCzm5HSxs5vTiu1kIGJQcwAvNg84G9qXnoBge9fAs=",
-        "version": "1.7.0"
+        "url": "https://github.com/numtide/treefmt-nix/archive/e2761d701581d8dcc4e0e88aecfde317ddf6f0cd.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

@@ -1,8 +1,9 @@
-import { configureStore } from '@reduxjs/toolkit';
-import swapSlice from './slices/swapSlice';
+import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 
 export const store = configureStore({
   reducer: {
-    swap: swapSlice
-  }
-});
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+    serializableCheck: false
+  })
+})

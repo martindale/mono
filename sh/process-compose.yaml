@@ -1,0 +1,68 @@
+version: "0.5"
+
+processes:
+  pre-init:
+    command: 'source $PORTAL_ROOT/sh/pre-init.sh'
+    namespace: pre-init
+
+  bitcoin:
+    command: bitcoind -conf=$PLAYNET_ROOT/bitcoind.portal.conf -datadir=$PLAYNET_ROOT/state/portal/bitcoind
+    namespace: proc
+    log_location: $PLAYNET_ROOT/log/portal/bitcoind.log
+    is_daemon: true
+    availability:
+      restart: always
+    depends_on:
+      pre-init:
+        condition: process_completed_successfully
+    readiness_probe:
+      exec:
+        command: bitcoin-cli -conf=$PLAYNET_ROOT/bitcoind.portal.conf -datadir=$PLAYNET_ROOT/state/portal/bitcoind getblockchaininfo
+    shutdown:
+      command: bitcoin-cli -conf=$PLAYNET_ROOT/bitcoind.portal.conf -datadir=$PLAYNET_ROOT/state/portal/bitcoind stop
+      timeout_seconds: 30
+      signal: 15
+
+  geth:
+    command: geth --dev --config=$PLAYNET_ROOT/geth.portal.toml --datadir=$PLAYNET_ROOT/state/portal/geth/data
+    namespace: proc
+    log_location: $PLAYNET_ROOT/log/portal/geth.log
+    availability:
+      restart: always
+    depends_on:
+      pre-init:
+        condition: process_completed_successfully
+    readiness_probe:
+      exec:
+        command: geth --config=$PLAYNET_ROOT/geth.portal.toml --datadir=$PLAYNET_ROOT/state/portal/geth/data attach --exec eth.coinbase
+
+  alice:
+    command: lnd --configfile=$PLAYNET_ROOT/lnd.alice.conf --lnddir=$PLAYNET_ROOT/state/alice/lnd --noseedbackup
+    namespace: users
+    log_location: $PLAYNET_ROOT/log/alice/lnd.log
+    depends_on:
+      bitcoin:
+        condition: process_healthy
+    readiness_probe:
+      exec:
+        command: lncli --network regtest --rpcserver="127.0.0.1:10001" --lnddir=$PLAYNET_ROOT/state/alice/lnd getinfo
+
+  bob:
+    command: lnd --configfile=$PLAYNET_ROOT/lnd.bob.conf --lnddir=$PLAYNET_ROOT/state/bob/lnd --noseedbackup
+    namespace: users
+    log_location: $PLAYNET_ROOT/log/bob/lnd.log
+    depends_on:
+      bitcoin:
+        condition: process_healthy
+    readiness_probe:
+      exec:
+        command: lncli --network regtest --rpcserver="127.0.0.1:10002" --lnddir=$PLAYNET_ROOT/state/bob/lnd getinfo
+
+  post-init:
+    command: 'source $PORTAL_ROOT/sh/post-init.sh'
+    namespace: post-init
+    depends_on:
+      alice:
+        condition: process_healthy
+      bob:
+        condition: process_healthy

@@ -2,7 +2,6 @@
 
 A polyglot mono-repo powered by the `nix` package manager.
 
-
 ## structure
 
 This repository is organized by language. At the root, is a directory for each language, designated by the file-extension of source code written in the language.
@@ -30,7 +29,6 @@ $ nix --version
 nix (Nix) 2.7.0
 ```
 
-
 ## portable developer environment
 
 This repository ships with its own portable developer environment that frees developers from having to track down and pin the versions of various development tools/frameworks and elimiate the most common sources of variablility in builds.
@@ -45,11 +43,9 @@ To access the developer environment, from the root of the repository run:
 
 On your first setup, you will be provided with instructions to setup the required security credentials to be able to perform deployments.
 
-
 ## secure credential access
 
 As of this writing, you need access to third-party service credentials (AWS, Cloudflare, etc.). If you don't already have access to these, please reach out to anand@portaldefi.com to get yourself setup.
-
 
 ## deployments
 
