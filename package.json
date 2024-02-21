@@ -4,6 +4,8 @@
   "description": "Basic Fabric workspace.",
   "main": "services/workspace.js",
   "scripts": {
+    "report:install": "rm -rf node_modules && echo \"\n\" > package-lock.json && echo \"$ npm i\" > reports/install.log && npm i >> reports/install.log",
+    "start": "node scripts/node.js",
     "test": "mocha tests"
   },
   "repository": {
@@ -22,6 +24,6 @@
   },
   "homepage": "https://github.com/FabricLabs/mono#readme",
   "dependencies": {
-    "@fabric/core": "github:FabricLabs/fabric#feature/noise-channels"
+    "@fabric/core": "github:FabricLabs/fabric#feature/v0.1.0-RC1"
   }
 }
